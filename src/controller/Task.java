@@ -43,6 +43,14 @@ public interface Task {
 	Boolean isPrioritized();
 	
 	/**
+	 * This method calculate if the task is overdue (for timed and deadline tasks)
+	 * Will return false if this is a floating task
+	 * 
+	 * @return Boolean (if overdue)
+	 */
+	Boolean isOverdue();
+	
+	/**
 	 * This method return the type of this task
 	 * TaskType is an enum with
 	 * 	{FLOATING, TIMED, DEADLINE}
