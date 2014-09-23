@@ -3,10 +3,13 @@
  */
 package storage;
 
+import java.util.ArrayList;
+
 /**
  * @author 
  *
  */
 public interface Storage {
-	//TO-DO
+	ArrayList<String> read();
+	void write(ArrayList<String> list);
 }
