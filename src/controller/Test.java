@@ -1,15 +1,16 @@
+package controller;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-class Task {
+class _Task {
 	enum TaskType { FLOATING, TIMED, DEADLINE; }
 	String[] wordsInString;
 	String task;
 	String dateTime;
 	
-	Task(String command) {
+	_Task(String command) {
 		wordsInString = command.split(" ");
 
 	}
@@ -37,7 +38,7 @@ class Task {
 	}
 }
 
-class Controller {
+class _Controller {
 	
 	enum CommandType { ADD, DELETE, EDIT, DISPLAY; }
 	
