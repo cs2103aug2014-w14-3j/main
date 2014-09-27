@@ -1,30 +1,31 @@
 package controller;
+
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-class _Task {
+class TaskClass {
 	enum TaskType { FLOATING, TIMED, DEADLINE; }
 	String[] wordsInString;
 	String task;
 	String dateTime;
-	
-	_Task(String command) {
+		
+	TaskClass(String command) {
 		wordsInString = command.split(" ");
 
 	}
-	
+		
 	Date getDateTime() throws ParseException {
 		DateFormat df = new SimpleDateFormat("dd.MM h:mm a");
 		Date dateForm = (Date) df.parse(dateTime);
 		return dateForm;
 	}
-	
+		
 	String getDesc() {
 		return task;
 	}
-	
+		
 	boolean isPrioritised() {
 		if(task.substring(0, 1).equals("!")) {
 			return true;
@@ -32,28 +33,8 @@ class _Task {
 			return false;
 		}
 	}
-	
+		
 	public String toString() {
 		return task + " " + dateTime;
-	}
-}
-
-class _Controller {
-	
-	enum CommandType { ADD, DELETE, EDIT, DISPLAY; }
-	
-	private static final int POSITION_OF_OPERATION = 0;
-	void execCmd(String command) {
-		parseCommand(command);
-	}
-	
-	void parseCommand(String command) {
-		String[] splitCommandIntoWords = command.split(" ");
-		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
-		executeOperation(operation);
-	}
-	
-	void executeOperation(String operation) {
-		
 	}
 }
