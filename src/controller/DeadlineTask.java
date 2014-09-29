@@ -1,32 +1,32 @@
 package controller;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.ParseException;
 
-class TimedTask implements Task{
-	int LENGTH_OF_TIME = 9;
+class DeadlineTask implements Task{
+	int LENGTH_OF_DATE = 8;
 	String[] wordsInString;
 	String task;
 	String dateTime;
 		
-	TimedTask(String command) {
+	DeadlineTask(String command) {
 		wordsInString = command.split(" ");
-		int numOfWordsInString = wordsInString.length;
-		dateTime = wordsInString[numOfWordsInString - 2] + " " + wordsInString[numOfWordsInString - 1];
+		dateTime = wordsInString[wordsInString.length - 1];
 		
 		if(isPrioritized()) {
-			task = command.substring(1, command.length() - LENGTH_OF_TIME);
+			task = command.substring(1, command.length() - LENGTH_OF_DATE);
 		} else {
-			task = command.substring(0, command.length() - LENGTH_OF_TIME);
+			task = command.substring(0, command.length() - LENGTH_OF_DATE);
 		}
 	}
 		
 	public Date getDateTime() {
 		try {
-			SimpleDateFormat dateTimeFormat = new SimpleDateFormat("HHHH HHHH");
-			return dateTimeFormat.parse(dateTime);
-		} catch (ParseException e) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
+			return dateFormat.parse(dateTime);
+		} catch(ParseException e) {
+			
 		}
 		
 		return null;
@@ -55,6 +55,6 @@ class TimedTask implements Task{
 
 	@Override
 	public controller.Task.TaskType getType() {
-		return controller.Task.TaskType.TIMED;
+		return controller.Task.TaskType.DEADLINE;
 	}
 }
