@@ -17,7 +17,7 @@ class TaskClass {
 	}
 		
 	Date getDateTime() throws ParseException {
-		DateFormat df = new SimpleDateFormat("dd.MM h:mm a");
+		DateFormat df = new SimpleDateFormat("ddMM HHmm");
 		Date dateForm = (Date) df.parse(dateTime);
 		return dateForm;
 	}
