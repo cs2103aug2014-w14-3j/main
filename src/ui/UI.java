@@ -22,4 +22,10 @@ public interface UI {
 	 * @param page : page should contain one page of task element
 	 */
 	void display(ArrayList<String> page);
+	
+	void updateToScreen();
+	
+	void initialize();
+	
+	void exit();
 }

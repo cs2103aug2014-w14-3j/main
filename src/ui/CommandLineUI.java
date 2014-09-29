@@ -11,23 +11,38 @@ import java.util.ArrayList;
  */
 public class CommandLineUI implements UI {
 
+	static final String initMsg = "onInit";
+	static final String exitMsg = "onExit";
 	/* (non-Javadoc)
 	 * @see ui.UI#display(java.util.ArrayList)
 	 */
 	@Override
 	public void display(ArrayList<String> page) {
-		// TODO Auto-generated method stub
 		displayBuf = page;
 	}
 	
-	public void printToScreen() {
+	/* (non-Javadoc)
+	 * @see ui.UI#updateToScreen()
+	 */
+	@Override
+	public void updateToScreen() {
 		for(String i : displayBuf) {
 			System.out.println(i);
 		}
 	}
 	
-	public void printInitMessage() {
-		System.out.println("hahahahahha");
+	/* (non-Javadoc)
+	 * @see ui.UI#printInitMessage()
+	 */
+	@Override
+	public void initialize() {
+		System.out.println(initMsg);
+	}
+	
+	@Override
+	public void exit() {
+		System.out.println(exitMsg);
+		
 	}
 	
 	ArrayList<String> displayBuf;
