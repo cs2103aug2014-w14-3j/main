@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * 
  */
 
-public class ControllerClass implements Controller {
+public class ControllerClass {
 	
 	enum CommandType {
 		ADD, DELETE, EDIT, DISPLAY, INVALID
