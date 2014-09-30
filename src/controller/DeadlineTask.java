@@ -1,51 +1,55 @@
 package controller;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.text.ParseException;
 
 class DeadlineTask implements Task{
-	int LENGTH_OF_DATE = 8;
-	String[] wordsInString;
-	String task;
-	String dateTime;
+	boolean isPrioritized;
+	String description;
+	Date deadline;
+	
+	DeadlineTask(boolean priority, String desc, Date endDate) {
+		isPrioritized = priority;
+		description = desc;
+		deadline = endDate;
+	}
+	
+	DeadlineTask(String task) throws ParseException {
+		String[] getAttributes = task.split("$");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		
-	DeadlineTask(String command) {
-		wordsInString = command.split(" ");
-		dateTime = wordsInString[wordsInString.length - 1];
-		
-		if(isPrioritized()) {
-			task = command.substring(1, command.length() - LENGTH_OF_DATE);
+		if(getAttributes[0].equals("!")) {
+			isPrioritized = true;
+			description = getAttributes[1];
+			deadline = timeFormat.parse(getAttributes[2]);
 		} else {
-			task = command.substring(0, command.length() - LENGTH_OF_DATE);
+			isPrioritized = false;
+			description = getAttributes[0];
+			deadline = timeFormat.parse(getAttributes[1]);
 		}
 	}
 		
 	public Date getDateTime() {
-		try {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy");
-			return dateFormat.parse(dateTime);
-		} catch(ParseException e) {
-			
-		}
-		
-		return null;
+		return deadline;
 	}
 		
 	public String getDesc() {
-		return task;
+		return description;
 	}
 		
 	public Boolean isPrioritized() {
-		if(task.substring(0, 1).equals("!")) {
-			return true;
-		} else {
-			return false;
-		}
+		return isPrioritized;
 	}
 		
 	public String toString() {
-		return task;
+		String task = description + "$" + deadline.toString();
+		
+		if(isPrioritized()) {
+			return "!" + "$" + task;
+		} else {
+			return task;
+		}
 	}
 
 	@Override
