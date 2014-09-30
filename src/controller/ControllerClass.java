@@ -1,5 +1,6 @@
 package controller;
 
+import ui.UI;
 import java.util.ArrayList;
 
 /*
@@ -18,6 +19,11 @@ public class ControllerClass implements Controller {
 	private static final int numTasksInSinglePage = 10;
 	
 	private ArrayList<Task> tasks;
+	private UI ui;
+	
+	ControllerClass(UI ui) {
+		this.ui = ui;
+	}
 	
 	public void execCmd(String command) {
 			parseCommand(command);
