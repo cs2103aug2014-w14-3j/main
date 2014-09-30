@@ -21,7 +21,7 @@ public class ControllerClass implements Controller {
 	private ArrayList<Task> tasks;
 	private UI ui;
 	
-	ControllerClass(UI ui) {
+	public ControllerClass(UI ui) {
 		this.ui = ui;
 	}
 	

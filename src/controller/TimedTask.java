@@ -9,7 +9,7 @@ class TimedTask implements Task{
 	String[] wordsInString;
 	String task;
 	String dateTime;
-		
+	
 	TimedTask(String command) {
 		wordsInString = command.split(" ");
 		int numOfWordsInString = wordsInString.length;
