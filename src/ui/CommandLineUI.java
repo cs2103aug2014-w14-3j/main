@@ -11,8 +11,9 @@ import java.util.ArrayList;
  */
 public class CommandLineUI implements UI {
 
-	static final String initMsg = "onInit";
-	static final String exitMsg = "onExit";
+	static final String initMsg = "        Forget-Me-Not\n"
+			 					+ "------------------------------";
+	static final String exitMsg = "==============================";
 	/* (non-Javadoc)
 	 * @see ui.UI#display(java.util.ArrayList)
 	 */

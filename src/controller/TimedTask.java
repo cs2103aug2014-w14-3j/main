@@ -20,7 +20,7 @@ class TimedTask implements Task{
 	TimedTask(String task) throws ParseException {
 		String[] getAttributes = task.split("$");
 		SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
-		
+
 		if(getAttributes[0].equals("!")) {
 			isPrioritized = true;
 			description = getAttributes[1];
