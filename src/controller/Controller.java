@@ -3,6 +3,8 @@
  */
 package controller;
 
+import java.util.ArrayList;
+
 /**
  * This interface represent Controller
  * 
@@ -26,7 +28,7 @@ public interface Controller {
 	 * @param cmd
 	 * @throws Exception
 	 */
-	void execCmd(String cmd) throws Exception;
+	ArrayList<String> execCmd(String cmd) throws Exception;
 	
 	/**
 	 * List of commands

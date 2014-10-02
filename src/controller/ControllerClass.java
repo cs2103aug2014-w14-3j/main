@@ -19,14 +19,13 @@ public class ControllerClass implements Controller {
 	private static final int numTasksInSinglePage = 10;
 	
 	private ArrayList<Task> tasks;
-	private UI ui;
 	
-	public ControllerClass(UI ui) {
-		this.ui = ui;
-	}
-	
-	public void execCmd(String command) {
+	//deleted constructor
+	//Changed return value, added return null 
+	//Update needed (TO-DO)
+	public ArrayList<String> execCmd(String command) {
 			parseCommand(command);
+			return null;
 		}
 	
 	private void parseCommand(String command) {

@@ -15,14 +15,6 @@ import java.util.ArrayList;
  */
 public interface UI {
 	
-	/**
-	 * This method update the display buffer
-	 * the display buffer will be updated to screen
-	 * 
-	 * @param page : page should contain one page of task element
-	 */
-	void display(ArrayList<String> page);
-	
 	void updateToScreen();
 	
 	void initialize();

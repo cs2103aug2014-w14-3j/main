@@ -14,13 +14,6 @@ public class CommandLineUI implements UI {
 	static final String initMsg = "        Forget-Me-Not\n"
 			 					+ "------------------------------";
 	static final String exitMsg = "==============================";
-	/* (non-Javadoc)
-	 * @see ui.UI#display(java.util.ArrayList)
-	 */
-	@Override
-	public void display(ArrayList<String> page) {
-		displayBuf = page;
-	}
 	
 	/* (non-Javadoc)
 	 * @see ui.UI#updateToScreen()
