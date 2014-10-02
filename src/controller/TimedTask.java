@@ -5,47 +5,55 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 class TimedTask implements Task{
-	int LENGTH_OF_TIME = 9;
-	String[] wordsInString;
-	String task;
-	String dateTime;
+	boolean isPrioritized;
+	String description;
+	Date start;
+	Date end;
 	
-	TimedTask(String command) {
-		wordsInString = command.split(" ");
-		int numOfWordsInString = wordsInString.length;
-		dateTime = wordsInString[numOfWordsInString - 2] + " " + wordsInString[numOfWordsInString - 1];
-		
-		if(isPrioritized()) {
-			task = command.substring(1, command.length() - LENGTH_OF_TIME);
+	TimedTask(boolean priority, String desc, Date startTime, Date endTime) {
+		isPrioritized = priority;
+		description = desc;
+		start = startTime;
+		end = endTime;
+	}
+	
+	TimedTask(String task) throws ParseException {
+		String[] getAttributes = task.split("$");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
+
+		if(getAttributes[0].equals("!")) {
+			isPrioritized = true;
+			description = getAttributes[1];
+			start = timeFormat.parse(getAttributes[2]);
+			end = timeFormat.parse(getAttributes[3]);
 		} else {
-			task = command.substring(0, command.length() - LENGTH_OF_TIME);
+			isPrioritized = false;
+			description = getAttributes[0];
+			start = timeFormat.parse(getAttributes[1]);
+			end = timeFormat.parse(getAttributes[2]);
 		}
 	}
 		
 	public Date getDateTime() {
-		try {
-			SimpleDateFormat dateTimeFormat = new SimpleDateFormat("HHHH HHHH");
-			return dateTimeFormat.parse(dateTime);
-		} catch (ParseException e) {
-		}
-		
-		return null;
+		return start;
 	}
 		
 	public String getDesc() {
-		return task;
+		return description;
 	}
 		
 	public Boolean isPrioritized() {
-		if(task.substring(0, 1).equals("!")) {
-			return true;
-		} else {
-			return false;
-		}
+		return isPrioritized;
 	}
 		
 	public String toString() {
-		return task;
+		String task = description + "$" + start.toString() + "$" + end.toString();
+		
+		if(isPrioritized()) {
+			return "!" + "$" + task;
+		} else {
+			return task;
+		}
 	}
 
 	@Override

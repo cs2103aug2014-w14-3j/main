@@ -3,14 +3,12 @@ package controller;
 import java.util.Date;
 
 class FloatingTask implements Task{
-	String task;
+	boolean isPrioritized;
+	String description;
 		
-	FloatingTask(String command) {
-		if(isPrioritized()) {
-			task = command.substring(1);
-		} else {
-			task = command;
-		}
+	FloatingTask(boolean priority, String desc) {
+		description = desc;
+		isPrioritized = priority;
 	}
 		
 	public Date getDateTime() {
@@ -18,19 +16,15 @@ class FloatingTask implements Task{
 	}
 		
 	public String getDesc() {
-		return task;
+		return description;
 	}
 		
 	public Boolean isPrioritized() {
-		if(task.substring(0, 1).equals("!")) {
-			return true;
-		} else {
-			return false;
-		}
+		return isPrioritized;
 	}
 		
 	public String toString() {
-		return task;
+		return description;
 	}
 
 	@Override
