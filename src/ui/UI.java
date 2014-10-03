@@ -3,7 +3,6 @@
  */
 package ui;
 
-import java.util.ArrayList;
 
 /**
  * This interface represent the UI
