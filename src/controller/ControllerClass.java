@@ -95,7 +95,7 @@ public class ControllerClass implements Controller {
 	}
 	
 	private Task convertStringToTask(String taskString) {
-			
+		
 	}
 	
 	private void convertTaskListStringList() {
@@ -106,7 +106,7 @@ public class ControllerClass implements Controller {
 	}
 	
 	private String convertTaskToString(Task task) {
-		
+		return task.getType() + "$" + task.toString();
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -204,18 +204,12 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
-	private void addTask(String content) throws Exception {
-		try {
-			if (isEmptyCommand(content)) {
-				// throw new Exception e;
-			} else {
-				Task task = processUserInput(content);
-				this.tasks.add(task);
-			}
-		} catch (Exception e) {
-			// System.out.println(e.getMessage());
-			// Message: Please specify what to add.
+	private void addTask(String content) {
+		if (content.isEmpty()) {
+			return;
 		}
+		Task task = processUserInput(content);
+		this.tasks.add(task);
 	}
 
 	// This method checks if the user has entered anything after the command
@@ -225,7 +219,7 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * TODO
+	 * Simple implementation, should be improved on date and type recognizing
 	 * 
 	 * @author Luo Shaohuai
 	 * @param content
