@@ -66,23 +66,47 @@ public class ControllerClass implements Controller {
 	};
 
 	private ArrayList<Task> tasks;
-	private ArrayList<String> tasksString;
+	private ArrayList<String> taskStrings;
 
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
-	public void execCmd(String command) {
+	public ArrayList<String> execCmd(String command) {
 		getFileContent();
 		parseCommand(command);
+		return taskStrings;
 	}
 
 	// This method returns all the existing tasks in the list, if any.
 	private void getFileContent() {
-		Storage storage = new StoragePlus();
-		tasksString = storage.read();
+		Storage storage = createStorageObject();
+		taskStrings = storage.read();
+	}
+
+	//This method returns a storage object, storagePlus.
+	private StoragePlus createStorageObject() {
+		return new StoragePlus();
 	}
 	
-	private void convertStringsToTasks() {
+	private void convertStringListTaskList() {
+		tasks.clear();
+		for (int i=0; i<taskStrings.size(); i++) {
+			tasks.add(convertStringToTask(taskStrings.get(i)));
+		}
+	}
+	
+	private Task convertStringToTask(String taskString) {
+			
+	}
+	
+	private void convertTaskListStringList() {
+		taskStrings.clear();
+		for (int i=0; i<tasks.size(); i++) {
+			taskStrings.add(convertTaskToString(tasks.get(i)));
+		}
+	}
+	
+	private String convertTaskToString(Task task) {
 		
 	}
 
@@ -134,13 +158,71 @@ public class ControllerClass implements Controller {
 
 	}
 
+	//This method checks if the task to be deleted exists and if it exists, proceeds with deletion.
 	private void deleteTask(String content) {
-
+		if (isValidDelete(content)) {
+		proceedWithDelete(content);			
+		} else {
+			//throw exception
+		}
+	}
+	
+	//This method goes on to delete task after knowing the task to delete exists.
+	private void proceedWithDelete(String content) {
+		int taskNum = getTaskNum(content);
+		executeDelete(taskNum);
 	}
 
-	private void addTask(String content) {
-		Task task = processUserInput(content);
-		this.tasks.add(task);
+	//This method deletes the task with the specified number.
+	private void executeDelete(int taskNum) {
+		int positionOfTask = taskNum - 1;
+		tasks.remove(positionOfTask);
+		updateStorage();
+	}
+
+	//This method updates the content stored.
+	private void updateStorage() {
+		convertTaskListStringList();
+		Storage storage = createStorageObject();		
+		storage.write(taskStrings);
+	}
+
+	// This method checks if the list of tasks is empty or if the user has not
+	// specified the task number to delete. Otherwise, the deletion is deemed
+	// valid and it returns true.
+	private boolean isValidDelete(String content) {
+		if (tasks.isEmpty()) {
+			return false;
+		} else if (isEmptyCommand(content)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	// This method gets the number of the task to be deleted.
+	public static int getTaskNum(String content) {
+		return Integer.parseInt(content);
+	}
+
+	private void addTask(String content) throws Exception {
+		try {
+			if (isEmptyCommand(content)) {
+				// throw new Exception e;
+			} else {
+				Task task = processUserInput(content);
+				this.tasks.add(task);
+			}
+		} catch (Exception e) {
+			// System.out.println(e.getMessage());
+			// Message: Please specify what to add.
+		}
+	}
+
+	// This method checks if the user has entered anything after the command
+	// type.
+	private boolean isEmptyCommand(String content) {
+		return content.trim().equals("");
 	}
 
 	/**
