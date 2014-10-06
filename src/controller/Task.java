@@ -16,7 +16,7 @@ import java.util.Date;
  *
  */
 public interface Task {
-	enum TaskType {
+	public enum TaskType {
 		FLOATING, TIMED, DEADLINE
 	}
 	
