@@ -152,8 +152,22 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	private void display() {
-
+	// This method is to display the existing tasks to the user.
+	private ArrayList<String> display() {
+		ArrayList<String> displayTasks = new ArrayList<String>();
+		if(!tasks.isEmpty()) {
+			for(Task taskItem : tasks) {
+				String stringedTask = taskItem.toString().replace("$", " ");
+				
+				if(stringedTask.startsWith("!")) {
+					displayTasks.add(stringedTask.substring(1));
+				} else {
+					displayTasks.add(stringedTask);
+				}
+			}
+		}
+		
+		return displayTasks;
 	}
 
 	private void editTask(String content) {
