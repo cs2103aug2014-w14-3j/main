@@ -85,7 +85,7 @@ public class ControllerClass implements Controller {
 		taskStrings = storage.read();
 	}
 
-	//This method returns a storage object, storagePlus.
+	// This method returns a storage object, storagePlus.
 	private StoragePlus createStorageObject() {
 		return new StoragePlus();
 	}
