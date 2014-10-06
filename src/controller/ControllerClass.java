@@ -1,5 +1,6 @@
 package controller;
 
+import controller.Task.TaskType;
 import storage.Storage;
 import storage.StoragePlus;
 
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+
+
 
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
@@ -86,27 +89,27 @@ public class ControllerClass implements Controller {
 	private StoragePlus createStorageObject() {
 		return new StoragePlus();
 	}
-	
+
 	private void convertStringListTaskList() {
 		tasks.clear();
-		for (int i=0; i<taskStrings.size(); i++) {
+		for (int i = 0; i < taskStrings.size(); i++) {
 			tasks.add(convertStringToTask(taskStrings.get(i)));
 		}
 	}
-	
+
 	private Task convertStringToTask(String taskString) {
-		
+
 	}
-	
+
 	private void convertTaskListStringList() {
 		taskStrings.clear();
-		for (int i=0; i<tasks.size(); i++) {
+		for (int i = 0; i < tasks.size(); i++) {
 			taskStrings.add(convertTaskToString(tasks.get(i)));
 		}
 	}
-	
+
 	private String convertTaskToString(Task task) {
-		return task.getType() + "$" + task.toString();
+
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -149,40 +152,100 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	private void display() {
-
+	// This method is to display the existing tasks to the user.
+	private ArrayList<String> display() {
+		ArrayList<String> displayTasks = new ArrayList<String>();
+		if(!tasks.isEmpty()) {
+			for(Task taskItem : tasks) {
+				String stringedTask = taskItem.toString().replace("$", " ");
+				
+				if(stringedTask.startsWith("!")) {
+					displayTasks.add(stringedTask.substring(1));
+				} else {
+					displayTasks.add(stringedTask);
+				}
+			}
+		}
+		
+		return displayTasks;
 	}
 
 	private void editTask(String content) {
+		if (isEmptyCommand(content)) {
+			// throw exception
+		} else {
+			proceedWithEdit(content);
+		}
 
 	}
 
-	//This method checks if the task to be deleted exists and if it exists, proceeds with deletion.
-	private void deleteTask(String content) {
-		if (isValidDelete(content)) {
-		proceedWithDelete(content);			
+	private void proceedWithEdit(String content) {
+		// TODO Auto-generated method stub
+		String[] words = content.split(" ");
+		int positionOfTask = getTaskNum(words[0])- 1;
+		String attributeToChange = words[1];
+		String details = content.substring(content.indexOf(words[2]));
+		Task taskToEdit = tasks.get(positionOfTask);
+		Task editedTask = editAttribute(taskToEdit, attributeToChange, details);
+	}
+
+	private Task editAttribute(Task taskToEdit, String attribute, String details) {
+		// TODO Auto-generated method stub
+		if (attribute.equalsIgnoreCase("description")) {
+			return editDescription(taskToEdit, details);
+		} else if (attribute.equalsIgnoreCase("date")) {
+			return editDate(taskToEdit, details);
+		} else if (attribute.equalsIgnoreCase("time")) {
+			return editTime(taskToEdit, details);
 		} else {
-			//throw exception
+			editStartEndTimes(taskToEdit, details);
 		}
+		
 	}
 	
-	//This method goes on to delete task after knowing the task to delete exists.
+	
+
+	private void editDescription(Task taskToEdit, String details) {
+		// TODO Auto-generated method stub
+		TaskType type = taskToEdit.getType();
+		if (type==TaskType.FLOATING) {
+			Task editedTask = new FloatingTask(taskToEdit.isPrioritized(),details);
+		} else if (type==TaskType.DEADLINE) {
+			
+		} else {
+			
+		}
+		
+	}
+
+	// This method checks if the task to be deleted exists and if it exists,
+	// proceeds with deletion.
+	private void deleteTask(String content) {
+		if (isValidDelete(content)) {
+			proceedWithDelete(content);
+		} else {
+			// throw exception
+		}
+	}
+
+	// This method goes on to delete task after knowing the task to delete
+	// exists.
 	private void proceedWithDelete(String content) {
 		int taskNum = getTaskNum(content);
 		executeDelete(taskNum);
 	}
 
-	//This method deletes the task with the specified number.
+	// This method deletes the task with the specified number.
 	private void executeDelete(int taskNum) {
 		int positionOfTask = taskNum - 1;
 		tasks.remove(positionOfTask);
 		updateStorage();
 	}
 
-	//This method updates the content stored.
+	// This method updates the content stored.
 	private void updateStorage() {
 		convertTaskListStringList();
-		Storage storage = createStorageObject();		
+		Storage storage = createStorageObject();
 		storage.write(taskStrings);
 	}
 
@@ -190,12 +253,18 @@ public class ControllerClass implements Controller {
 	// specified the task number to delete. Otherwise, the deletion is deemed
 	// valid and it returns true.
 	private boolean isValidDelete(String content) {
-		if (tasks.isEmpty()) {
-			return false;
-		} else if (isEmptyCommand(content)) {
-			return false;
-		} else {
-			return true;
+		try{
+			if (tasks.isEmpty()) {
+				//throw exception
+			} else if (isEmptyCommand(content)) {
+				//throw exception
+			} else {
+				return true;
+			}
+		} catch (Exception e1) {
+			
+		} catch (AnotherException e2) {
+			
 		}
 	}
 
@@ -204,12 +273,18 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
-	private void addTask(String content) {
-		if (content.isEmpty()) {
-			return;
+	private void addTask(String content) throws Exception {
+		try {
+			if (isEmptyCommand(content)) {
+				// throw new Exception e;
+			} else {
+				Task task = processUserInput(content);
+				this.tasks.add(task);
+			}
+		} catch (Exception e) {
+			// System.out.println(e.getMessage());
+			// Message: Please specify what to add.
 		}
-		Task task = processUserInput(content);
-		this.tasks.add(task);
 	}
 
 	// This method checks if the user has entered anything after the command
@@ -219,7 +294,7 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Simple implementation, should be improved on date and type recognizing
+	 * TODO
 	 * 
 	 * @author Luo Shaohuai
 	 * @param content
