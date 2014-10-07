@@ -6,6 +6,7 @@ package ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import controller.Controller;
 import controller.ControllerClass;
@@ -39,7 +40,10 @@ public class Main {
 				break;
 			}
 			try {
-				controller.execCmd(cmd);
+				ArrayList<String> output = controller.execCmd(cmd);
+				for (String item : output) {
+					System.out.println(item);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				continue;
