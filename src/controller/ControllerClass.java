@@ -232,17 +232,18 @@ public class ControllerClass implements Controller {
 	*/
 
 	//Timed task no date? so only possible tasks are floating or deadline. If timed task given throw exception?
-	private Task editDate(Task taskToEdit, String details) throws ParseException {
+	private Task editDate(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
 		Task editedTask;
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		try {
 			Date date = timeFormat.parse(details);
-		//if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
-			return editedTask = new DeadlineTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), date);
-		/*} else {
-			editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), taskToEdit.getDateTime(), taskToEdit.getEndTime());
-		}*/
+			if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
+				return editedTask = new DeadlineTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), date);
+			} else {
+				editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), taskToEdit.getDateTime(), taskToEdit.getEndTime());
+				return editedTask;
+			}
 		} catch(ParseException e) {
 			//nothing
 		}
