@@ -46,13 +46,19 @@ class DeadlineTask implements Task{
 		return isPrioritized;
 	}
 		
+	
+		//Author: Cong Thien
+	   //TaskType: 1 for floating, 2 for Deadline and 3 for TimedTask
+		// isPrioritized: 0 is false, 1 is true
+		//Format for toString() method
+		//    *DeadlineTask: <taskType>$<isPrioritized>$<content>$<date>
+	
 	public String toString() {
-		String task = description + "$" + deadline.toString();
 		
-		if(isPrioritized()) {
-			return "!" + "$" + task;
-		} else {
-			return task;
+		if(!isPrioritized) {
+			return "2$0$"+description+"$"+deadline.toString();
+		} else{
+			return "2$1$"+description+"$"+deadline.toString();
 		}
 	}
 
