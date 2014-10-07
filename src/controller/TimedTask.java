@@ -4,6 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/*
+ * Represents timed tasks
+ * 
+ * @author Koh Xian Hui (unless specified)
+ */
 class TimedTask implements Task{
 	boolean isPrioritized;
 	String description;
@@ -34,7 +39,7 @@ class TimedTask implements Task{
 		}
 	}
 		
-	public Date getDateTime() {
+	public Date getStartTime() {
 		return start;
 	}
 	
@@ -59,9 +64,9 @@ class TimedTask implements Task{
 	public String toString() {
 		
 		if(!isPrioritized) {
-			return "3$0$"+description+"$"+start.toString()+"$"+end.toString();
+			return "3%0%"+description+"%"+start.toString()+"%"+end.toString();
 		} else {
-			return "3$1$"+description+"$"+start.toString()+"$"+end.toString();
+			return "3%1%"+description+"%"+start.toString()+"%"+end.toString();
 		}
 	}
 
