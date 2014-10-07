@@ -35,7 +35,7 @@ class DeadlineTask implements Task{
 	}
 	
 	public Date getEndTime() {
-		return null;
+		return deadline;
 	}
 		
 	public String getDesc() {
