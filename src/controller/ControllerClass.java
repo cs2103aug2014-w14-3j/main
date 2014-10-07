@@ -232,14 +232,14 @@ public class ControllerClass implements Controller {
 
 	private Task editAttribute(Task taskToEdit, String attribute,
 			String editDetails) {
-		if (attribute.equalsIgnoreCase("description")) {
+		if (attribute.equalsIgnoreCase("desc")) {
 			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
 			return editDate(taskToEdit, editDetails);
-		} else {
+		} else if (attribute.equalsIgnoreCase("time")){
 			return editStartEndTimes(taskToEdit, editDetails);
 		}
-
+		return taskToEdit;
 	}
 
 	private Task editStartEndTimes(Task taskToEdit, String details) {
@@ -333,7 +333,6 @@ public class ControllerClass implements Controller {
 	// This method updates the content stored.
 	private void updateStorage() {
 		convertTaskListStringList();
-		Storage storage = createStorageObject();
 		storage.write(taskStrings);
 	}
 
