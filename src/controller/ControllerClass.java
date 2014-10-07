@@ -141,14 +141,15 @@ public class ControllerClass implements Controller {
 			break;
 		case EDIT:
 			editTask(content);
+			break;
 		case DISPLAY:
 			display();
 			break;
 		case INVALID:
-			// printInvalidCommand();
+			System.out.println("Invalid command.");
 			break;
 		default:
-			// throw new Error();
+			System.out.println("Invalid command.");
 		}
 	}
 
@@ -217,20 +218,6 @@ public class ControllerClass implements Controller {
 		return editedTask;
 	}
 
-	/*private Task editTime(Task taskToEdit, String details) {
-		TaskType type = taskToEdit.getType();
-		Task editedTask;
-		if (type==TaskType.FLOATING) {
-			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
-		} else if (type==TaskType.DEADLINE) {
-			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime());
-		} else {
-			editedTask = new TimedTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime(), taskToEdit. );
-		}
-		return editedTask;
-	}
-	*/
-
 	//Timed task no date? so only possible tasks are floating or deadline. If timed task given throw exception?
 	private Task editDate(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
@@ -264,12 +251,14 @@ public class ControllerClass implements Controller {
 	// This method checks if the task to be deleted exists and if it exists,
 	// proceeds with deletion.
 	private void deleteTask(String content) {
-			if (isValidDelete(content)) {
+		try{
+				if (isValidDelete(content)) {
 			proceedWithDelete(content);
-		} else {
-			// throw exception
+			}
+		} catch(Exception e){
+			System.out.println(e.getMessage());
 		}
-	}
+		}
 
 	// This method goes on to delete task after knowing the task to delete
 	// exists.
@@ -314,7 +303,7 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
-	private void addTask(String content) throws Exception {
+	private void addTask(String content) {
 		try {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to add.");
