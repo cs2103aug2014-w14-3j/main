@@ -22,6 +22,7 @@ public class ControllerClass implements Controller {
 	
 	public ControllerClass(){
 		storage = createStorageObject();
+		tasks = new ArrayList<Task>();
 		getFileContent();
 	}
 	
@@ -30,7 +31,7 @@ public class ControllerClass implements Controller {
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
-	private static final int numTasksInSinglePage = 10;
+	//private static final int numTasksInSinglePage = 10;
 	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
 		private static final long serialVersionUID = -8905622371814695255L;
 
