@@ -197,11 +197,9 @@ public class ControllerClass implements Controller {
 			for (Task taskItem : tasks) {
 				String stringedTask = taskItem.toString().replace("$", " ");
 
-				if (stringedTask.startsWith("!")) {
-					displayTasks.add(stringedTask.substring(1));
-				} else {
-					displayTasks.add(stringedTask);
-				}
+			
+					displayTasks.add(stringedTask.substring(4));
+			
 			}
 		}
 

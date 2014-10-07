@@ -49,12 +49,26 @@ public class StoragePlus implements Storage {
 		// if backUp file does not exist, just rename current file to backUp
 		// before writing
 		// else delete the backUp file and rename current file
+		if (!file.exists()) {
+			try {
+				PrintWriter printWriter = new PrintWriter(file);
 
-		if (!backUp.exists()) {
-			file.renameTo(backUp);
+				for (int i = 0; i < list.size(); i++) {
+					printWriter.println(list.get(i));
+				}
+				printWriter.close();
+			} catch (FileNotFoundException e) {
+				// Exception
+				e.printStackTrace();
+
+			}
 		} else {
-			backUp.delete();
-			file.renameTo(backUp);
+			if (!backUp.exists()) {
+				file.renameTo(backUp);
+			} else {
+				backUp.delete();
+				file.renameTo(backUp);
+			}
 
 			// write the list to the file
 			try {
@@ -65,7 +79,7 @@ public class StoragePlus implements Storage {
 				}
 				printWriter.close();
 			} catch (FileNotFoundException e) {
-				//Exception
+				// Exception
 				e.printStackTrace();
 			}
 		}
