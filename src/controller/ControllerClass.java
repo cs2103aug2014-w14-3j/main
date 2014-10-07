@@ -19,7 +19,12 @@ import java.util.TimeZone;
  */
 
 public class ControllerClass implements Controller {
-
+	
+	public ControllerClass(){
+		storage = createStorageObject();
+		getFileContent();
+	}
+	
 	enum CommandType {
 		ADD, DELETE, EDIT, DISPLAY, INVALID
 	};
@@ -51,23 +56,25 @@ public class ControllerClass implements Controller {
 
 	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
+	private Storage storage;
 
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
 	public ArrayList<String> execCmd(String command) {
-		getFileContent();
-		convertStringListTaskList();
 		parseCommand(command);
-		convertTaskListStringList();
 		return taskStrings;
 	}
 	
 
 	// This method returns all the existing tasks in the list, if any.
 	private void getFileContent() {
-		Storage storage = createStorageObject();
 		taskStrings = storage.read();
+		convertStringListTaskList();
+	}
+	
+	private void saveToStorage() {
+		storage.write(taskStrings);
 	}
 
 	// This method returns a storage object, storagePlus.
@@ -141,6 +148,8 @@ public class ControllerClass implements Controller {
 		CommandType commandType = matchCommandType(operation);
 		String content = removeCommandType(command, operation);
 		processInput(commandType, content);
+		convertTaskListStringList();
+		saveToStorage();
 	}
 
 	// This method returns the type of operation to be carried out, either add,
