@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 
-
-
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
  * It is called by the UI component, processes the user inputs and sends necessary information to the storage to be stored.
@@ -98,38 +96,37 @@ public class ControllerClass implements Controller {
 	}
 
 	private Task convertStringToTask(String taskString) throws ParseException {
-	
-			
-			String[] para=taskString.trim().split("$");
-			SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
-			Boolean isPrioritized;
-			Task task=null;
-			
-			if (para[1].equals("0")){
-				isPrioritized=false;
-			}else {
-				isPrioritized=true;
-			}
-			
-			String content=para[2];
-			
-			switch(Integer.parseInt(para[0])){
-			
-			case 1:
-				task= new FloatingTask(isPrioritized,content);
-				break;
-			case 2:
-				Date date=timeFormat.parse(para[3]);
-				task= new DeadlineTask(isPrioritized,content,date);
-				break;
-			case 3:
-				Date startTime=timeFormat.parse(para[3]);
-				Date endTime=timeFormat.parse(para[4]);
-				task= new TimedTask(isPrioritized,content,startTime,endTime);
-				break;
-			}
-			
-			return task;
+
+		String[] para = taskString.trim().split("$");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
+		Boolean isPrioritized;
+		Task task = null;
+
+		if (para[1].equals("0")) {
+			isPrioritized = false;
+		} else {
+			isPrioritized = true;
+		}
+
+		String content = para[2];
+
+		switch (Integer.parseInt(para[0])) {
+
+		case 1:
+			task = new FloatingTask(isPrioritized, content);
+			break;
+		case 2:
+			Date date = timeFormat.parse(para[3]);
+			task = new DeadlineTask(isPrioritized, content, date);
+			break;
+		case 3:
+			Date startTime = timeFormat.parse(para[3]);
+			Date endTime = timeFormat.parse(para[4]);
+			task = new TimedTask(isPrioritized, content, startTime, endTime);
+			break;
+		}
+
+		return task;
 
 	}
 
@@ -188,18 +185,18 @@ public class ControllerClass implements Controller {
 	// This method is to display the existing tasks to the user.
 	private ArrayList<String> display() {
 		ArrayList<String> displayTasks = new ArrayList<String>();
-		if(!tasks.isEmpty()) {
-			for(Task taskItem : tasks) {
+		if (!tasks.isEmpty()) {
+			for (Task taskItem : tasks) {
 				String stringedTask = taskItem.toString().replace("$", " ");
-				
-				if(stringedTask.startsWith("!")) {
+
+				if (stringedTask.startsWith("!")) {
 					displayTasks.add(stringedTask.substring(1));
 				} else {
 					displayTasks.add(stringedTask);
 				}
 			}
 		}
-		
+
 		return displayTasks;
 	}
 
@@ -215,16 +212,18 @@ public class ControllerClass implements Controller {
 	private void proceedWithEdit(String content) {
 
 		String[] words = content.split(" ");
-		int positionOfTask = getTaskNum(words[0])- 1;
+		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
 		String editDetails = content.substring(content.indexOf(words[2]));
 		Task taskToEdit = tasks.get(positionOfTask);
-		Task editedTask = editAttribute(taskToEdit, attributeToChange, editDetails);
+		Task editedTask = editAttribute(taskToEdit, attributeToChange,
+				editDetails);
 		tasks.set(positionOfTask, editedTask);
 		updateStorage();
 	}
 
-	private Task editAttribute(Task taskToEdit, String attribute, String editDetails) {
+	private Task editAttribute(Task taskToEdit, String attribute,
+			String editDetails) {
 		if (attribute.equalsIgnoreCase("description")) {
 			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
@@ -234,37 +233,47 @@ public class ControllerClass implements Controller {
 		} else {
 			return editStartEndTimes(taskToEdit, editDetails);
 		}
-		
+
 	}
-	
-	private Task editStartEndTimes(Task taskToEdit, String details) throws ParseException {
-		Task editedTask;
-		String [] times = details.split(" ");
+
+	private Task editStartEndTimes(Task taskToEdit, String details) {
+		Task editedTask = null;
+		String[] times = details.split(" ");
 		Date start;
 		Date end;
 		SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
-		start = timeFormat.parse(times[0]);
-		end = timeFormat.parse(times[2]);
-		editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), start, end);
-		
+		try {
+			start = timeFormat.parse(times[0]);
+			end = timeFormat.parse(times[2]);
+			editedTask = new TimedTask(taskToEdit.isPrioritized(),
+					taskToEdit.getDesc(), start, end);
+		} catch (ParseException e) {
+			// nothing
+		}
+
 		return editedTask;
 	}
 
-	//First initialize editedTask is null, then when use the method, just check if it's null or not
-	//Timed task no date? so only possible tasks are floating or deadline. If timed task given throw exception?
+	// First initialize editedTask is null, then when use the method, just check
+	// if it's null or not
+	// Timed task no date? so only possible tasks are floating or deadline. If
+	// timed task given throw exception?
 	private Task editDate(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
-		Task editedTask=null;
+		Task editedTask = null;
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		try {
 			Date date = timeFormat.parse(details);
-		//if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
-			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), date);
-		/*} else {
-			editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), taskToEdit.getDateTime(), taskToEdit.getEndTime());
-		}*/
-		} catch(ParseException e) {
-			//nothing
+			// if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
+			editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
+					taskToEdit.getDesc(), date);
+			/*
+			 * } else { editedTask = new TimedTask(taskToEdit.isPrioritized(),
+			 * taskToEdit.getDesc(), taskToEdit.getDateTime(),
+			 * taskToEdit.getEndTime()); }
+			 */
+		} catch (ParseException e) {
+			// nothing
 		}
 		return editedTask;
 	}
@@ -272,12 +281,14 @@ public class ControllerClass implements Controller {
 	private Task editDescription(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
 		Task editedTask;
-		if (type==TaskType.FLOATING) {
+		if (type == TaskType.FLOATING) {
 			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
-		} else if (type==TaskType.DEADLINE) {
-			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime());
+		} else if (type == TaskType.DEADLINE) {
+			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details,
+					taskToEdit.getDateTime());
 		} else {
-			editedTask = new TimedTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime(), taskToEdit.getEndTime() );
+			editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
+					taskToEdit.getDateTime(), taskToEdit.getEndTime());
 		}
 		return editedTask;
 	}
@@ -285,14 +296,14 @@ public class ControllerClass implements Controller {
 	// This method checks if the task to be deleted exists and if it exists,
 	// proceeds with deletion.
 	private void deleteTask(String content) {
-		try{
-				if (isValidDelete(content)) {
-			proceedWithDelete(content);
+		try {
+			if (isValidDelete(content)) {
+				proceedWithDelete(content);
 			}
-		} catch(Exception e){
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-		}
+	}
 
 	// This method goes on to delete task after knowing the task to delete
 	// exists.
@@ -300,8 +311,9 @@ public class ControllerClass implements Controller {
 		try {
 			int taskNum = getTaskNum(content);
 			executeDelete(taskNum);
-		} catch(NumberFormatException e){
-			System.out.println("Invalid delete format. Please enter task number.");
+		} catch (NumberFormatException e) {
+			System.out
+					.println("Invalid delete format. Please enter task number.");
 		}
 	}
 
@@ -323,13 +335,13 @@ public class ControllerClass implements Controller {
 	// specified the task number to delete. Otherwise, the deletion is deemed
 	// valid and it returns true.
 	private boolean isValidDelete(String content) throws Exception {
-			if (tasks.isEmpty()) {
-				throw new Exception("Nothing to delete list is empty!");
-			} else if (isEmptyCommand(content)) {
-				throw new Exception("Please specify what to delete.");
-			} else {
-				return true;
-			}
+		if (tasks.isEmpty()) {
+			throw new Exception("Nothing to delete list is empty!");
+		} else if (isEmptyCommand(content)) {
+			throw new Exception("Please specify what to delete.");
+		} else {
+			return true;
+		}
 	}
 
 	// This method gets the number of the task.
@@ -346,7 +358,7 @@ public class ControllerClass implements Controller {
 				this.tasks.add(task);
 			}
 		} catch (Exception e) {
-			System.out.println(e.getMessage());	
+			System.out.println(e.getMessage());
 		}
 	}
 
