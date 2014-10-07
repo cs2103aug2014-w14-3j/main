@@ -50,13 +50,18 @@ class TimedTask implements Task{
 		return isPrioritized;
 	}
 		
+	
+	//Author: Cong Thien
+    //TaskType: 1 for floating, 2 for Deadline and 3 for TimedTask
+	// isPrioritized: 0 is false, 1 is true
+	//Format for toString() method:
+	//   *TimedTask   : <taskType>$<isPrioritized>$<content>$<startTime>$<endTime>
 	public String toString() {
-		String task = description + "$" + start.toString() + "$" + end.toString();
 		
-		if(isPrioritized()) {
-			return "!" + "$" + task;
+		if(!isPrioritized) {
+			return "3$0$"+description+"$"+start.toString()+"$"+end.toString();
 		} else {
-			return task;
+			return "3$1$"+description+"$"+start.toString()+"$"+end.toString();
 		}
 	}
 

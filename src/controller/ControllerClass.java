@@ -90,14 +90,46 @@ public class ControllerClass implements Controller {
 		return new StoragePlus();
 	}
 
-	private void convertStringListTaskList() {
+	private void convertStringListTaskList() throws ParseException {
 		tasks.clear();
 		for (int i = 0; i < taskStrings.size(); i++) {
 			tasks.add(convertStringToTask(taskStrings.get(i)));
 		}
 	}
 
-	private Task convertStringToTask(String taskString) {
+	private Task convertStringToTask(String taskString) throws ParseException {
+	
+			
+			String[] para=taskString.trim().split("$");
+			SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
+			Boolean isPrioritized;
+			Task task=null;
+			
+			if (para[1].equals("0")){
+				isPrioritized=false;
+			}else {
+				isPrioritized=true;
+			}
+			
+			String content=para[2];
+			
+			switch(Integer.parseInt(para[0])){
+			
+			case 1:
+				task= new FloatingTask(isPrioritized,content);
+				break;
+			case 2:
+				Date date=timeFormat.parse(para[3]);
+				task= new DeadlineTask(isPrioritized,content,date);
+				break;
+			case 3:
+				Date startTime=timeFormat.parse(para[3]);
+				Date endTime=timeFormat.parse(para[4]);
+				task= new TimedTask(isPrioritized,content,startTime,endTime);
+				break;
+			}
+			
+			return task;
 
 	}
 
@@ -109,7 +141,7 @@ public class ControllerClass implements Controller {
 	}
 
 	private String convertTaskToString(Task task) {
-
+		return task.toString();
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -218,21 +250,23 @@ public class ControllerClass implements Controller {
 		return editedTask;
 	}
 
+	//First initialize editedTask is null, then when use the method, just check if it's null or not
 	//Timed task no date? so only possible tasks are floating or deadline. If timed task given throw exception?
 	private Task editDate(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
-		Task editedTask;
+		Task editedTask=null;
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		try {
 			Date date = timeFormat.parse(details);
 		//if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
-			return editedTask = new DeadlineTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), date);
+			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), date);
 		/*} else {
 			editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), taskToEdit.getDateTime(), taskToEdit.getEndTime());
 		}*/
 		} catch(ParseException e) {
 			//nothing
 		}
+		return editedTask;
 	}
 
 	private Task editDescription(Task taskToEdit, String details) {

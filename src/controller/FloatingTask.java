@@ -23,8 +23,17 @@ class FloatingTask implements Task{
 		return isPrioritized;
 	}
 		
+		//Author: Cong Thien
+	    //TaskType: 1 for floating, 2 for Deadline and 3 for TimedTask
+		// isPrioritized: 0 is false, 1 is true
+		//Format for toString() method:
+		//   *FloatingTask: <taskType>$<isPrioritized>$<content>
 	public String toString() {
-		return description;
+		if (!isPrioritized){
+			return "1$0$"+description;
+		}else{
+			return "1$1$"+description;
+		}
 	}
 
 	@Override
