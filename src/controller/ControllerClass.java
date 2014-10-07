@@ -236,8 +236,8 @@ public class ControllerClass implements Controller {
 			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
 			return editDate(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("time")) {
-			return editTime(taskToEdit, editDetails);
+		//} else if (attribute.equalsIgnoreCase("time")) {
+			//return editTime(taskToEdit, editDetails);
 		} else {
 			return editStartEndTimes(taskToEdit, editDetails);
 		}
@@ -291,13 +291,13 @@ public class ControllerClass implements Controller {
 		Task editedTask;
 		if (type == TaskType.FLOATING) {
 			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
-		} else if (type == TaskType.DEADLINE) {
+		} else {
 			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details,
 					taskToEdit.getDateTime());
-		} else {
-			editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
-					taskToEdit.getDateTime(), taskToEdit.getEndTime());
-		}
+		} //else {
+			//editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
+				//	taskToEdit.getDateTime(), taskToEdit.getEndTime());
+		//}
 		return editedTask;
 	}
 
