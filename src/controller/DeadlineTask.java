@@ -62,9 +62,9 @@ class DeadlineTask implements Task{
 	public String toString() {
 		
 		if(!isPrioritized) {
-			return "2$0$"+description+"$"+deadline.toString();
+			return "2%0%"+description+"%"+deadline.toString();
 		} else{
-			return "2$1$"+description+"$"+deadline.toString();
+			return "2%1%"+description+"%"+deadline.toString();
 		}
 	}
 

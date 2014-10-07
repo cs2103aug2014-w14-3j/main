@@ -26,6 +26,10 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		onInitialize();
+		String a = "saa$aaa$bbb";
+		String aa[] = a.split("$");
+		
+		
 		Controller controller = new ControllerClass();
 		while(true) {
 			System.out.println("Command: ");

@@ -64,9 +64,9 @@ class TimedTask implements Task{
 	public String toString() {
 		
 		if(!isPrioritized) {
-			return "3$0$"+description+"$"+start.toString()+"$"+end.toString();
+			return "3%0%"+description+"%"+start.toString()+"%"+end.toString();
 		} else {
-			return "3$1$"+description+"$"+start.toString()+"$"+end.toString();
+			return "3%1%"+description+"%"+start.toString()+"%"+end.toString();
 		}
 	}
 

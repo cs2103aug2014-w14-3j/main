@@ -39,9 +39,9 @@ class FloatingTask implements Task{
 		//   *FloatingTask: <taskType>$<isPrioritized>$<content>
 	public String toString() {
 		if (!isPrioritized){
-			return "1$0$"+description;
+			return "1%0%"+description;
 		}else{
-			return "1$1$"+description;
+			return "1%1%"+description;
 		}
 	}
 

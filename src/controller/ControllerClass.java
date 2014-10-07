@@ -73,10 +73,6 @@ public class ControllerClass implements Controller {
 		taskStrings = storage.read();
 		convertStringListTaskList();
 	}
-	
-	private void saveToStorage() {
-		storage.write(taskStrings);
-	}
 
 	// This method returns a storage object, storagePlus.
 	private StoragePlus createStorageObject() {
@@ -96,7 +92,7 @@ public class ControllerClass implements Controller {
 
 	private Task convertStringToTask(String taskString) throws ParseException {
 
-		String[] para = taskString.trim().split("$");
+		String[] para = taskString.trim().split("%");
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		Boolean isPrioritized;
 		Task task = null;
@@ -150,7 +146,7 @@ public class ControllerClass implements Controller {
 		String content = removeCommandType(command, operation);
 		processInput(commandType, content);
 		convertTaskListStringList();
-		saveToStorage();
+		updateStorage();
 	}
 
 	// This method returns the type of operation to be carried out, either add,
@@ -195,7 +191,7 @@ public class ControllerClass implements Controller {
 		ArrayList<String> displayTasks = new ArrayList<String>();
 		if (!tasks.isEmpty()) {
 			for (Task taskItem : tasks) {
-				String stringedTask = taskItem.toString().replace("$", " ");
+				String stringedTask = taskItem.toString().replace("%", " ");
 
 			
 					displayTasks.add(stringedTask.substring(4));
