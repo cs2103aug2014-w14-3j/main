@@ -38,10 +38,6 @@ class DeadlineTask implements Task{
 	public Date getEndTime() {
 		return deadline;
 	}
-	
-	public Date getEndTime() {
-		return deadline;
-	}
 		
 	public String getDesc() {
 		return description;
