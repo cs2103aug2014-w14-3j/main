@@ -37,7 +37,11 @@ class TimedTask implements Task{
 	public Date getDateTime() {
 		return start;
 	}
-		
+	
+	public Date getEndTime() {
+		return end;
+	}
+	
 	public String getDesc() {
 		return description;
 	}

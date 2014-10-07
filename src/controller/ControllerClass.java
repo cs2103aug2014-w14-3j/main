@@ -180,48 +180,91 @@ public class ControllerClass implements Controller {
 	}
 
 	private void proceedWithEdit(String content) {
-		// TODO Auto-generated method stub
+
 		String[] words = content.split(" ");
 		int positionOfTask = getTaskNum(words[0])- 1;
 		String attributeToChange = words[1];
-		String details = content.substring(content.indexOf(words[2]));
+		String editDetails = content.substring(content.indexOf(words[2]));
 		Task taskToEdit = tasks.get(positionOfTask);
-		Task editedTask = editAttribute(taskToEdit, attributeToChange, details);
+		Task editedTask = editAttribute(taskToEdit, attributeToChange, editDetails);
+		tasks.set(positionOfTask, editedTask);
+		updateStorage();
 	}
 
-	private Task editAttribute(Task taskToEdit, String attribute, String details) {
-		// TODO Auto-generated method stub
+	private Task editAttribute(Task taskToEdit, String attribute, String editDetails) {
 		if (attribute.equalsIgnoreCase("description")) {
-			return editDescription(taskToEdit, details);
+			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
-			return editDate(taskToEdit, details);
+			return editDate(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
-			return editTime(taskToEdit, details);
+			return editTime(taskToEdit, editDetails);
 		} else {
-			editStartEndTimes(taskToEdit, details);
+			return editStartEndTimes(taskToEdit, editDetails);
 		}
 		
 	}
 	
-	
-
-	private void editDescription(Task taskToEdit, String details) {
-		// TODO Auto-generated method stub
-		TaskType type = taskToEdit.getType();
-		if (type==TaskType.FLOATING) {
-			Task editedTask = new FloatingTask(taskToEdit.isPrioritized(),details);
-		} else if (type==TaskType.DEADLINE) {
-			
-		} else {
-			
-		}
+	private Task editStartEndTimes(Task taskToEdit, String details) throws ParseException {
+		Task editedTask;
+		String [] times = details.split(" ");
+		Date start;
+		Date end;
+		SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
+		start = timeFormat.parse(times[0]);
+		end = timeFormat.parse(times[2]);
+		editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), start, end);
 		
+		return editedTask;
+	}
+
+	/*private Task editTime(Task taskToEdit, String details) {
+		TaskType type = taskToEdit.getType();
+		Task editedTask;
+		if (type==TaskType.FLOATING) {
+			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
+		} else if (type==TaskType.DEADLINE) {
+			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime());
+		} else {
+			editedTask = new TimedTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime(), taskToEdit. );
+		}
+		return editedTask;
+	}
+	*/
+
+	//Timed task no date? so only possible tasks are floating or deadline. If timed task given throw exception?
+	private Task editDate(Task taskToEdit, String details) throws ParseException {
+		TaskType type = taskToEdit.getType();
+		Task editedTask;
+		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
+		try {
+			Date date = timeFormat.parse(details);
+		//if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
+			return editedTask = new DeadlineTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), date);
+		/*} else {
+			editedTask = new TimedTask(taskToEdit.isPrioritized(), taskToEdit.getDesc(), taskToEdit.getDateTime(), taskToEdit.getEndTime());
+		}*/
+		} catch(ParseException e) {
+			//nothing
+		}
+	}
+
+	private Task editDescription(Task taskToEdit, String details) {
+		TaskType type = taskToEdit.getType();
+		Task editedTask;
+		if (type==TaskType.FLOATING) {
+			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
+		} else if (type==TaskType.DEADLINE) {
+			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime());
+		} else {
+			editedTask = new TimedTask(taskToEdit.isPrioritized(), details, taskToEdit.getDateTime(), taskToEdit.getEndTime() );
+		}
+		return editedTask;
 	}
 
 	// This method checks if the task to be deleted exists and if it exists,
 	// proceeds with deletion.
 	private void deleteTask(String content) {
-		if (isValidDelete(content)) {
+			if (isValidDelete(content)) {
 			proceedWithDelete(content);
 		} else {
 			// throw exception
@@ -230,9 +273,13 @@ public class ControllerClass implements Controller {
 
 	// This method goes on to delete task after knowing the task to delete
 	// exists.
-	private void proceedWithDelete(String content) {
-		int taskNum = getTaskNum(content);
-		executeDelete(taskNum);
+	private void proceedWithDelete(String content) throws NumberFormatException {
+		try {
+			int taskNum = getTaskNum(content);
+			executeDelete(taskNum);
+		} catch(NumberFormatException e){
+			//nothing
+		}
 	}
 
 	// This method deletes the task with the specified number.
@@ -252,24 +299,18 @@ public class ControllerClass implements Controller {
 	// This method checks if the list of tasks is empty or if the user has not
 	// specified the task number to delete. Otherwise, the deletion is deemed
 	// valid and it returns true.
-	private boolean isValidDelete(String content) {
-		try{
+	private boolean isValidDelete(String content) throws InvalidInputException {
 			if (tasks.isEmpty()) {
-				//throw exception
+				throw new InvalidInputException("");
 			} else if (isEmptyCommand(content)) {
-				//throw exception
+				throw new InvalidInputException("");
 			} else {
 				return true;
 			}
-		} catch (Exception e1) {
-			
-		} catch (AnotherException e2) {
-			
-		}
 	}
 
-	// This method gets the number of the task to be deleted.
-	public static int getTaskNum(String content) {
+	// This method gets the number of the task.
+	public static int getTaskNum(String content) throws NumberFormatException {
 		return Integer.parseInt(content);
 	}
 
