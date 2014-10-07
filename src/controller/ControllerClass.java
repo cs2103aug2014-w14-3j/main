@@ -93,7 +93,6 @@ public class ControllerClass implements Controller {
 	private Task convertStringToTask(String taskString) throws ParseException {
 
 		String[] para = taskString.trim().split("%");
-		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		Boolean isPrioritized;
 		Task task = null;
 
@@ -111,12 +110,12 @@ public class ControllerClass implements Controller {
 			task = new FloatingTask(isPrioritized, content);
 			break;
 		case 2:
-			Date date = timeFormat.parse(para[3]);
+			Date date = new Date(Long.parseLong(para[3]));
 			task = new DeadlineTask(isPrioritized, content, date);
 			break;
 		case 3:
-			Date startTime = timeFormat.parse(para[3]);
-			Date endTime = timeFormat.parse(para[4]);
+			Date startTime = new Date(Long.parseLong(para[3]));
+			Date endTime = new Date(Long.parseLong(para[4]));
 			task = new TimedTask(isPrioritized, content, startTime, endTime);
 			break;
 		}
@@ -417,7 +416,7 @@ public class ControllerClass implements Controller {
 							if (format != null) {
 								dateFormat = new SimpleDateFormat(format);
 								dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-								timeEnd = dateFormat.parse(word);
+								timeEnd = dateFormat.parse(words[timeEndPos]);
 								i = timeEndPos;
 								break;
 							}
@@ -487,7 +486,7 @@ public class ControllerClass implements Controller {
 	private static String determineTimeFormat(String dateString) {
 		for (String regexp : TIME_FORMAT_REGEXPS.keySet()) {
 			if (dateString.toLowerCase().matches(regexp)) {
-				return DATE_FORMAT_REGEXPS.get(regexp);
+				return TIME_FORMAT_REGEXPS.get(regexp);
 			}
 		}
 		return null; // Unknown format.

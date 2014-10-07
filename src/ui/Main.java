@@ -43,7 +43,7 @@ public class Main {
 			try {
 				ArrayList<String> output = controller.execCmd(cmd);
 				for (String item : output) {
-					System.out.println(item);
+					System.out.println(item.substring(4));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
