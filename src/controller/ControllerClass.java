@@ -279,7 +279,7 @@ public class ControllerClass implements Controller {
 			int taskNum = getTaskNum(content);
 			executeDelete(taskNum);
 		} catch(NumberFormatException e){
-			//nothing
+			System.out.println("Invalid delete format. Please enter task number.");
 		}
 	}
 
@@ -300,11 +300,11 @@ public class ControllerClass implements Controller {
 	// This method checks if the list of tasks is empty or if the user has not
 	// specified the task number to delete. Otherwise, the deletion is deemed
 	// valid and it returns true.
-	private boolean isValidDelete(String content) throws InvalidInputException {
+	private boolean isValidDelete(String content) throws Exception {
 			if (tasks.isEmpty()) {
-				throw new InvalidInputException("");
+				throw new Exception("Nothing to delete list is empty!");
 			} else if (isEmptyCommand(content)) {
-				throw new InvalidInputException("");
+				throw new Exception("Please specify what to delete.");
 			} else {
 				return true;
 			}
@@ -318,14 +318,13 @@ public class ControllerClass implements Controller {
 	private void addTask(String content) throws Exception {
 		try {
 			if (isEmptyCommand(content)) {
-				// throw new Exception e;
+				throw new Exception("Please specify what to add.");
 			} else {
 				Task task = processUserInput(content);
 				this.tasks.add(task);
 			}
 		} catch (Exception e) {
-			// System.out.println(e.getMessage());
-			// Message: Please specify what to add.
+			System.out.println(e.getMessage());	
 		}
 	}
 
