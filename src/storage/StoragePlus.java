@@ -55,19 +55,19 @@ public class StoragePlus implements Storage {
 		} else {
 			backUp.delete();
 			file.renameTo(backUp);
+		}
+		
+		// write the list to the file
+		try {
+			PrintWriter printWriter = new PrintWriter(file);
 
-			// write the list to the file
-			try {
-				PrintWriter printWriter = new PrintWriter(file);
-
-				for (int i = 0; i < list.size(); i++) {
-					printWriter.println(list.get(i));
-				}
-				printWriter.close();
-			} catch (FileNotFoundException e) {
-				//Exception
-				e.printStackTrace();
+			for (int i = 0; i < list.size(); i++) {
+				printWriter.println(list.get(i));
 			}
+			printWriter.close();
+		} catch (FileNotFoundException e) {
+			//Exception
+			e.printStackTrace();
 		}
 	}
 }
