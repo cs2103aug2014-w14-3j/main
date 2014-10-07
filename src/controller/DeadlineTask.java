@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+//Author: Xian Hui (Author is Xian Hui unless specified.)
+//This class is used to represent DeadlineTask.
 class DeadlineTask implements Task{
 	boolean isPrioritized;
 	String description;
