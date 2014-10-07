@@ -29,8 +29,13 @@ class DeadlineTask implements Task{
 			deadline = timeFormat.parse(getAttributes[1]);
 		}
 	}
-		
-	public Date getDateTime() {
+	
+	public Date getStartTime(){
+		return null;
+	}
+	
+	
+	public Date getEndTime() {
 		return deadline;
 	}
 		
