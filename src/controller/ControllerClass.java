@@ -170,7 +170,12 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	// This method is to display the existing tasks to the user.
+	/*
+	 * Displays the existing tasks to the user.
+	 * 
+	 * @return ArrayList<String>
+	 * @author Koh Xian Hui
+	 */
 	private ArrayList<String> display() {
 		ArrayList<String> displayTasks = new ArrayList<String>();
 		if (!tasks.isEmpty()) {

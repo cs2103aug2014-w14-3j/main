@@ -2,6 +2,11 @@ package controller;
 
 import java.util.Date;
 
+/*
+ * Represents floating tasks.
+ * 
+ * @author Koh Xian Hui (unless specified)
+ */
 class FloatingTask implements Task{
 	boolean isPrioritized;
 	String description;
@@ -11,7 +16,11 @@ class FloatingTask implements Task{
 		isPrioritized = priority;
 	}
 		
-	public Date getDateTime() {
+	public Date getStartTime() {
+		return null;
+	}
+	
+	public Date getEndTime(){
 		return null;
 	}
 		

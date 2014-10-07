@@ -21,7 +21,7 @@ import java.util.Date;
 			isPrioritized="1";
 		}
 		else {
-			isPrioritized="0";
+		isPrioritized="0";
 		}
 		
 		content=task.getDesc();

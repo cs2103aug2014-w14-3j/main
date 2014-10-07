@@ -4,6 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/*
+ * Represents deadline tasks
+ * 
+ * @author Koh Xian Hui (unless specified)
+ */
 class DeadlineTask implements Task{
 	boolean isPrioritized;
 	String description;
@@ -29,8 +34,13 @@ class DeadlineTask implements Task{
 			deadline = timeFormat.parse(getAttributes[1]);
 		}
 	}
-		
-	public Date getDateTime() {
+	
+	public Date getStartTime(){
+		return null;
+	}
+	
+	
+	public Date getEndTime() {
 		return deadline;
 	}
 		

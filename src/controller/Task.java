@@ -27,10 +27,18 @@ public interface Task {
 	 * 
 	 * There should not be Date object only with date (and no time)
 	 * For Timed Task, it should return the starting time
-	 * For Floating Task, it should return null
+	 * For Floating Task and DeadlineTask, it should return null
 	 * @return Date (of this task)
 	 */
-	Date getDateTime();
+	Date getStartTime();
+	
+	/*
+	 * This method return the end time for the task (for timedTask and deadlineTask only)
+	 * for floatingTask, this method will return null
+	 */
+	
+	Date getEndTime();
+	
 	
 	/**
 	 * This method return description string of the task
