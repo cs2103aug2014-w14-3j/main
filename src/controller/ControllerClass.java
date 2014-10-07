@@ -73,9 +73,11 @@ public class ControllerClass implements Controller {
 	// which course of action to take.
 	public ArrayList<String> execCmd(String command) {
 		getFileContent();
+		convertStringListTaskList();
 		parseCommand(command);
 		return taskStrings;
 	}
+	
 
 	// This method returns all the existing tasks in the list, if any.
 	private void getFileContent() {
@@ -88,10 +90,14 @@ public class ControllerClass implements Controller {
 		return new StoragePlus();
 	}
 
-	private void convertStringListTaskList() throws ParseException {
+	private void convertStringListTaskList() {
 		tasks.clear();
+		try{
 		for (int i = 0; i < taskStrings.size(); i++) {
 			tasks.add(convertStringToTask(taskStrings.get(i)));
+		}
+		} catch(ParseException e) {
+			//nothing
 		}
 	}
 
@@ -129,7 +135,8 @@ public class ControllerClass implements Controller {
 		return task;
 
 	}
-
+	
+	//This method converts tasks from tasks list to taskStrings list.
 	private void convertTaskListStringList() {
 		taskStrings.clear();
 		for (int i = 0; i < tasks.size(); i++) {
@@ -137,6 +144,7 @@ public class ControllerClass implements Controller {
 		}
 	}
 
+	//This method converts tasks to strings to be stored in taskStrings list.
 	private String convertTaskToString(Task task) {
 		return task.toString();
 	}
@@ -312,8 +320,7 @@ public class ControllerClass implements Controller {
 			int taskNum = getTaskNum(content);
 			executeDelete(taskNum);
 		} catch (NumberFormatException e) {
-			System.out
-					.println("Invalid delete format. Please enter task number.");
+			System.out.println("Invalid delete format. Please enter task number.");
 		}
 	}
 
