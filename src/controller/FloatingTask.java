@@ -14,6 +14,10 @@ class FloatingTask implements Task{
 	public Date getDateTime() {
 		return null;
 	}
+	
+	public Date getEndTime() {
+		return null;
+	}
 		
 	public String getDesc() {
 		return description;
