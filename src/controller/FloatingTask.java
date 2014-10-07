@@ -2,8 +2,11 @@ package controller;
 
 import java.util.Date;
 
-// Author: Xian Hui (Author is Xian Hui unless specified.)
-// This class is used to represent FloatingTask.
+/*
+ * Represents floating tasks.
+ * 
+ * @author Koh Xian Hui (unless specified)
+ */
 class FloatingTask implements Task{
 	boolean isPrioritized;
 	String description;

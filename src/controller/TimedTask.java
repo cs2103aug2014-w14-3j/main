@@ -4,8 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-//Author: Xian Hui (Author is Xian Hui unless specified.)
-//This class is used to represent TimedTask.
+/*
+ * Represents timed tasks
+ * 
+ * @author Koh Xian Hui (unless specified)
+ */
 class TimedTask implements Task{
 	boolean isPrioritized;
 	String description;
