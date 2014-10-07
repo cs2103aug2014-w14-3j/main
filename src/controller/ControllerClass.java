@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
@@ -18,62 +19,50 @@ import java.util.HashMap;
  */
 
 public class ControllerClass implements Controller {
-
+	
+	public ControllerClass(){
+		storage = createStorageObject();
+		tasks = new ArrayList<Task>();
+		getFileContent();
+	}
+	
 	enum CommandType {
 		ADD, DELETE, EDIT, DISPLAY, INVALID
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
-	private static final int numTasksInSinglePage = 10;
+	//private static final int numTasksInSinglePage = 10;
 	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
+		private static final long serialVersionUID = -8905622371814695255L;
+
 		{
 			put("^\\d{8}$", "yyyyMMdd");
 			put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
 			put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
-			put("^\\d{1,2}/\\d{1,2}/\\d{4}$", "MM/dd/yyyy");
+			put("^\\d{1,2}/\\d{1,2}/\\d{4}$", "dd/MM/yyyy");
 			put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd");
-			put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}$", "dd MMM yyyy");
-			put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}$", "dd MMMM yyyy");
-			put("^\\d{12}$", "yyyyMMddHHmm");
-			put("^\\d{8}\\s\\d{4}$", "yyyyMMdd HHmm");
-			put("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}$",
-					"dd-MM-yyyy HH:mm");
-			put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}$",
-					"yyyy-MM-dd HH:mm");
-			put("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}$",
-					"MM/dd/yyyy HH:mm");
-			put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}$",
-					"yyyy/MM/dd HH:mm");
-			put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
-					"dd MMM yyyy HH:mm");
-			put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}$",
-					"dd MMMM yyyy HH:mm");
-			put("^\\d{14}$", "yyyyMMddHHmmss");
-			put("^\\d{8}\\s\\d{6}$", "yyyyMMdd HHmmss");
-			put("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-					"dd-MM-yyyy HH:mm:ss");
-			put("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-					"yyyy-MM-dd HH:mm:ss");
-			put("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-					"MM/dd/yyyy HH:mm:ss");
-			put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-					"yyyy/MM/dd HH:mm:ss");
-			put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-					"dd MMM yyyy HH:mm:ss");
-			put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$",
-					"dd MMMM yyyy HH:mm:ss");
+			put("^\\d{1,2}-\\d{1,2}$", "dd-MM");
+			put("^\\d{1,2}/\\d{1,2}$", "dd/MM");
+		}
+	};
+	
+	private static final Map<String, String> TIME_FORMAT_REGEXPS = new HashMap<String, String>() {
+		private static final long serialVersionUID = -1690161551539169383L;
+
+		{
+			put("^\\d{1,2}:\\d{2}$", "HH:mm");
+			put("^\\d{4}$", "HHmm");
 		}
 	};
 
 	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
+	private Storage storage;
 
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
 	public ArrayList<String> execCmd(String command) {
-		getFileContent();
-		convertStringListTaskList();
 		parseCommand(command);
 		return taskStrings;
 	}
@@ -81,8 +70,8 @@ public class ControllerClass implements Controller {
 
 	// This method returns all the existing tasks in the list, if any.
 	private void getFileContent() {
-		Storage storage = createStorageObject();
 		taskStrings = storage.read();
+		convertStringListTaskList();
 	}
 
 	// This method returns a storage object, storagePlus.
@@ -103,8 +92,7 @@ public class ControllerClass implements Controller {
 
 	private Task convertStringToTask(String taskString) throws ParseException {
 
-		String[] para = taskString.trim().split("$");
-		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
+		String[] para = taskString.trim().split("%");
 		Boolean isPrioritized;
 		Task task = null;
 
@@ -122,12 +110,12 @@ public class ControllerClass implements Controller {
 			task = new FloatingTask(isPrioritized, content);
 			break;
 		case 2:
-			Date date = timeFormat.parse(para[3]);
+			Date date = new Date(Long.parseLong(para[3]));
 			task = new DeadlineTask(isPrioritized, content, date);
 			break;
 		case 3:
-			Date startTime = timeFormat.parse(para[3]);
-			Date endTime = timeFormat.parse(para[4]);
+			Date startTime = new Date(Long.parseLong(para[3]));
+			Date endTime = new Date(Long.parseLong(para[4]));
 			task = new TimedTask(isPrioritized, content, startTime, endTime);
 			break;
 		}
@@ -156,6 +144,8 @@ public class ControllerClass implements Controller {
 		CommandType commandType = matchCommandType(operation);
 		String content = removeCommandType(command, operation);
 		processInput(commandType, content);
+		convertTaskListStringList();
+		updateStorage();
 	}
 
 	// This method returns the type of operation to be carried out, either add,
@@ -190,18 +180,21 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	// This method is to display the existing tasks to the user.
+	/*
+	 * Displays the existing tasks to the user.
+	 * 
+	 * @return ArrayList<String>
+	 * @author Koh Xian Hui
+	 */
 	private ArrayList<String> display() {
 		ArrayList<String> displayTasks = new ArrayList<String>();
 		if (!tasks.isEmpty()) {
 			for (Task taskItem : tasks) {
-				String stringedTask = taskItem.toString().replace("$", " ");
+				String stringedTask = taskItem.toString().replace("%", " ");
 
-				if (stringedTask.startsWith("!")) {
-					displayTasks.add(stringedTask.substring(1));
-				} else {
-					displayTasks.add(stringedTask);
-				}
+			
+					displayTasks.add(stringedTask.substring(4));
+			
 			}
 		}
 
@@ -232,16 +225,14 @@ public class ControllerClass implements Controller {
 
 	private Task editAttribute(Task taskToEdit, String attribute,
 			String editDetails) {
-		if (attribute.equalsIgnoreCase("description")) {
+		if (attribute.equalsIgnoreCase("desc")) {
 			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
 			return editDate(taskToEdit, editDetails);
-		//} else if (attribute.equalsIgnoreCase("time")) {
-			//return editTime(taskToEdit, editDetails);
-		} else {
+		} else if (attribute.equalsIgnoreCase("time")){
 			return editStartEndTimes(taskToEdit, editDetails);
 		}
-
+		return taskToEdit;
 	}
 
 	private Task editStartEndTimes(Task taskToEdit, String details) {
@@ -272,14 +263,15 @@ public class ControllerClass implements Controller {
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		try {
 			Date date = timeFormat.parse(details);
-			// if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
-			editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
-					taskToEdit.getDesc(), date);
-			/*
-			 * } else { editedTask = new TimedTask(taskToEdit.isPrioritized(),
-			 * taskToEdit.getDesc(), taskToEdit.getDateTime(),
-			 * taskToEdit.getEndTime()); }
-			 */
+			if (type==TaskType.DEADLINE) {
+				editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
+						taskToEdit.getDesc(), date);
+			
+			} else if(type == TaskType.TIMED) { 
+				editedTask = new TimedTask(taskToEdit.isPrioritized(),
+				taskToEdit.getDesc(), taskToEdit.getStartTime(),
+				taskToEdit.getEndTime()); 
+			}
 		} catch (ParseException e) {
 			// nothing
 		}
@@ -291,13 +283,13 @@ public class ControllerClass implements Controller {
 		Task editedTask;
 		if (type == TaskType.FLOATING) {
 			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
-		} else {
+		} else if (type == TaskType.DEADLINE) {
 			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details,
-					taskToEdit.getDateTime());
-		} //else {
-			//editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
-				//	taskToEdit.getDateTime(), taskToEdit.getEndTime());
-		//}
+					taskToEdit.getEndTime());
+		} else {
+			editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
+					taskToEdit.getStartTime(), taskToEdit.getEndTime());
+		}
 		return editedTask;
 	}
 
@@ -334,7 +326,6 @@ public class ControllerClass implements Controller {
 	// This method updates the content stored.
 	private void updateStorage() {
 		convertTaskListStringList();
-		Storage storage = createStorageObject();
 		storage.write(taskStrings);
 	}
 
@@ -376,58 +367,97 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * TODO
+	 * Process user input for add task
 	 * 
 	 * @author Luo Shaohuai
 	 * @param content
 	 * @return Task Object
 	 */
 	private Task processUserInput(String content) {
-		ArrayList<Date> dates = new ArrayList<Date>();
-		String words[] = content.split(" ");
-		for (String word : words) {
-			String format = determineDateFormat(word);
-			if (format != null) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-				try {
-					Date date = dateFormat.parse(word);
-					if (date != null) {
-						dates.add(date);
-					}
-				} catch (ParseException e) {
-					// do nothing
-				}
-			}
-		}
-
-		if (dates.size() > 2) {
-			dates = new ArrayList<Date>(dates.subList(dates.size() - 2,
-					dates.size()));
-		}
-
 		boolean priority = false;
 		if (content.contains("!")) {
 			priority = true;
 		}
+		
+		String words[] = content.split(" ");
+		content = "";
+		Date date = null;
+		Date timeStart = null;
+		Date timeEnd = null;
+		for (int i = 0; i< words.length; i++) {
+			String word = words[i].trim();
 
-		Task task = null;
-		if (dates.size() == 0) {
-			task = new FloatingTask(priority, content);
-		} else if (dates.size() == 1) {
-			task = new DeadlineTask(priority, content, dates.get(0));
-		} else if (dates.size() == 2) {
-			task = new TimedTask(priority, content, dates.get(0), dates.get(1));
+			String format = determineDateFormat(word);
+			if (format != null) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+				try {
+					date = dateFormat.parse(word);
+					continue;
+				} catch (ParseException e) {
+					//do nothing
+				}
+			}
+			
+			format = determineTimeFormat(word);
+			if (format != null) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+				try {
+					Date time = dateFormat.parse(word);
+					if (timeEnd == null) {
+						timeStart = time;
+						int timeStartPos = i;
+						int timeEndPos = timeStartPos;
+						
+						while(timeEndPos < timeStartPos + 3) {
+							timeEndPos++;
+							format = determineTimeFormat(words[timeEndPos].trim());
+							if (format != null) {
+								dateFormat = new SimpleDateFormat(format);
+								dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+								timeEnd = dateFormat.parse(words[timeEndPos]);
+								i = timeEndPos;
+								break;
+							}
+						}
+					}
+					if(timeEnd != null) {
+						continue;
+					}
+				} catch (ParseException e) {
+					//do nothing
+				}
+			}
+			
+			content += word + " ";
 		}
-
-		return task;
+		
+		if (date == null) {
+			return new FloatingTask(priority, content);
+		} else if (timeEnd == null) {
+			return new DeadlineTask (priority, content, date);
+		} else {
+			timeStart = addDate(date, timeStart);
+			timeEnd = addDate(date, timeEnd);
+			return new TimedTask(priority, content, timeStart, timeEnd);
+		}
 	}
+	
+	private Date addDate(Date date1, Date date2) {
+		long ms = date1.getTime() + date2.getTime();
+		return new Date(ms);
+	}
+	
 
 	/**
+	 * Determine SimpleDateFormat pattern matching with
+	 * the given date string. Returns null if format is unknown. 
+	 * 
 	 * @author Retrieved from
 	 *         http://stackoverflow.com/questions/3389348/parse-any-date-in-java
-	 *         by Luo Shaohuai Determine SimpleDateFormat pattern matching with
-	 *         the given date string. Returns null if format is unknown. You can
-	 *         simply extend DateUtil with more formats if needed.
+	 *         and modified
+	 *         by Luo Shaohuai 
 	 * @param dateString
 	 *            The date string to determine the SimpleDateFormat pattern for.
 	 * @return The matching SimpleDateFormat pattern, or null if format is
@@ -438,6 +468,25 @@ public class ControllerClass implements Controller {
 		for (String regexp : DATE_FORMAT_REGEXPS.keySet()) {
 			if (dateString.toLowerCase().matches(regexp)) {
 				return DATE_FORMAT_REGEXPS.get(regexp);
+			}
+		}
+		return null; // Unknown format.
+	}
+	
+	/**
+	 * Determine SimpleDateFormat pattern matching with
+	 * the given date string. Returns null if format is unknown.
+	 * 
+	 * @author Luo Shaohuai
+	 * @param dateString
+	 *            The date string to determine the SimpleDateFormat pattern for.
+	 * @return The matching SimpleDateFormat pattern, or null if format is
+	 *         unknown.
+	 */
+	private static String determineTimeFormat(String dateString) {
+		for (String regexp : TIME_FORMAT_REGEXPS.keySet()) {
+			if (dateString.toLowerCase().matches(regexp)) {
+				return TIME_FORMAT_REGEXPS.get(regexp);
 			}
 		}
 		return null; // Unknown format.
