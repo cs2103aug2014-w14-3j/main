@@ -27,6 +27,8 @@ public class ControllerClass implements Controller {
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int numTasksInSinglePage = 10;
 	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
+		private static final long serialVersionUID = -8905622371814695255L;
+
 		{
 			put("^\\d{8}$", "yyyyMMdd");
 			put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
@@ -39,6 +41,8 @@ public class ControllerClass implements Controller {
 	};
 	
 	private static final Map<String, String> TIME_FORMAT_REGEXPS = new HashMap<String, String>() {
+		private static final long serialVersionUID = -1690161551539169383L;
+
 		{
 			put("^\\d{1,2}:\\d{2}$", "HH:mm");
 			put("^\\d{4}$", "HHmm");
@@ -55,6 +59,7 @@ public class ControllerClass implements Controller {
 		getFileContent();
 		convertStringListTaskList();
 		parseCommand(command);
+		convertTaskListStringList();
 		return taskStrings;
 	}
 	
@@ -221,8 +226,6 @@ public class ControllerClass implements Controller {
 			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
 			return editDate(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("time")) {
-			return editTime(taskToEdit, editDetails);
 		} else {
 			return editStartEndTimes(taskToEdit, editDetails);
 		}
@@ -257,14 +260,15 @@ public class ControllerClass implements Controller {
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		try {
 			Date date = timeFormat.parse(details);
-			// if ((type==TaskType.FLOATING) || (type==TaskType.DEADLINE)) {
-			editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
-					taskToEdit.getDesc(), date);
-			/*
-			 * } else { editedTask = new TimedTask(taskToEdit.isPrioritized(),
-			 * taskToEdit.getDesc(), taskToEdit.getDateTime(),
-			 * taskToEdit.getEndTime()); }
-			 */
+			if (type==TaskType.DEADLINE) {
+				editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
+						taskToEdit.getDesc(), date);
+			
+			} else if(type == TaskType.TIMED) { 
+				editedTask = new TimedTask(taskToEdit.isPrioritized(),
+				taskToEdit.getDesc(), taskToEdit.getStartTime(),
+				taskToEdit.getEndTime()); 
+			}
 		} catch (ParseException e) {
 			// nothing
 		}
@@ -278,10 +282,10 @@ public class ControllerClass implements Controller {
 			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
 		} else if (type == TaskType.DEADLINE) {
 			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details,
-					taskToEdit.getDateTime());
+					taskToEdit.getEndTime());
 		} else {
 			editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
-					taskToEdit.getDateTime(), taskToEdit.getEndTime());
+					taskToEdit.getStartTime(), taskToEdit.getEndTime());
 		}
 		return editedTask;
 	}
