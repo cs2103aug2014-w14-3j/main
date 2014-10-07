@@ -34,7 +34,7 @@ class TimedTask implements Task{
 		}
 	}
 		
-	public Date getDateTime() {
+	public Date getStartTime() {
 		return start;
 	}
 	

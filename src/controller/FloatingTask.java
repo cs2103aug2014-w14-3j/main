@@ -11,7 +11,11 @@ class FloatingTask implements Task{
 		isPrioritized = priority;
 	}
 		
-	public Date getDateTime() {
+	public Date getStartTime() {
+		return null;
+	}
+	
+	public Date getEndTime(){
 		return null;
 	}
 	
