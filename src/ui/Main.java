@@ -3,11 +3,8 @@
  */
 package ui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-
+import javafx.application.Application;
+import javafx.stage.Stage;
 import controller.Controller;
 import controller.ControllerClass;
 
@@ -15,7 +12,7 @@ import controller.ControllerClass;
  * @author Luo Shaohuai
  *
  */
-public class Main {
+public class Main extends Application{
 	public static final String initMsg = "        Forget-Me-Not\n"
 				+ "------------------------------";
 	public static final String exitMsg = "==============================";
@@ -25,40 +22,22 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		onInitialize();
-		
-		Controller controller = new ControllerClass();
-		while(true) {
-			System.out.println("Command: ");
-			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			String cmd;
-			try {
-				cmd = in.readLine();
-			} catch (IOException e1) {
-				continue;
-			}
-			if(cmd.trim().isEmpty()) {
-				break;
-			}
-			try {
-				ArrayList<String> output = controller.execCmd(cmd);
-				for (String item : output) {
-					System.out.println(item.substring(4));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
-			}
-		}
-		onExit();
+		// TODO Auto-generated method stub
+		CmdInitialize();
+		CmdExit();
 	}
 	
-	public static void onInitialize() {
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		
+	}
+	
+	public static void CmdInitialize() {
 		System.out.println(initMsg);
 	}
 	
-	public static void onExit() {
+	public static void CmdExit() {
 		System.out.println(exitMsg);
+		
 	}
-
 }
