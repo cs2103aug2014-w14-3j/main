@@ -266,7 +266,6 @@ public class ControllerClass implements Controller {
 			if (type==TaskType.DEADLINE) {
 				editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
 						taskToEdit.getDesc(), date);
-			
 			} else if(type == TaskType.TIMED) { 
 				editedTask = new TimedTask(taskToEdit.isPrioritized(),
 				taskToEdit.getDesc(), taskToEdit.getStartTime(),
