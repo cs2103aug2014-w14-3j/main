@@ -40,6 +40,13 @@ public class Main extends Application{
 				+ "-------------------------------";
 	public static final String exitMsg = "===============================";
 	
+	
+	public Main() {
+		controller = new ControllerClass();
+		displayBuf = new ArrayList<String>();
+		root = new BorderPane();
+	}
+	
 	/**
 	 * GUI entry
 	 */
@@ -48,7 +55,6 @@ public class Main extends Application{
 		try {
 			primaryStage.initStyle(StageStyle.UNDECORATED);
 			
-			BorderPane root = new BorderPane();
 			Scene scene = new Scene(root, 600, 400);
 			root.setStyle("-fx-background-color: #CCBBAA;");
 			
@@ -60,7 +66,7 @@ public class Main extends Application{
 			bottom.setStyle("-fx-background-color: #AABBCC;");
 			root.setBottom(bottom);
 			
-			ListView<String> list = creatCenter(new ArrayList<String>(){{add("aaa");}});
+			ListView<String> list = creatCenter(new ArrayList<String>());
 			root.setCenter(list);
 			
 			primaryStage.setScene(scene);
@@ -97,9 +103,10 @@ public class Main extends Application{
 		commandInput.setPrefWidth(590);
 		commandInput.setStyle("-fx-font-size: 16pt;");
 		commandInput.setPromptText("Enter command here");
-		commandInput.setOnKeyTyped((event) -> {
+		commandInput.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				onEnter(commandInput.getText());
+				commandInput.clear();
 			}
 		});
 		bottom.getChildren().add(commandInput);
@@ -114,12 +121,24 @@ public class Main extends Application{
 	}
 	
 	private ObservableList<String> loadList(ArrayList<String> data) {
-		
+		for (int i = 0; i < data.size(); i++) {
+			data.set(i, data.get(i).substring(4));
+		}
 		return FXCollections.observableList(data);
 	}
 	
 	private void onEnter(String command) {
-		
+		try {
+			displayBuf = controller.execCmd(command);
+			updateDisplay();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void updateDisplay() {
+		ListView<String> list = creatCenter(displayBuf);
+		root.setCenter(list);
 	}
 	
 	/**
@@ -168,6 +187,7 @@ public class Main extends Application{
 		System.out.println(exitMsg);
 	}
 
-	
-
+	private Controller controller;
+	private ArrayList<String> displayBuf;
+	private BorderPane root;
 }
