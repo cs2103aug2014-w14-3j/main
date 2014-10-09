@@ -53,7 +53,7 @@ public class Main extends Application{
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			primaryStage.initStyle(StageStyle.UNDECORATED);
+			//primaryStage.initStyle(StageStyle.UNDECORATED);
 			
 			Scene scene = new Scene(root, 600, 400);
 			root.setStyle("-fx-background-color: #CCBBAA;");
