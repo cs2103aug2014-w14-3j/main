@@ -25,7 +25,7 @@ public class ControllerClass implements Controller {
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
-	// private static final int numTasksInSinglePage = 10;
+	private static final int numTasksInSinglePage = 10;
 	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
 		private static final long serialVersionUID = -8905622371814695255L;
 
@@ -156,7 +156,26 @@ public class ControllerClass implements Controller {
 		String content = removeCommandType(command, operation);
 		processInput(commandType, content);
 		convertTaskListStringList();
+		addTaskNum();
 		updateStorage();
+	}
+
+	/**
+	 * Appends the task number to the beginning of each string in taskStrings.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void addTaskNum() {
+		int numPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
+		taskStrings.add(0,Integer.toString(numPages));
+		for (int i=1; i<taskStrings.size(); i++) {
+			int numTask = i%(numTasksInSinglePage);
+			if (numTask==0) {
+				numTask = numTasksInSinglePage;
+			}
+			String numberedTask = Integer.toString(numTask) + ". " + taskStrings.get(i);
+			taskStrings.set(i, numberedTask);
+		}
 	}
 
 	// This method returns the type of operation to be carried out, either add,
@@ -253,7 +272,6 @@ public class ControllerClass implements Controller {
 		Task editedTask = editAttribute(taskToEdit, attributeToChange,
 				editDetails);
 		tasks.set(positionOfTask, editedTask);
-		updateStorage();
 	}
 
 	/**
@@ -390,7 +408,6 @@ public class ControllerClass implements Controller {
 		try {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
-			updateStorage();
 		} catch (IndexOutOfBoundsException e) {
 			System.out.println("Task does not exist. Please enter task number within the range.");
 		}
