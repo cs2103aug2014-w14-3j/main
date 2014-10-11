@@ -232,13 +232,14 @@ public class ControllerClass implements Controller {
 				proceedWithEdit(content);
 			}
 		} catch (Exception e) {
-			// nothing
+			System.out.println(e.getMessage());
 		}
 
 	}
-    
+
 	/**
 	 * Edits the task using the specified content.
+	 * 
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
@@ -254,9 +255,10 @@ public class ControllerClass implements Controller {
 		tasks.set(positionOfTask, editedTask);
 		updateStorage();
 	}
-	
+
 	/**
 	 * Matches the attribute to be edited and returns the edited task.
+	 * 
 	 * @param taskToEdit
 	 * @param attribute
 	 * @param editDetails
@@ -319,6 +321,7 @@ public class ControllerClass implements Controller {
 
 	/**
 	 * Creates and returns a new task with the details specified.
+	 * 
 	 * @param taskToEdit
 	 * @param details
 	 * @return Task Object
@@ -339,9 +342,10 @@ public class ControllerClass implements Controller {
 		return editedTask;
 	}
 
-	
 	/**
-	 * This method checks if the task to be deleted exists or is specified and if it is valid, proceeds with deletion.
+	 * This method checks if the task to be deleted exists or is specified and
+	 * if it is valid, proceeds with deletion.
+	 * 
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
@@ -356,9 +360,10 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	
 	/**
-	 * This method goes on to delete task after knowing the task to delete exists.
+	 * This method goes on to delete task after knowing the task to delete
+	 * exists.
+	 * 
 	 * @param content
 	 * @throws NumberFormatException
 	 * @return void
@@ -367,34 +372,33 @@ public class ControllerClass implements Controller {
 	private void proceedWithDelete(String content) {
 		try {
 			int taskNum = getTaskNum(content);
-			if(taskNum > tasks.size()) {
-				throw new Exception("Task number out of range. Please enter correct task number.");
-			}
 			executeDelete(taskNum);
-		}
-		catch (NumberFormatException e) {
-			System.out.println("Invalid delete format. Please enter task number.");
-		} catch (Exception e) {
-			//nothing
+		} catch (NumberFormatException e) {
+			System.out
+					.println("Invalid delete format. Please enter task number.");
 		}
 	}
 
-	
 	/**
 	 * This method deletes the task with the specified number.
+	 * 
 	 * @param taskNum
 	 * @return void
 	 * @author G. Vishnu Priya
 	 */
 	private void executeDelete(int taskNum) {
-		int positionOfTask = taskNum - 1;
-		tasks.remove(positionOfTask);
-		updateStorage();
+		try {
+			int positionOfTask = taskNum - 1;
+			tasks.remove(positionOfTask);
+			updateStorage();
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("Task does not exist. Please enter task number within the range.");
+		}
 	}
 
-	
 	/**
 	 * This method updates the content stored.
+	 * 
 	 * @return void
 	 * @author G. Vishnu Priya
 	 */
@@ -402,11 +406,12 @@ public class ControllerClass implements Controller {
 		convertTaskListStringList();
 		storage.write(taskStrings);
 	}
- 
+
 	/**
 	 * This method checks if the list of tasks is empty or if the user has not
-	 specified the task number to delete. Otherwise, the deletion is deemed
-	 valid and it returns true. 
+	 * specified the task number to delete. Otherwise, the deletion is deemed
+	 * valid and it returns true.
+	 * 
 	 * @param content
 	 * @return boolean
 	 * @throws Exception
@@ -422,9 +427,9 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	
 	/**
 	 * This method gets the number of the task.
+	 * 
 	 * @param content
 	 * @return integer
 	 * @throws NumberFormatException
@@ -447,9 +452,10 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	
 	/**
-	 * This method checks if the user has entered anything after the command type.
+	 * This method checks if the user has entered anything after the command
+	 * type.
+	 * 
 	 * @param content
 	 * @return boolean
 	 * @author G. Vishnu Priya
@@ -584,9 +590,10 @@ public class ControllerClass implements Controller {
 		return null; // Unknown format.
 	}
 
-	
 	/**
-	 * This method removes the command, either add, delete, edit or display, from the command string.
+	 * This method removes the command, either add, delete, edit or display,
+	 * from the command string.
+	 * 
 	 * @param command
 	 * @param operation
 	 * @return String
@@ -596,9 +603,9 @@ public class ControllerClass implements Controller {
 		return command.replace(operation, "").trim();
 	}
 
-	
 	/**
 	 * This method returns the command type for each operation.
+	 * 
 	 * @param operation
 	 * @return CommandType
 	 * @author G. Vishnu Priya
