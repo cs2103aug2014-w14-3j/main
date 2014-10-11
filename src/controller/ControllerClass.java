@@ -19,19 +19,13 @@ import java.util.TimeZone;
  */
 
 public class ControllerClass implements Controller {
-	
-	public ControllerClass(){
-		storage = createStorageObject();
-		tasks = new ArrayList<Task>();
-		getFileContent();
-	}
-	
+
 	enum CommandType {
 		ADD, DELETE, EDIT, DISPLAY, INVALID
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
-	//private static final int numTasksInSinglePage = 10;
+	// private static final int numTasksInSinglePage = 10;
 	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
 		private static final long serialVersionUID = -8905622371814695255L;
 
@@ -45,7 +39,7 @@ public class ControllerClass implements Controller {
 			put("^\\d{1,2}/\\d{1,2}$", "dd/MM");
 		}
 	};
-	
+
 	private static final Map<String, String> TIME_FORMAT_REGEXPS = new HashMap<String, String>() {
 		private static final long serialVersionUID = -1690161551539169383L;
 
@@ -59,6 +53,12 @@ public class ControllerClass implements Controller {
 	private ArrayList<String> taskStrings;
 	private Storage storage;
 
+	public ControllerClass() {
+		storage = createStorageObject();
+		tasks = new ArrayList<Task>();
+		getFileContent();
+	}
+
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
@@ -66,27 +66,38 @@ public class ControllerClass implements Controller {
 		parseCommand(command);
 		return taskStrings;
 	}
-	
 
-	// This method returns all the existing tasks in the list, if any.
+	//
+
+	/**
+	 * This method returns all the existing tasks in the list, if any.
+	 * 
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void getFileContent() {
 		taskStrings = storage.read();
 		convertStringListTaskList();
 	}
 
-	// This method returns a storage object, storagePlus.
+	/**
+	 * This method returns a storage object, storagePlus.
+	 * 
+	 * @return StoragePlus Object
+	 * @author G. Vishnu Priya
+	 */
 	private StoragePlus createStorageObject() {
 		return new StoragePlus();
 	}
 
 	private void convertStringListTaskList() {
 		tasks.clear();
-		try{
-		for (int i = 0; i < taskStrings.size(); i++) {
-			tasks.add(convertStringToTask(taskStrings.get(i)));
-		}
-		} catch(ParseException e) {
-			//nothing
+		try {
+			for (int i = 0; i < taskStrings.size(); i++) {
+				tasks.add(convertStringToTask(taskStrings.get(i)));
+			}
+		} catch (ParseException e) {
+			// nothing
 		}
 	}
 
@@ -123,8 +134,8 @@ public class ControllerClass implements Controller {
 		return task;
 
 	}
-	
-	//This method converts tasks from tasks list to taskStrings list.
+
+	// This method converts tasks from tasks list to taskStrings list.
 	private void convertTaskListStringList() {
 		taskStrings.clear();
 		for (int i = 0; i < tasks.size(); i++) {
@@ -132,7 +143,7 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	//This method converts tasks to strings to be stored in taskStrings list.
+	// This method converts tasks to strings to be stored in taskStrings list.
 	private String convertTaskToString(Task task) {
 		return task.toString();
 	}
@@ -156,8 +167,12 @@ public class ControllerClass implements Controller {
 		return operation;
 	}
 
-	// This method processes each string of user input according to the command
-	// type.
+	/**
+	 * Chooses which course of action to take according to the command type.
+	 *
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void processInput(CommandType commandType, String content) {
 		switch (commandType) {
 		case ADD:
@@ -184,6 +199,7 @@ public class ControllerClass implements Controller {
 	 * Displays the existing tasks to the user.
 	 * 
 	 * @return ArrayList<String>
+	 * 
 	 * @author Koh Xian Hui
 	 */
 	private ArrayList<String> display() {
@@ -192,26 +208,42 @@ public class ControllerClass implements Controller {
 			for (Task taskItem : tasks) {
 				String stringedTask = taskItem.toString().replace("%", " ");
 
-			
-					displayTasks.add(stringedTask.substring(4));
-			
+				displayTasks.add(stringedTask.substring(4));
+
 			}
 		}
 
 		return displayTasks;
 	}
 
+	/**
+	 * Checks if the user has specified any task to edit and if specified,
+	 * proceeds with the edit.
+	 * 
+	 * @param content
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void editTask(String content) {
-		if (isEmptyCommand(content)) {
-			// throw exception
-		} else {
-			proceedWithEdit(content);
+		try {
+			if (isEmptyCommand(content)) {
+				throw new Exception("Please specify what to edit.");
+			} else {
+				proceedWithEdit(content);
+			}
+		} catch (Exception e) {
+			// nothing
 		}
 
 	}
-
+    
+	/**
+	 * Edits the task using the specified content.
+	 * @param content
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void proceedWithEdit(String content) {
-
 		String[] words = content.split(" ");
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
@@ -222,14 +254,22 @@ public class ControllerClass implements Controller {
 		tasks.set(positionOfTask, editedTask);
 		updateStorage();
 	}
-
+	
+	/**
+	 * Matches the attribute to be edited and returns the edited task.
+	 * @param taskToEdit
+	 * @param attribute
+	 * @param editDetails
+	 * @return Task Object
+	 * @author G. Vishnu Priya
+	 */
 	private Task editAttribute(Task taskToEdit, String attribute,
 			String editDetails) {
 		if (attribute.equalsIgnoreCase("desc")) {
 			return editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
 			return editDate(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("time")){
+		} else if (attribute.equalsIgnoreCase("time")) {
 			return editStartEndTimes(taskToEdit, editDetails);
 		}
 		return taskToEdit;
@@ -263,13 +303,13 @@ public class ControllerClass implements Controller {
 		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
 		try {
 			Date date = timeFormat.parse(details);
-			if (type==TaskType.DEADLINE) {
+			if (type == TaskType.DEADLINE) {
 				editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
 						taskToEdit.getDesc(), date);
-			} else if(type == TaskType.TIMED) { 
+			} else if (type == TaskType.TIMED) {
 				editedTask = new TimedTask(taskToEdit.isPrioritized(),
-				taskToEdit.getDesc(), taskToEdit.getStartTime(),
-				taskToEdit.getEndTime()); 
+						taskToEdit.getDesc(), taskToEdit.getStartTime(),
+						taskToEdit.getEndTime());
 			}
 		} catch (ParseException e) {
 			// nothing
@@ -277,6 +317,13 @@ public class ControllerClass implements Controller {
 		return editedTask;
 	}
 
+	/**
+	 * Creates and returns a new task with the details specified.
+	 * @param taskToEdit
+	 * @param details
+	 * @return Task Object
+	 * @author G. Vishnu Priya
+	 */
 	private Task editDescription(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
 		Task editedTask;
@@ -292,8 +339,13 @@ public class ControllerClass implements Controller {
 		return editedTask;
 	}
 
-	// This method checks if the task to be deleted exists and if it exists,
-	// proceeds with deletion.
+	
+	/**
+	 * This method checks if the task to be deleted exists or is specified and if it is valid, proceeds with deletion.
+	 * @param content
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void deleteTask(String content) {
 		try {
 			if (isValidDelete(content)) {
@@ -304,33 +356,57 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	// This method goes on to delete task after knowing the task to delete
-	// exists.
+	
+	/**
+	 * This method goes on to delete task after knowing the task to delete exists.
+	 * @param content
+	 * @throws NumberFormatException
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void proceedWithDelete(String content) throws NumberFormatException {
 		try {
 			int taskNum = getTaskNum(content);
 			executeDelete(taskNum);
 		} catch (NumberFormatException e) {
-			System.out.println("Invalid delete format. Please enter task number.");
+			System.out
+					.println("Invalid delete format. Please enter task number.");
 		}
 	}
 
-	// This method deletes the task with the specified number.
+	
+	/**
+	 * This method deletes the task with the specified number.
+	 * @param taskNum
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void executeDelete(int taskNum) {
 		int positionOfTask = taskNum - 1;
 		tasks.remove(positionOfTask);
 		updateStorage();
 	}
 
-	// This method updates the content stored.
+	
+	/**
+	 * This method updates the content stored.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
 	private void updateStorage() {
 		convertTaskListStringList();
 		storage.write(taskStrings);
 	}
-
-	// This method checks if the list of tasks is empty or if the user has not
-	// specified the task number to delete. Otherwise, the deletion is deemed
-	// valid and it returns true.
+ 
+	/**
+	 * This method checks if the list of tasks is empty or if the user has not
+	 specified the task number to delete. Otherwise, the deletion is deemed
+	 valid and it returns true. 
+	 * @param content
+	 * @return boolean
+	 * @throws Exception
+	 * @author G. Vishnu Priya
+	 */
 	private boolean isValidDelete(String content) throws Exception {
 		if (tasks.isEmpty()) {
 			throw new Exception("Nothing to delete list is empty!");
@@ -341,7 +417,14 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	// This method gets the number of the task.
+	
+	/**
+	 * This method gets the number of the task.
+	 * @param content
+	 * @return integer
+	 * @throws NumberFormatException
+	 * @author G. Vishnu Priya
+	 */
 	public static int getTaskNum(String content) throws NumberFormatException {
 		return Integer.parseInt(content);
 	}
@@ -359,8 +442,13 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	// This method checks if the user has entered anything after the command
-	// type.
+	
+	/**
+	 * This method checks if the user has entered anything after the command type.
+	 * @param content
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
 	private boolean isEmptyCommand(String content) {
 		return content.trim().equals("");
 	}
@@ -377,13 +465,13 @@ public class ControllerClass implements Controller {
 		if (content.contains("!")) {
 			priority = true;
 		}
-		
+
 		String words[] = content.split(" ");
 		content = "";
 		Date date = null;
 		Date timeStart = null;
 		Date timeEnd = null;
-		for (int i = 0; i< words.length; i++) {
+		for (int i = 0; i < words.length; i++) {
 			String word = words[i].trim();
 
 			String format = determineDateFormat(word);
@@ -394,10 +482,10 @@ public class ControllerClass implements Controller {
 					date = dateFormat.parse(word);
 					continue;
 				} catch (ParseException e) {
-					//do nothing
+					// do nothing
 				}
 			}
-			
+
 			format = determineTimeFormat(word);
 			if (format != null) {
 				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
@@ -408,55 +496,55 @@ public class ControllerClass implements Controller {
 						timeStart = time;
 						int timeStartPos = i;
 						int timeEndPos = timeStartPos;
-						
-						while(timeEndPos < timeStartPos + 3) {
+
+						while (timeEndPos < timeStartPos + 3) {
 							timeEndPos++;
-							format = determineTimeFormat(words[timeEndPos].trim());
+							format = determineTimeFormat(words[timeEndPos]
+									.trim());
 							if (format != null) {
 								dateFormat = new SimpleDateFormat(format);
-								dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+								dateFormat.setTimeZone(TimeZone
+										.getTimeZone("UTC"));
 								timeEnd = dateFormat.parse(words[timeEndPos]);
 								i = timeEndPos;
 								break;
 							}
 						}
 					}
-					if(timeEnd != null) {
+					if (timeEnd != null) {
 						continue;
 					}
 				} catch (ParseException e) {
-					//do nothing
+					// do nothing
 				}
 			}
-			
+
 			content += word + " ";
 		}
-		
+
 		if (date == null) {
 			return new FloatingTask(priority, content);
 		} else if (timeEnd == null) {
-			return new DeadlineTask (priority, content, date);
+			return new DeadlineTask(priority, content, date);
 		} else {
 			timeStart = addDate(date, timeStart);
 			timeEnd = addDate(date, timeEnd);
 			return new TimedTask(priority, content, timeStart, timeEnd);
 		}
 	}
-	
+
 	private Date addDate(Date date1, Date date2) {
 		long ms = date1.getTime() + date2.getTime();
 		return new Date(ms);
 	}
-	
 
 	/**
-	 * Determine SimpleDateFormat pattern matching with
-	 * the given date string. Returns null if format is unknown. 
+	 * Determine SimpleDateFormat pattern matching with the given date string.
+	 * Returns null if format is unknown.
 	 * 
 	 * @author Retrieved from
 	 *         http://stackoverflow.com/questions/3389348/parse-any-date-in-java
-	 *         and modified
-	 *         by Luo Shaohuai 
+	 *         and modified by Luo Shaohuai
 	 * @param dateString
 	 *            The date string to determine the SimpleDateFormat pattern for.
 	 * @return The matching SimpleDateFormat pattern, or null if format is
@@ -471,10 +559,10 @@ public class ControllerClass implements Controller {
 		}
 		return null; // Unknown format.
 	}
-	
+
 	/**
-	 * Determine SimpleDateFormat pattern matching with
-	 * the given date string. Returns null if format is unknown.
+	 * Determine SimpleDateFormat pattern matching with the given date string.
+	 * Returns null if format is unknown.
 	 * 
 	 * @author Luo Shaohuai
 	 * @param dateString
@@ -491,13 +579,25 @@ public class ControllerClass implements Controller {
 		return null; // Unknown format.
 	}
 
-	// This method removes the command, either add, delete, edit or display,
-	// from the command string.
+	
+	/**
+	 * This method removes the command, either add, delete, edit or display, from the command string.
+	 * @param command
+	 * @param operation
+	 * @return String
+	 * @author G. Vishnu Priya
+	 */
 	private String removeCommandType(String command, String operation) {
 		return command.replace(operation, "").trim();
 	}
 
-	// This method returns the command type for each operation.
+	
+	/**
+	 * This method returns the command type for each operation.
+	 * @param operation
+	 * @return CommandType
+	 * @author G. Vishnu Priya
+	 */
 	private CommandType matchCommandType(String operation) {
 		if (operation.equalsIgnoreCase("add")) {
 			return CommandType.ADD;
