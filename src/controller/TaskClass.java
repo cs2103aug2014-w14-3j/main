@@ -21,9 +21,9 @@ class TaskClass implements Task {
 		
 		setPriority(attributes[0]);
 		setDesc(attributes[1]);
-		setDeadline(attributes[2]);
-		setStartTime(attributes[3]);
-		setEndTime(attributes[4]);
+		setDeadline(new Date(Long.parseLong(attributes[2].trim())));
+		setStartTime(new Date(Long.parseLong(attributes[3].trim())));
+		setEndTime(new Date(Long.parseLong(attributes[4].trim())));
 		setType();
 	}
 	
