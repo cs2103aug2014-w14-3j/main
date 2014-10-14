@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -128,12 +129,22 @@ public class Main extends Application{
 	}
 	
 	private void onEnter(String command) {
+		execCmd(command);
+	}
+	
+	private void execCmd(String cmd) {
+		if(cmd.trim().compareTo("exit") == 0) {
+			Platform.exit();
+			System.exit(0);
+		}
+		
 		try {
-			displayBuf = controller.execCmd(command);
+			displayBuf = controller.execCmd(cmd);
 			updateDisplay();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 	}
 	
 	private void updateDisplay() {
@@ -146,7 +157,7 @@ public class Main extends Application{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		onInitialize();
+		//onInitialize();
 		/*
 		Controller controller = new ControllerClass();
 		while(true) {
@@ -176,7 +187,7 @@ public class Main extends Application{
 			}
 		}*/
 		launch(args);
-		onExit();
+		//onExit();
 	}
 	
 	public static void onInitialize() {
