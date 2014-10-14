@@ -173,7 +173,7 @@ public class ControllerClass implements Controller {
 			if (numTask==0) {
 				numTask = numTasksInSinglePage;
 			}
-			String numberedTask = Integer.toString(numTask) + ". " + taskStrings.get(i);
+			String numberedTask = Integer.toString(numTask) + "%" + taskStrings.get(i);
 			taskStrings.set(i, numberedTask);
 		}
 	}

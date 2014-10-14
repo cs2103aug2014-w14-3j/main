@@ -12,6 +12,10 @@ class TaskClass implements Task {
 	Date endTime;
 	TaskType type;
 	
+	TaskClass() {
+	
+	}
+	
 	TaskClass(String stringedTask) throws ParseException {
 		String[] attributes = stringedTask.split("%");
 		
@@ -85,6 +89,6 @@ class TaskClass implements Task {
 	}
 	
 	public String toString() {
-		return isPrioritized + "%" +  description + "%" + deadline.toString() + "%" + startTime.toString() + "%" + endTime.toString();
+		return isPrioritized + "%" +  description + "%" + deadline.getTime() + "%" + startTime.getTime() + "%" + endTime.getTime();
 	}
 }
