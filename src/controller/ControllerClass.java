@@ -173,7 +173,7 @@ public class ControllerClass implements Controller {
 			if (numTask==0) {
 				numTask = numTasksInSinglePage;
 			}
-			String numberedTask = Integer.toString(numTask) + "%" + taskStrings.get(i);
+			String numberedTask = Integer.toString(numTask) + ". " + taskStrings.get(i);
 			taskStrings.set(i, numberedTask);
 		}
 	}
@@ -430,6 +430,18 @@ public class ControllerClass implements Controller {
 			return true;
 		}
 	}
+	
+	/**
+	 * This method checks if the user has entered anything after the command
+	 * type.
+	 * 
+	 * @param content
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean isEmptyCommand(String content) {
+		return content.trim().equals("");
+	}
 
 	/**
 	 * This method gets the number of the task.
@@ -454,18 +466,6 @@ public class ControllerClass implements Controller {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-	}
-
-	/**
-	 * This method checks if the user has entered anything after the command
-	 * type.
-	 * 
-	 * @param content
-	 * @return boolean
-	 * @author G. Vishnu Priya
-	 */
-	private boolean isEmptyCommand(String content) {
-		return content.trim().equals("");
 	}
 
 	/**

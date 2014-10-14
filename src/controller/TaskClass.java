@@ -1,7 +1,6 @@
 package controller;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 class TaskClass implements Task {
@@ -12,14 +11,18 @@ class TaskClass implements Task {
 	Date endTime;
 	TaskType type;
 	
+	TaskClass() {
+	
+	}
+	
 	TaskClass(String stringedTask) throws ParseException {
 		String[] attributes = stringedTask.split("%");
 		
 		setPriority(attributes[0]);
 		setDesc(attributes[1]);
-		setDeadline(attributes[2]);
-		setStartTime(attributes[3]);
-		setEndTime(attributes[4]);
+		setDeadline(new Date(Long.parseLong(attributes[2].trim())));
+		setStartTime(new Date(Long.parseLong(attributes[3].trim())));
+		setEndTime(new Date(Long.parseLong(attributes[4].trim())));
 		setType();
 	}
 	
@@ -59,19 +62,16 @@ class TaskClass implements Task {
 		description = desc;
 	}
 	
-	public void setDeadline(String date) throws ParseException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy");
-		deadline = dateFormat.parse(date);
+	public void setDeadline(Date date) throws ParseException {
+		deadline = date;
 	}
 	
-	public void setStartTime(String start) throws ParseException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("HHmm");
-		startTime = dateFormat.parse(start);
+	public void setStartTime(Date time) throws ParseException {
+		startTime = time;
 	}
 	
-	public void setEndTime(String end) throws ParseException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("HHmm");
-		endTime = dateFormat.parse(end);
+	public void setEndTime(Date time) throws ParseException {
+		endTime = time;
 	}
 	
 	public void setType() {
@@ -85,6 +85,6 @@ class TaskClass implements Task {
 	}
 	
 	public String toString() {
-		return isPrioritized + "%" +  description + "%" + deadline.toString() + "%" + startTime.toString() + "%" + endTime.toString();
+		return isPrioritized + "%" +  description + "%" + deadline.getTime() + "%" + startTime.getTime() + "%" + endTime.getTime();
 	}
 }

@@ -43,7 +43,7 @@ public class Main extends Application{
 	
 	
 	public Main() {
-		controller = new ControllerClass();
+		//controller = new ControllerClass();
 		displayBuf = new ArrayList<String>();
 		root = new BorderPane();
 	}
@@ -139,7 +139,7 @@ public class Main extends Application{
 		}
 		
 		try {
-			displayBuf = controller.execCmd(cmd);
+			//displayBuf = controller.execCmd(cmd);
 			updateDisplay();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -198,7 +198,7 @@ public class Main extends Application{
 		System.out.println(exitMsg);
 	}
 
-	private Controller controller;
+	//private Controller controller;
 	private ArrayList<String> displayBuf;
 	private BorderPane root;
 }
