@@ -22,7 +22,7 @@ import java.util.Stack;
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY, INVALID
+		ADD, DELETE, EDIT, DISPLAY,UNDO, INVALID
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -104,38 +104,9 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	private Task convertStringToTask(String taskString) throws ParseException {
-
-		String[] para = taskString.trim().split("%");
-		Boolean isPrioritized;
-		Task task = null;
-
-		if (para[1].equals("0")) {
-			isPrioritized = false;
-		} else {
-			isPrioritized = true;
-		}
-
-		String content = para[2];
-
-		switch (Integer.parseInt(para[0])) {
-
-		case 1:
-			task = new FloatingTask(isPrioritized, content);
-			break;
-		case 2:
-			Date date = new Date(Long.parseLong(para[3]));
-			task = new DeadlineTask(isPrioritized, content, date);
-			break;
-		case 3:
-			Date startTime = new Date(Long.parseLong(para[3]));
-			Date endTime = new Date(Long.parseLong(para[4]));
-			task = new TimedTask(isPrioritized, content, startTime, endTime);
-			break;
-		}
-
-		return task;
-
+	private TaskClass convertStringToTask(String taskString) throws ParseException {
+		 
+		return new TaskClass(taskString);
 	}
 
 	// This method converts tasks from tasks list to taskStrings list.
@@ -147,7 +118,7 @@ public class ControllerClass implements Controller {
 	}
 
 	// This method converts tasks to strings to be stored in taskStrings list.
-	private String convertTaskToString(Task task) {
+	private String convertTaskToString(TaskClass task) {
 		return task.toString();
 	}
 
@@ -198,13 +169,19 @@ public class ControllerClass implements Controller {
 	private void processInput(CommandType commandType, String content) {
 		switch (commandType) {
 		case ADD:
+			updateUndoList();
 			addTask(content);
 			break;
 		case DELETE:
+			updateUndoList();
 			deleteTask(content);
 			break;
 		case EDIT:
+			updateUndoList();
 			editTask(content);
+			break;
+		case UNDO:
+			undo();
 			break;
 		case DISPLAY:
 			display();
@@ -218,19 +195,21 @@ public class ControllerClass implements Controller {
 	}
 
 	
-	//undo
+	//push the current state to the undoList
 	//Tran Cong Thien
 	private void updateUndoList(){
 		ArrayList<TaskClass> item=new ArrayList<TaskClass>();
+		//copy content of tasks to item
 		for (int i=0;i<tasks.size();i++)
 			item.add(tasks.get(i));
 		
 		undoList.push(item);
 	}
 	
-	//undo
+	//undo command, the tasks will be replaced by the previous state
 	//Tran Cong Thien
 	private void undo(){
+		//if there is states to undo
 		if(!undoList.empty()){
 			tasks=undoList.pop();
 		}
@@ -646,6 +625,8 @@ public class ControllerClass implements Controller {
 		} else if ((operation.equalsIgnoreCase("display"))
 				|| (operation.equalsIgnoreCase("list"))) {
 			return CommandType.DISPLAY;
+		} else if (operation.equalsIgnoreCase("undo")){
+			return CommandType.UNDO;
 		} else {
 			return CommandType.INVALID;
 		}
