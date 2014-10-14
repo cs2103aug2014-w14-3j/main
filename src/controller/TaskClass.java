@@ -20,9 +20,25 @@ class TaskClass implements Task {
 		
 		setPriority(attributes[0]);
 		setDesc(attributes[1]);
-		setDeadline(new Date(Long.parseLong(attributes[2].trim())));
-		setStartTime(new Date(Long.parseLong(attributes[3].trim())));
-		setEndTime(new Date(Long.parseLong(attributes[4].trim())));
+		
+		if(attributes[2].trim().isEmpty()) {
+			setDeadline(null);
+		} else {
+			setDeadline(new Date(Long.parseLong(attributes[2].trim())));
+		}
+		
+		if(attributes[3].trim().isEmpty()) {
+			setStartTime(null);
+		} else {
+			setStartTime(new Date(Long.parseLong(attributes[3].trim())));
+		}
+		
+		if(attributes[4].trim().isEmpty()) {
+			setEndTime(null);
+		} else {
+			setEndTime(new Date(Long.parseLong(attributes[4].trim())));
+		}
+		
 		setType();
 	}
 	
@@ -85,6 +101,13 @@ class TaskClass implements Task {
 	}
 	
 	public String toString() {
-		return isPrioritized + "%" +  description + "%" + deadline.getTime() + "%" + startTime.getTime() + "%" + endTime.getTime();
+		boolean isNullStartTime =(startTime == null);
+		boolean isNullEndTime = (endTime == null);
+		boolean isNullDeadline = (deadline == null);
+		return isPrioritized + "%" +  
+				description + "%" + 
+				(isNullDeadline? " " : deadline.getTime()) + "%" +
+				(isNullStartTime? " " : startTime.getTime()) + "%" + 
+				(isNullEndTime? " " : endTime.getTime());
 	}
 }
