@@ -49,13 +49,13 @@ public class ControllerClass implements Controller {
 		}
 	};
 
-	private ArrayList<Task> tasks;
+	private ArrayList<TaskClass> tasks;
 	private ArrayList<String> taskStrings;
 	private Storage storage;
 
 	public ControllerClass() {
 		storage = createStorageObject();
-		tasks = new ArrayList<Task>();
+		tasks = new ArrayList<TaskClass>();
 		getFileContent();
 	}
 
@@ -268,31 +268,29 @@ public class ControllerClass implements Controller {
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
 		String editDetails = content.substring(content.indexOf(words[2]));
-		Task taskToEdit = tasks.get(positionOfTask);
-		Task editedTask = editAttribute(taskToEdit, attributeToChange,
+		TaskClass taskToEdit = tasks.get(positionOfTask);
+		editAttribute(taskToEdit, attributeToChange,
 				editDetails);
-		tasks.set(positionOfTask, editedTask);
 	}
 
 	/**
-	 * Matches the attribute to be edited and returns the edited task.
+	 * Matches the attribute to be edited and calls the relevant function.
 	 * 
 	 * @param taskToEdit
 	 * @param attribute
 	 * @param editDetails
-	 * @return Task Object
+	 * @return void
 	 * @author G. Vishnu Priya
 	 */
-	private Task editAttribute(Task taskToEdit, String attribute,
+	private void editAttribute(TaskClass taskToEdit, String attribute,
 			String editDetails) {
 		if (attribute.equalsIgnoreCase("desc")) {
-			return editDescription(taskToEdit, editDetails);
+			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
-			return editDate(taskToEdit, editDetails);
+			editDate(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
-			return editStartEndTimes(taskToEdit, editDetails);
+			editStartEndTimes(taskToEdit, editDetails);
 		}
-		return taskToEdit;
 	}
 
 	private Task editStartEndTimes(Task taskToEdit, String details) {
@@ -338,26 +336,15 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Creates and returns a new task with the details specified.
+	 * Replaces the description of task with the desc string.
 	 * 
 	 * @param taskToEdit
 	 * @param details
 	 * @return Task Object
 	 * @author G. Vishnu Priya
 	 */
-	private Task editDescription(Task taskToEdit, String details) {
-		TaskType type = taskToEdit.getType();
-		Task editedTask;
-		if (type == TaskType.FLOATING) {
-			editedTask = new FloatingTask(taskToEdit.isPrioritized(), details);
-		} else if (type == TaskType.DEADLINE) {
-			editedTask = new DeadlineTask(taskToEdit.isPrioritized(), details,
-					taskToEdit.getEndTime());
-		} else {
-			editedTask = new TimedTask(taskToEdit.isPrioritized(), details,
-					taskToEdit.getStartTime(), taskToEdit.getEndTime());
-		}
-		return editedTask;
+	private void editDescription(TaskClass taskToEdit, String desc) {
+			taskToEdit.setDesc(desc);
 	}
 
 	/**
@@ -461,7 +448,7 @@ public class ControllerClass implements Controller {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to add.");
 			} else {
-				Task task = processUserInput(content);
+				TaskClass task = processUserInput(content);
 				this.tasks.add(task);
 			}
 		} catch (Exception e) {
