@@ -63,19 +63,16 @@ class TaskClass implements Task {
 		description = desc;
 	}
 	
-	public void setDeadline(String date) throws ParseException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy");
-		deadline = dateFormat.parse(date);
+	public void setDeadline(Date date) throws ParseException {
+		deadline = date;
 	}
 	
-	public void setStartTime(String start) throws ParseException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("HHmm");
-		startTime = dateFormat.parse(start);
+	public void setStartTime(Date time) throws ParseException {
+		startTime = time;
 	}
 	
-	public void setEndTime(String end) throws ParseException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("HHmm");
-		endTime = dateFormat.parse(end);
+	public void setEndTime(Date time) throws ParseException {
+		endTime = time;
 	}
 	
 	public void setType() {
