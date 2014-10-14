@@ -100,6 +100,7 @@ class TaskClass implements Task {
 		}
 	}
 	
+	
 	public String toString() {
 		boolean isNullStartTime =(startTime == null);
 		boolean isNullEndTime = (endTime == null);

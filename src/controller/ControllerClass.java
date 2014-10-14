@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TimeZone;
+import java.util.Stack;
 
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
@@ -52,10 +53,12 @@ public class ControllerClass implements Controller {
 	private ArrayList<TaskClass> tasks;
 	private ArrayList<String> taskStrings;
 	private Storage storage;
+	private Stack<ArrayList<TaskClass>> undoList;
 
 	public ControllerClass() {
 		storage = createStorageObject();
 		tasks = new ArrayList<TaskClass>();
+		undoList=new Stack<ArrayList<TaskClass>>();
 		getFileContent();
 	}
 
@@ -214,6 +217,25 @@ public class ControllerClass implements Controller {
 		}
 	}
 
+	
+	//undo
+	//Tran Cong Thien
+	private void updateUndoList(){
+		ArrayList<TaskClass> item=new ArrayList<TaskClass>();
+		for (int i=0;i<tasks.size();i++)
+			item.add(tasks.get(i));
+		
+		undoList.push(item);
+	}
+	
+	//undo
+	//Tran Cong Thien
+	private void undo(){
+		if(!undoList.empty()){
+			tasks=undoList.pop();
+		}
+	}
+	
 	/*
 	 * Displays the existing tasks to the user.
 	 * 
