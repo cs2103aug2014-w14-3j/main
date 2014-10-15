@@ -3,6 +3,7 @@
  */
 package controller;
 
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -22,56 +23,29 @@ public interface Task {
 		FLOATING, TIMED, DEADLINE
 	}
 	
-	/**
-	 * This method return the date and time of the task
-	 * 
-	 * There should not be Date object only with date (and no time)
-	 * For Timed Task, it should return the starting time
-	 * For Floating Task and DeadlineTask, it should return null
-	 * @return Date (of this task)
-	 */
-	Date getStartTime();
+	public Date getStartTime();
 	
-	/*
-	 * This method return the end time for the task (for timedTask and deadlineTask only)
-	 * for floatingTask, this method will return null
-	 */
+	public Date getEndTime();
 	
-	Date getEndTime();
+	public String getDesc();
 	
+	public Boolean isPrioritized();
 	
-	/**
-	 * This method return description string of the task
-	 * @return String (Task description)
-	 */
-	String getDesc();
+	public Boolean isOverdue();
 	
-	/**
-	 * This method return true if this task is prioritized
-	 * @return Boolean (if prioritized)
-	 */
-	Boolean isPrioritized();
+	public TaskType getType();
 	
-	/**
-	 * This method calculate if the task is overdue (for timed and deadline tasks)
-	 * Will return false if this is a floating task
-	 * 
-	 * @return Boolean (if overdue)
-	 */
-	Boolean isOverdue();
+	public void setPriority(String priority);
 	
-	/**
-	 * This method return the type of this task
-	 * TaskType is an enum with
-	 * 	{FLOATING, TIMED, DEADLINE}
-	 * @return TaskType
-	 */
-	TaskType getType();
+	public void setDesc(String desc);
 	
-	/**
-	 * This method return the string representation of the task
-	 * This string should be used for Storage or Display
-	 * @return String
-	 */
-	String toString();
+	public void setDeadline(Date date);
+	
+	public void setStartTime(Date time);
+	
+	public void setEndTime(Date time);
+	
+	public void setType();
+	
+	public String toString();
 }

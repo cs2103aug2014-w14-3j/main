@@ -15,7 +15,7 @@ class TaskClass implements Task {
 	
 	}
 	
-	TaskClass(String stringedTask) throws ParseException {
+	TaskClass(String stringedTask) {
 		String[] attributes = stringedTask.split("%");
 		
 		setPriority(attributes[0]);
@@ -78,15 +78,15 @@ class TaskClass implements Task {
 		description = desc;
 	}
 	
-	public void setDeadline(Date date) throws ParseException {
+	public void setDeadline(Date date) {
 		deadline = date;
 	}
 	
-	public void setStartTime(Date time) throws ParseException {
+	public void setStartTime(Date time) {
 		startTime = time;
 	}
 	
-	public void setEndTime(Date time) throws ParseException {
+	public void setEndTime(Date time) {
 		endTime = time;
 	}
 	

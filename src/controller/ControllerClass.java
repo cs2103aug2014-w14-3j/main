@@ -562,16 +562,22 @@ public class ControllerClass implements Controller {
 			content += word + " ";
 		}
 
-		//todo
+		Task task;
 		if (date == null) {
-			return new TaskClass();
+			task = new TaskClass();
+			task.setDesc(content);
 		} else if (timeEnd == null) {
-			return new TaskClass();
+			task = new TaskClass();
+			task.setDesc(content);
+			task.setDeadline(timeStart);
 		} else {
 			timeStart = addDate(date, timeStart);
 			timeEnd = addDate(date, timeEnd);
-			return new TaskClass();
+			task = new TaskClass();
+			task.setStartTime(timeStart);
+			task.setEndTime(timeEnd);
 		}
+		return task;
 	}
 
 	private Date addDate(Date date1, Date date2) {
