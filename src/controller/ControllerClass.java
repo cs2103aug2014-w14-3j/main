@@ -21,7 +21,7 @@ import java.util.TimeZone;
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY, INVALID
+		ADD, DELETE, EDIT, DISPLAY, SEARCH
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -191,8 +191,9 @@ public class ControllerClass implements Controller {
 	 *
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void processInput(CommandType commandType, String content) {
+	private void processInput(CommandType commandType, String content) throws Exception {
 		switch (commandType) {
 		case ADD:
 			addTask(content);
@@ -206,12 +207,22 @@ public class ControllerClass implements Controller {
 		case DISPLAY:
 			display();
 			break;
-		case INVALID:
-			System.out.println("Invalid command.");
+		case SEARCH:
+			search();
 			break;
 		default:
 			System.out.println("Invalid command.");
 		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @author
+	 */
+	private void search() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/*
@@ -242,18 +253,14 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void editTask(String content) {
-		try {
+	private void editTask(String content) throws Exception {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to edit.");
 			} else {
 				proceedWithEdit(content);
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
 	}
 
 	/**
@@ -354,15 +361,12 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void deleteTask(String content) {
-		try {
+	private void deleteTask(String content) throws Exception {
 			if (isValidDelete(content)) {
 				proceedWithDelete(content);
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
 	}
 
 	/**
@@ -373,14 +377,14 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void proceedWithDelete(String content) {
+	private void proceedWithDelete(String content) throws Exception {
 		try {
 			int taskNum = getTaskNum(content);
 			executeDelete(taskNum);
 		} catch (NumberFormatException e) {
-			System.out
-					.println("Invalid delete format. Please enter task number.");
+			throw new Exception("Invalid delete format. Please enter task number.");
 		}
 	}
 
@@ -390,13 +394,14 @@ public class ControllerClass implements Controller {
 	 * @param taskNum
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void executeDelete(int taskNum) {
+	private void executeDelete(int taskNum) throws Exception {
 		try {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Task does not exist. Please enter task number within the range.");
+			throw new Exception("Task does not exist. Please enter task number within the range.");
 		}
 	}
 
@@ -455,17 +460,13 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
-	private void addTask(String content) {
-		try {
+	private void addTask(String content) throws Exception {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to add.");
 			} else {
 				TaskClass task = processUserInput(content);
 				this.tasks.add(task);
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
 	}
 
 	/**
@@ -625,7 +626,7 @@ public class ControllerClass implements Controller {
 				|| (operation.equalsIgnoreCase("list"))) {
 			return CommandType.DISPLAY;
 		} else {
-			return CommandType.INVALID;
+			return CommandType.SEARCH;
 		}
 	}
 }
