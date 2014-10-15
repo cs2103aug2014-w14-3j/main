@@ -14,3 +14,4 @@ hs_err_pid*
 /ToDoList.backup
 /ToDoList.txt
 /target/
+/log.txt
