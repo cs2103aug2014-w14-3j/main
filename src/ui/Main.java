@@ -37,15 +37,12 @@ import controller.ControllerClass;
  *
  */
 public class Main extends Application{
-	public static final String initMsg = "         Forget-Me-Not\n"
-				+ "-------------------------------";
-	public static final String exitMsg = "===============================";
-	
 	
 	public Main() {
-		//controller = new ControllerClass();
+		//controller = ControllerClass.getInstance();
 		displayBuf = new ArrayList<String>();
 		root = new BorderPane();
+		log = new Log();
 	}
 	
 	/**
@@ -54,17 +51,18 @@ public class Main extends Application{
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+			log.log("Initializing...");
 			primaryStage.initStyle(StageStyle.UNDECORATED);
 			
-			Scene scene = new Scene(root, 600, 400);
-			root.setStyle("-fx-background-color: #CCBBAA;");
+			Scene scene = new Scene(root, Config.width, Config.height);
+			root.setStyle(Config.rootStyle);
 			
 			HBox top = createTop();
-			top.setStyle("-fx-background-color: #AABBCC;");
+			top.setStyle(Config.topStyle);
 			root.setTop(top);
 			
 			HBox bottom = createBottom();
-			bottom.setStyle("-fx-background-color: #AABBCC;");
+			bottom.setStyle(Config.bottomStyle);
 			root.setBottom(bottom);
 			
 			ListView<String> list = creatCenter(new ArrayList<String>());
@@ -72,6 +70,7 @@ public class Main extends Application{
 			
 			primaryStage.setScene(scene);
 			primaryStage.show();
+			log.log("Initialized");
 			
 			resetStagePosition(primaryStage);
 		} catch(Exception e) {
@@ -89,8 +88,8 @@ public class Main extends Application{
 		HBox top = new HBox();
 		top.setPadding(new Insets(15, 15, 15, 15));
 		
-		Text title = new Text("Forget-Me-Not");
-		title.setStyle("-fx-fill: #FFEEDD;");
+		Text title = new Text(Config.title);
+		title.setStyle(Config.titleStyle);
 		top.getChildren().add(title);
 		
 		return top;
@@ -102,8 +101,8 @@ public class Main extends Application{
 		
 		TextField commandInput = new TextField();
 		commandInput.setPrefWidth(590);
-		commandInput.setStyle("-fx-font-size: 16pt;");
-		commandInput.setPromptText("Enter command here");
+		commandInput.setStyle(Config.inputFieldStyle);
+		commandInput.setPromptText(Config.inputFieldPlaceholder);
 		commandInput.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				onEnter(commandInput.getText());
@@ -133,16 +132,20 @@ public class Main extends Application{
 	}
 	
 	private void execCmd(String cmd) {
-		if(cmd.trim().compareTo("exit") == 0) {
+		if(cmd.trim().compareToIgnoreCase(Config.cmdExit) == 0) {
 			Platform.exit();
 			System.exit(0);
 		}
 		
 		try {
+			log.log("Command: " + cmd);
 			//displayBuf = controller.execCmd(cmd);
 			updateDisplay();
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (Config.onDevelopment) {
+				e.printStackTrace();
+			}
+			log.log(e.getMessage());
 		}
 
 	}
@@ -157,48 +160,12 @@ public class Main extends Application{
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//onInitialize();
-		/*
-		Controller controller = new ControllerClass();
-		while(true) {
-			System.out.println("Command: ");
-			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			String cmd;
-			try {
-				cmd = in.readLine();
-			} catch (IOException e1) {
-				continue;
-			}
-			if(cmd.trim().isEmpty()) {
-				break;
-			}
-			if(cmd.trim().compareToIgnoreCase("launch") == 0) {
-				launch(args);
-				break;
-			}
-			try {
-				ArrayList<String> output = controller.execCmd(cmd);
-				for (String item : output) {
-					System.out.println(item.substring(4));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
-			}
-		}*/
 		launch(args);
-		//onExit();
 	}
 	
-	public static void onInitialize() {
-		System.out.println(initMsg);
-	}
-	
-	public static void onExit() {
-		System.out.println(exitMsg);
-	}
 
-	//private Controller controller;
+	private Controller controller;
 	private ArrayList<String> displayBuf;
 	private BorderPane root;
+	private Log log;
 }

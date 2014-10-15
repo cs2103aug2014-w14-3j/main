@@ -631,4 +631,14 @@ public class ControllerClass implements Controller {
 			return CommandType.INVALID;
 		}
 	}
+	
+	
+	public static Controller getInstance() {
+		if (theController == null) {
+			theController = new ControllerClass();
+		}
+		
+		return theController;
+	}
+	private static Controller theController = null;
 }
