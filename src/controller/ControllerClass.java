@@ -22,7 +22,7 @@ import java.util.Stack;
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY,UNDO, INVALID
+		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -183,14 +183,24 @@ public class ControllerClass implements Controller {
 		case UNDO:
 			undo();
 			break;
+		case SEARCH:
+			search();
+			break;
 		case DISPLAY:
 			display();
 			break;
-		case INVALID:
-			System.out.println("Invalid command.");
-			break;
 		default:
-			System.out.println("Invalid command.");
+			System.out.println("Invalid command.")/**
+	 * 
+	 * @return
+	 * @author
+	 */
+	private void search() {
+		// TODO Auto-generated method stub
+		
+	}
+
+;
 		}
 	}
 
@@ -628,7 +638,7 @@ public class ControllerClass implements Controller {
 		} else if (operation.equalsIgnoreCase("undo")){
 			return CommandType.UNDO;
 		} else {
-			return CommandType.INVALID;
+			return CommandType.SEARCH;
 		}
 	}
 	
