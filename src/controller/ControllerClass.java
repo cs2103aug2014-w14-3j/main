@@ -56,15 +56,15 @@ public class ControllerClass implements Controller {
 	};
 	
 	private static Controller theController = null;
-	private ArrayList<TaskClass> tasks;
+	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
 	private Storage storage;
-	private Stack<ArrayList<TaskClass>> undoList;
+	private Stack<ArrayList<Task>> undoList;
 
 	public ControllerClass() {
 		storage = createStorageObject();
-		tasks = new ArrayList<TaskClass>();
-		undoList=new Stack<ArrayList<TaskClass>>();
+		tasks = new ArrayList<Task>();
+		undoList=new Stack<ArrayList<Task>>();
 		getFileContent();
 	}
 
@@ -110,9 +110,9 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	private TaskClass convertStringToTask(String taskString) throws ParseException {
+	private Task convertStringToTask(String taskString) throws ParseException {
 		 
-		return new TaskClass(taskString);
+		return new Task(taskString);
 	}
 
 	// This method converts tasks from tasks list to taskStrings list.
@@ -124,7 +124,7 @@ public class ControllerClass implements Controller {
 	}
 
 	// This method converts tasks to strings to be stored in taskStrings list.
-	private String convertTaskToString(TaskClass task) {
+	private String convertTaskToString(Task task) {
 		return task.toString();
 	}
 
@@ -213,7 +213,7 @@ public class ControllerClass implements Controller {
 	//push the current state to the undoList
 	//Tran Cong Thien
 	private void updateUndoList(){
-		ArrayList<TaskClass> item=new ArrayList<TaskClass>();
+		ArrayList<Task> item=new ArrayList<Task>();
 		//copy content of tasks to item
 		for (int i=0;i<tasks.size();i++)
 			item.add(tasks.get(i));
@@ -281,7 +281,7 @@ public class ControllerClass implements Controller {
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
 		String editDetails = content.substring(content.indexOf(words[2]));
-		TaskClass taskToEdit = tasks.get(positionOfTask);
+		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange,
 				editDetails);
 	}
@@ -295,7 +295,7 @@ public class ControllerClass implements Controller {
 	 * @return void
 	 * @author G. Vishnu Priya
 	 */
-	private void editAttribute(TaskClass taskToEdit, String attribute,
+	private void editAttribute(Task taskToEdit, String attribute,
 			String editDetails) {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
@@ -356,7 +356,7 @@ public class ControllerClass implements Controller {
 	 * @return Task Object
 	 * @author G. Vishnu Priya
 	 */
-	private void editDescription(TaskClass taskToEdit, String desc) {
+	private void editDescription(Task taskToEdit, String desc) {
 			taskToEdit.setDesc(desc);
 	}
 
@@ -472,7 +472,6 @@ public class ControllerClass implements Controller {
 				Task task = processUserInput(content);
 				this.tasks.add(task);
 			}
-<<<<<<< HEAD
 	}
 
 	
@@ -492,8 +491,6 @@ public class ControllerClass implements Controller {
 			return processUserInputClassic(content);
 		}
 		return null;
-=======
->>>>>>> branch 'master' of https://github.com/cs2103aug2014-w14-3j/main.git
 	}
 
 	/**
