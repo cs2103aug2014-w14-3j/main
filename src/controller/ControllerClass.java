@@ -13,16 +13,21 @@ import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.Stack;
 
+import com.joestelmach.natty.*;
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
  * It is called by the UI component, processes the user inputs and sends necessary information to the storage to be stored.
  * 
  */
 
+/**
+ * 
+ *
+ */
 public class ControllerClass implements Controller {
-
+	
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY,UNDO, INVALID
+		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -49,7 +54,8 @@ public class ControllerClass implements Controller {
 			put("^\\d{4}$", "HHmm");
 		}
 	};
-
+	
+	private static Controller theController = null;
 	private ArrayList<TaskClass> tasks;
 	private ArrayList<String> taskStrings;
 	private Storage storage;
@@ -65,7 +71,7 @@ public class ControllerClass implements Controller {
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
-	public ArrayList<String> execCmd(String command) {
+	public ArrayList<String> execCmd(String command) throws Exception {
 		parseCommand(command);
 		return taskStrings;
 	}
@@ -124,7 +130,7 @@ public class ControllerClass implements Controller {
 
 	// This method gets the command type of user input and further processes the
 	// input.
-	private void parseCommand(String command) {
+	private void parseCommand(String command) throws Exception {
 		String operation = getOperation(command);
 		CommandType commandType = matchCommandType(operation);
 		String content = removeCommandType(command, operation);
@@ -165,8 +171,9 @@ public class ControllerClass implements Controller {
 	 *
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void processInput(CommandType commandType, String content) {
+	private void processInput(CommandType commandType, String content) throws Exception {
 		switch (commandType) {
 		case ADD:
 			updateUndoList();
@@ -183,17 +190,25 @@ public class ControllerClass implements Controller {
 		case UNDO:
 			undo();
 			break;
+		case SEARCH:
+			search();
+			break;
 		case DISPLAY:
 			display();
 			break;
-		case INVALID:
-			System.out.println("Invalid command.");
-			break;
 		default:
-			System.out.println("Invalid command.");
+			throw new Exception("Invalid command.");
 		}
 	}
-
+	
+			/**
+	 * 
+	 * @return
+	 * @author
+	 */
+	private void search() {
+		// TODO Auto-generated method stub
+	}
 	
 	//push the current state to the undoList
 	//Tran Cong Thien
@@ -243,17 +258,14 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void editTask(String content) {
-		try {
+	private void editTask(String content) throws Exception {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to edit.");
 			} else {
 				proceedWithEdit(content);
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
 
 	}
 
@@ -356,14 +368,10 @@ public class ControllerClass implements Controller {
 	 * @return void
 	 * @author G. Vishnu Priya
 	 */
-	private void deleteTask(String content) {
-		try {
+	private void deleteTask(String content) throws Exception {
 			if (isValidDelete(content)) {
 				proceedWithDelete(content);
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
 	}
 
 	/**
@@ -391,13 +399,14 @@ public class ControllerClass implements Controller {
 	 * @param taskNum
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void executeDelete(int taskNum) {
+	private void executeDelete(int taskNum) throws Exception {
 		try {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Task does not exist. Please enter task number within the range.");
+			throw new Exception("Task does not exist. Please enter task number within the range.");
 		}
 	}
 
@@ -456,17 +465,32 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
-	private void addTask(String content) {
-		try {
+	private void addTask(String content) throws Exception {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to add.");
 			} else {
-				TaskClass task = processUserInput(content);
+				Task task = processUserInput(content);
 				this.tasks.add(task);
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+	}
+
+	
+	/**
+	 * @author Luo Shaohuai
+	 * @param content
+	 * @return
+	 */
+	private Task processUserInput(String content) {
+		String desc;
+		Integer singlePos = 0;
+		Integer doublePos = 0;
+		Integer endPos = 0;
+		singlePos = content.indexOf('\'', 0);
+		doublePos = content.indexOf('\"', 0);
+		if (singlePos == -1 && doublePos == -1) {
+			return processUserInputClassic(content);
 		}
+		return null;
 	}
 
 	/**
@@ -476,7 +500,7 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return Task Object
 	 */
-	private Task processUserInput(String content) {
+	private Task processUserInputClassic(String content) {
 		boolean priority = false;
 		if (content.contains("!")) {
 			priority = true;
@@ -538,14 +562,15 @@ public class ControllerClass implements Controller {
 			content += word + " ";
 		}
 
+		//todo
 		if (date == null) {
-			return new FloatingTask(priority, content);
+			return new TaskClass();
 		} else if (timeEnd == null) {
-			return new DeadlineTask(priority, content, date);
+			return new TaskClass();
 		} else {
 			timeStart = addDate(date, timeStart);
 			timeEnd = addDate(date, timeEnd);
-			return new TimedTask(priority, content, timeStart, timeEnd);
+			return new TaskClass();
 		}
 	}
 
@@ -628,7 +653,7 @@ public class ControllerClass implements Controller {
 		} else if (operation.equalsIgnoreCase("undo")){
 			return CommandType.UNDO;
 		} else {
-			return CommandType.INVALID;
+			return CommandType.SEARCH;
 		}
 	}
 	
@@ -640,5 +665,5 @@ public class ControllerClass implements Controller {
 		
 		return theController;
 	}
-	private static Controller theController = null;
+	
 }
