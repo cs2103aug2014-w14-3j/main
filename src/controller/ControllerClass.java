@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TimeZone;
+import java.util.Stack;
 
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
@@ -21,7 +22,7 @@ import java.util.TimeZone;
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY, SEARCH
+		ADD, DELETE, EDIT, DISPLAY,UNDO, INVALID
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -52,10 +53,12 @@ public class ControllerClass implements Controller {
 	private ArrayList<TaskClass> tasks;
 	private ArrayList<String> taskStrings;
 	private Storage storage;
+	private Stack<ArrayList<TaskClass>> undoList;
 
 	public ControllerClass() {
 		storage = createStorageObject();
 		tasks = new ArrayList<TaskClass>();
+		undoList=new Stack<ArrayList<TaskClass>>();
 		getFileContent();
 	}
 
@@ -101,38 +104,9 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	private Task convertStringToTask(String taskString) throws ParseException {
-
-		String[] para = taskString.trim().split("%");
-		Boolean isPrioritized;
-		Task task = null;
-
-		if (para[1].equals("0")) {
-			isPrioritized = false;
-		} else {
-			isPrioritized = true;
-		}
-
-		String content = para[2];
-
-		switch (Integer.parseInt(para[0])) {
-
-		case 1:
-			task = new FloatingTask(isPrioritized, content);
-			break;
-		case 2:
-			Date date = new Date(Long.parseLong(para[3]));
-			task = new DeadlineTask(isPrioritized, content, date);
-			break;
-		case 3:
-			Date startTime = new Date(Long.parseLong(para[3]));
-			Date endTime = new Date(Long.parseLong(para[4]));
-			task = new TimedTask(isPrioritized, content, startTime, endTime);
-			break;
-		}
-
-		return task;
-
+	private TaskClass convertStringToTask(String taskString) throws ParseException {
+		 
+		return new TaskClass(taskString);
 	}
 
 	// This method converts tasks from tasks list to taskStrings list.
@@ -144,7 +118,7 @@ public class ControllerClass implements Controller {
 	}
 
 	// This method converts tasks to strings to be stored in taskStrings list.
-	private String convertTaskToString(Task task) {
+	private String convertTaskToString(TaskClass task) {
 		return task.toString();
 	}
 
@@ -191,40 +165,56 @@ public class ControllerClass implements Controller {
 	 *
 	 * @return void
 	 * @author G. Vishnu Priya
-	 * @throws Exception 
 	 */
-	private void processInput(CommandType commandType, String content) throws Exception {
+	private void processInput(CommandType commandType, String content) {
 		switch (commandType) {
 		case ADD:
+			updateUndoList();
 			addTask(content);
 			break;
 		case DELETE:
+			updateUndoList();
 			deleteTask(content);
 			break;
 		case EDIT:
+			updateUndoList();
 			editTask(content);
+			break;
+		case UNDO:
+			undo();
 			break;
 		case DISPLAY:
 			display();
 			break;
-		case SEARCH:
-			search();
+		case INVALID:
+			System.out.println("Invalid command.");
 			break;
 		default:
 			System.out.println("Invalid command.");
 		}
 	}
 
-	/**
-	 * 
-	 * @return
-	 * @author
-	 */
-	private void search() {
-		// TODO Auto-generated method stub
+	
+	//push the current state to the undoList
+	//Tran Cong Thien
+	private void updateUndoList(){
+		ArrayList<TaskClass> item=new ArrayList<TaskClass>();
+		//copy content of tasks to item
+		for (int i=0;i<tasks.size();i++)
+			item.add(tasks.get(i));
 		
+		undoList.push(item);
 	}
-
+	
+	//undo command, the tasks will be replaced by the previous state
+	//Tran Cong Thien
+	private void undo(){
+		//if there is states to undo
+		if(!undoList.empty()){
+			tasks=undoList.pop();
+		}
+	}
+	
 	/*
 	 * Displays the existing tasks to the user.
 	 * 
@@ -253,14 +243,18 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
-	 * @throws Exception 
 	 */
-	private void editTask(String content) throws Exception {
+	private void editTask(String content) {
+		try {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to edit.");
 			} else {
 				proceedWithEdit(content);
 			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
 	}
 
 	/**
@@ -361,12 +355,15 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
-	 * @throws Exception 
 	 */
-	private void deleteTask(String content) throws Exception {
+	private void deleteTask(String content) {
+		try {
 			if (isValidDelete(content)) {
 				proceedWithDelete(content);
 			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	/**
@@ -394,14 +391,13 @@ public class ControllerClass implements Controller {
 	 * @param taskNum
 	 * @return void
 	 * @author G. Vishnu Priya
-	 * @throws Exception 
 	 */
-	private void executeDelete(int taskNum) throws Exception {
+	private void executeDelete(int taskNum) {
 		try {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
-			throw new Exception("Task does not exist. Please enter task number within the range.");
+			System.out.println("Task does not exist. Please enter task number within the range.");
 		}
 	}
 
@@ -460,13 +456,17 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
-	private void addTask(String content) throws Exception {
+	private void addTask(String content) {
+		try {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to add.");
 			} else {
 				TaskClass task = processUserInput(content);
 				this.tasks.add(task);
 			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	/**
@@ -625,8 +625,20 @@ public class ControllerClass implements Controller {
 		} else if ((operation.equalsIgnoreCase("display"))
 				|| (operation.equalsIgnoreCase("list"))) {
 			return CommandType.DISPLAY;
+		} else if (operation.equalsIgnoreCase("undo")){
+			return CommandType.UNDO;
 		} else {
-			return CommandType.SEARCH;
+			return CommandType.INVALID;
 		}
 	}
+	
+	
+	public static Controller getInstance() {
+		if (theController == null) {
+			theController = new ControllerClass();
+		}
+		
+		return theController;
+	}
+	private static Controller theController = null;
 }
