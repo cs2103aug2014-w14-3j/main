@@ -374,14 +374,14 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void proceedWithDelete(String content) {
+	private void proceedWithDelete(String content) throws Exception {
 		try {
 			int taskNum = getTaskNum(content);
 			executeDelete(taskNum);
 		} catch (NumberFormatException e) {
-			System.out
-					.println("Invalid delete format. Please enter task number.");
+			throw new Exception("Invalid delete format. Please enter task number.");
 		}
 	}
 

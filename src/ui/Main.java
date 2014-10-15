@@ -29,6 +29,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import junit.framework.Assert;
 import controller.Controller;
 import controller.ControllerClass;
 
@@ -140,6 +141,10 @@ public class Main extends Application{
 		try {
 			log.log("Command: " + cmd);
 			//displayBuf = controller.execCmd(cmd);
+			if (displayBuf == null) {
+				return;
+			}
+			assert displayBuf.size() <= Controller.taskPerPage;
 			updateDisplay();
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
