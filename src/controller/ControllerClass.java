@@ -472,6 +472,7 @@ public class ControllerClass implements Controller {
 				Task task = processUserInput(content);
 				this.tasks.add(task);
 			}
+<<<<<<< HEAD
 	}
 
 	
@@ -491,6 +492,8 @@ public class ControllerClass implements Controller {
 			return processUserInputClassic(content);
 		}
 		return null;
+=======
+>>>>>>> branch 'master' of https://github.com/cs2103aug2014-w14-3j/main.git
 	}
 
 	/**
