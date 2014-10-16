@@ -90,6 +90,12 @@ class TaskClass implements Task {
 		endTime = time;
 	}
 	
+	public void clearTimes() {
+		deadline = null;
+		startTime = null;
+		endTime = null;
+	}
+	
 	public void setType() {
 		if(deadline == null && (startTime == null && endTime == null)) {
 			type = TaskType.FLOATING;

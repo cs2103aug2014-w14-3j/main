@@ -3,33 +3,24 @@
  */
 package ui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import junit.framework.Assert;
 import controller.Controller;
 import controller.ControllerClass;
 
@@ -40,7 +31,7 @@ import controller.ControllerClass;
 public class Main extends Application{
 	
 	public Main() {
-		//controller = ControllerClass.getInstance();
+		controller = ControllerClass.getInstance();
 		displayBuf = new ArrayList<String>();
 		root = new BorderPane();
 		log = new Log();
@@ -123,7 +114,6 @@ public class Main extends Application{
 	
 	private ObservableList<String> loadList(ArrayList<String> data) {
 		for (int i = 0; i < data.size(); i++) {
-			data.set(i, data.get(i).substring(4));
 		}
 		return FXCollections.observableList(data);
 	}
@@ -140,7 +130,7 @@ public class Main extends Application{
 		
 		try {
 			log.log("Command: " + cmd);
-			//displayBuf = controller.execCmd(cmd);
+			displayBuf = controller.execCmd(cmd);
 			if (displayBuf == null) {
 				return;
 			}

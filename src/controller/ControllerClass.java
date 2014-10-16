@@ -7,11 +7,15 @@ import storage.StoragePlus;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.joestelmach.natty.*;
 /*
@@ -112,7 +116,7 @@ public class ControllerClass implements Controller {
 
 	private Task convertStringToTask(String taskString) throws ParseException {
 		 
-		return new Task(taskString);
+		return new TaskClass(taskString);
 	}
 
 	// This method converts tasks from tasks list to taskStrings list.
@@ -465,6 +469,11 @@ public class ControllerClass implements Controller {
 		return Integer.parseInt(content);
 	}
 
+	/**
+	 * @author Luo Shaohuai
+	 * @param content
+	 * @throws Exception
+	 */
 	private void addTask(String content) throws Exception {
 			if (isEmptyCommand(content)) {
 				throw new Exception("Please specify what to add.");
@@ -481,17 +490,60 @@ public class ControllerClass implements Controller {
 	 * @return
 	 */
 	private Task processUserInput(String content) {
-		String desc;
+		String desc = "";
 		Integer singlePos = 0;
 		Integer doublePos = 0;
-		Integer endPos = 0;
 		singlePos = content.indexOf('\'', 0);
 		doublePos = content.indexOf('\"', 0);
 		if (singlePos == -1 && doublePos == -1) {
 			return processUserInputClassic(content);
 		}
-		return null;
+		
+		String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+		Matcher matcher = Pattern.compile(regex).matcher(content);
+		while (matcher.find()) {
+			desc += content.substring(matcher.start() + 1, matcher.end() - 1) + " ";
+		}
+		desc = desc.substring(0, desc.length() - 1);
+		String timeStr = content.replaceAll(regex, "");
+		Task task = new TaskClass();
+		task.setDesc(desc);
+		processTime(task, timeStr);
+		
+		return task;
 	}
+	
+	//TODO 
+	private boolean processTime(Task task, String content) {
+		content = content.trim();
+		if (content.isEmpty()) {
+			return false;
+		}
+		
+		Parser parser = new Parser();
+		List<DateGroup> groups = parser.parse(content);
+		List<Date> dates = new ArrayList<Date>();
+		for(DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+		
+		Collections.sort(dates);
+		
+		if(dates.size() < 1) {
+			return false;
+		} else if (dates.size() == 1) {
+			task.clearTimes();
+			task.setDeadline(dates.get(0));
+			task.setType();
+			return true;
+		} else {
+			task.clearTimes();
+			task.setStartTime(dates.get(0));
+			task.setEndTime(dates.get(dates.size() - 1));
+			task.setType();
+			return true;
+		}
+}
 
 	/**
 	 * Process user input for add task
@@ -501,7 +553,7 @@ public class ControllerClass implements Controller {
 	 * @return Task Object
 	 */
 	private Task processUserInputClassic(String content) {
-		boolean priority = false;
+		Boolean priority = false;
 		if (content.contains("!")) {
 			priority = true;
 		}
@@ -563,20 +615,21 @@ public class ControllerClass implements Controller {
 		}
 
 		Task task;
-		if (date == null) {
-			task = new TaskClass();
-			task.setDesc(content);
-		} else if (timeEnd == null) {
-			task = new TaskClass();
-			task.setDesc(content);
-			task.setDeadline(timeStart);
-		} else {
-			timeStart = addDate(date, timeStart);
-			timeEnd = addDate(date, timeEnd);
-			task = new TaskClass();
-			task.setStartTime(timeStart);
-			task.setEndTime(timeEnd);
+		task = new TaskClass();
+		task.setDesc(content);
+		task.setPriority(priority.toString());
+		if (date != null) {
+			if (timeEnd != null) {
+				timeStart = addDate(date, timeStart);
+				timeEnd = addDate(date, timeEnd);
+				task.setStartTime(timeStart);
+				task.setEndTime(timeEnd);
+			} else {
+				task.setDeadline(timeStart);
+			}
 		}
+		task.setType();
+		
 		return task;
 	}
 

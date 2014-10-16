@@ -45,6 +45,8 @@ public interface Task {
 	
 	public void setEndTime(Date time);
 	
+	public void clearTimes();
+	
 	public void setType();
 	
 	public String toString();
