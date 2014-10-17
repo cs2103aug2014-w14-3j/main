@@ -65,6 +65,9 @@ public class ControllerClass implements Controller {
 	private ArrayList<String> taskStrings;
 	private Storage storage;
 	private Stack<ArrayList<Task>> undoList;
+	private Stack<ArrayList<Task>> undoArchiveList;
+ 	private ArrayList<Task> archiveTasks;
+	
 
 	public ControllerClass() {
 		storage = createStorageObject();
@@ -206,14 +209,40 @@ public class ControllerClass implements Controller {
 		}
 	}
 	
+	
+	// the format will be "done <number>"
+	private void done(String content){
+	
+		int taskID=Integer.parseInt(content.trim())-1;
+		
+		
+		//move task from task List to archive
+		if (taskID>=0 && taskID<tasks.size()){
+			Task task=tasks.get(taskID);
+			archiveTasks.add(task);
+			tasks.remove(taskID);
+			
+		}
+
+	}
+	
+	
+	
 			/**
 	 * 
-	 * @return
-	 * @author
+	 * @return: the result list of task
+	 * if the key appears in the list of task, return the list of exact search
+	 * else return the list of nearMatch search
+	 * @author: Tran Cong Thien
 	 */
-	private void search() {
+	private  ArrayList<Task> searchCommand(String key) {
+		ArrayList<Task> resultSearch=exactSearch(key);
 		
-		
+		if (resultSearch!=null){
+			return resultSearch;
+		}else {
+			return nearMatchSearch(key);
+		}	
 	}
 	
 	
@@ -298,6 +327,15 @@ public class ControllerClass implements Controller {
 	}
 	
 	
+	private void updateUndoArchiveList(){
+		ArrayList<Task> item=new ArrayList<Task>();
+		
+		for (int i=0;i<archiveTasks.size();i++)
+			item.add(archiveTasks.get(i));
+		
+		undoArchiveList.push(item);
+	}
+	
 	//push the current state to the undoList
 	//Tran Cong Thien
 	private void updateUndoList(){
@@ -315,6 +353,7 @@ public class ControllerClass implements Controller {
 		//if there is states to undo
 		if(!undoList.empty()){
 			tasks=undoList.pop();
+			archiveTasks=undoArchiveList.pop();
 		}
 	}
 	

@@ -12,6 +12,8 @@ public class StoragePlus implements Storage {
 
 	// Name of the back-up file
 	private final static String backUpFile = "ToDoList.backup";
+	
+	private final static String archiveFile="Archive.txt";
 
 	public ArrayList<String> read() {
 
@@ -35,6 +37,30 @@ public class StoragePlus implements Storage {
 			// the method will return the empty arrayList
 		}
 		return toDoList;
+	}
+	
+	
+	public ArrayList<String> readArchive(){
+		
+		ArrayList<String> archiveList=new ArrayList<String>();
+		
+		try{
+			Scanner scanner=new Scanner(new File(archiveFile));
+			
+			while(scanner.hasNextLine()){
+				String task=scanner.nextLine();
+				archiveList.add(task);
+			}
+			
+			scanner.close();
+			}
+		
+		//File not found
+		catch (FileNotFoundException e){
+			
+		}
+		
+		return archiveList;
 	}
 
 	// before write to the list, move the content of current list to
@@ -83,5 +109,25 @@ public class StoragePlus implements Storage {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	
+	//wrtie the archive list to the storage file
+	public void writeArchive(ArrayList<String> archiveList){
+		
+		File archive=new File(archiveFile);
+		
+		try {
+			PrintWriter printWriter = new PrintWriter(archive);
+
+			for (int i = 0; i < archiveList.size(); i++) {
+				printWriter.println(archiveList.get(i));
+			}
+			printWriter.close();
+		} catch (FileNotFoundException e) {
+			// Exception
+			e.printStackTrace();
+		}
+		
 	}
 }
