@@ -6,6 +6,7 @@ import storage.StoragePlus;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -211,8 +212,91 @@ public class ControllerClass implements Controller {
 	 * @author
 	 */
 	private void search() {
-		// TODO Auto-generated method stub
+		
+		
 	}
+	
+	
+	private ArrayList<Task> exactSearch(String key){
+		
+		ArrayList<Task> resultList=new ArrayList<Task>();
+		int sizeOfList=tasks.size();
+		
+		for (int i=0;i<sizeOfList;i++){
+			String currentTask=tasks.get(i).getDesc();
+			//if the key occurs in the description
+			if (currentTask.indexOf(key)!=-1){
+				resultList.add(tasks.get(i));
+			}
+		}
+		
+		if (resultList.isEmpty()){
+			return null;
+		}else {
+			return resultList;
+		}
+	}
+	
+	
+	private ArrayList<Task> nearMatchSearch(String key){
+		ArrayList<Task> resultList=new ArrayList<Task>();
+		ArrayList<Pair> list=new ArrayList<Pair>();
+		
+		int numOfTask=tasks.size();
+		
+		for (int i=0;i<numOfTask;i++){
+			Task task=tasks.get(i);
+			int alignmentScore=AlignmentScore(key,task.getDesc());
+			list.add(new Pair(alignmentScore,task));
+		}
+		
+		Collections.sort(list);
+		
+		for (int i=0;i<numOfTask;i++){
+			Task task=list.get(i).getSecond();
+			resultList.add(task);
+		}
+		
+		return resultList;
+		
+		
+		
+	}
+	
+	
+	//the alignment score between 2 strings, used for nearMatch Search
+	//the higher, the better
+	//Tran Cong Thien
+	private int AlignmentScore(String sourceString, String destString){
+		int sourceStrLen=sourceString.length();
+		int destStrLen=destString.length();
+		char[] sourceChar=sourceString.toCharArray();
+		char[] destChar=destString.toCharArray();
+		
+		//sourceString in for vertical axis
+		//destString in the horizontal axis
+		int[][] alignmentScore=new int[sourceStrLen+1][destStrLen+1];
+		
+		for (int i=1;i<=sourceStrLen;i++){
+			alignmentScore[i][0]=i*-1;
+		}
+		
+		for (int j=1;j<=destStrLen;j++){
+			alignmentScore[0][j]=j*-1;
+		}
+		
+		for (int i=1;i<=sourceStrLen;i++){
+			for (int j=1;j<=destStrLen;j++){
+				//match=2 points, mismatch=-1 point
+				alignmentScore[i][j]=alignmentScore[i-1][j-1]+(sourceChar[i-1]==destChar[j-1] ? 2: -1);
+				//insert or delete=-1 point
+				alignmentScore[i][j]=Math.max(alignmentScore[i][j],alignmentScore[i-1][j]-1);
+				alignmentScore[i][j]=Math.max(alignmentScore[i][j],alignmentScore[i][j-1]-1);
+		}
+	}
+	 return alignmentScore[sourceStrLen][destStrLen];
+	}
+	
 	
 	//push the current state to the undoList
 	//Tran Cong Thien
