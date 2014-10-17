@@ -32,7 +32,7 @@ import com.joestelmach.natty.*;
 public class ControllerClass implements Controller {
 	
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH
+		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH, DONE
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -281,15 +281,13 @@ public class ControllerClass implements Controller {
 		
 		Collections.sort(list);
 		
-		for (int i=0;i<numOfTask;i++){
+		for (int i=numOfTask;i>=0;i--){
 			Task task=list.get(i).getSecond();
 			resultList.add(task);
 		}
 		
 		return resultList;
-		
-		
-		
+			
 	}
 	
 	
@@ -299,8 +297,7 @@ public class ControllerClass implements Controller {
 	private int AlignmentScore(String sourceString, String destString){
 		int sourceStrLen=sourceString.length();
 		int destStrLen=destString.length();
-		char[] sourceChar=sourceString.toCharArray();
-		char[] destChar=destString.toCharArray();
+		
 		
 		//sourceString in for vertical axis
 		//destString in the horizontal axis
@@ -317,13 +314,20 @@ public class ControllerClass implements Controller {
 		for (int i=1;i<=sourceStrLen;i++){
 			for (int j=1;j<=destStrLen;j++){
 				//match=2 points, mismatch=-1 point
-				alignmentScore[i][j]=alignmentScore[i-1][j-1]+(sourceChar[i-1]==destChar[j-1] ? 2: -1);
+				alignmentScore[i][j]=alignmentScore[i-1][j-1]+(sourceString.charAt(i-1)==destString.charAt(j-1) ? 2: -1);
 				//insert or delete=-1 point
 				alignmentScore[i][j]=Math.max(alignmentScore[i][j],alignmentScore[i-1][j]-1);
 				alignmentScore[i][j]=Math.max(alignmentScore[i][j],alignmentScore[i][j-1]-1);
 		}
 	}
-	 return alignmentScore[sourceStrLen][destStrLen];
+		
+	 int max=alignmentScore[sourceStrLen][0];
+	 for (int i=0;i<= destStrLen;i++){
+		 if (max < alignmentScore[sourceStrLen][i]){
+			 max=alignmentScore[sourceStrLen][i];
+		 }
+	 }
+	 return max;
 	}
 	
 	
@@ -834,7 +838,10 @@ public class ControllerClass implements Controller {
 			return CommandType.DISPLAY;
 		} else if (operation.equalsIgnoreCase("undo")){
 			return CommandType.UNDO;
-		} else {
+		} else if (operation.equalsIgnoreCase("done")){ 
+			return CommandType.DONE;
+		}
+		else {
 			return CommandType.SEARCH;
 		}
 	}
