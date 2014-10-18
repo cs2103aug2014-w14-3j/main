@@ -32,7 +32,7 @@ import com.joestelmach.natty.*;
 public class ControllerClass implements Controller {
 	
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH, DONE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY,UNDO, SEARCH, DONE
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -204,6 +204,9 @@ public class ControllerClass implements Controller {
 		case DISPLAY:
 			display();
 			break;
+		case POSTPONE:
+			postpone(content);
+			break;
 		default:
 			throw new Exception("Invalid command.");
 		}
@@ -362,6 +365,21 @@ public class ControllerClass implements Controller {
 	}
 	
 	/*
+	 *Postpones the desired task.
+	 *
+	 * @author Koh Xian Hui
+	 */
+	private void postpone(String taskNum) {
+		try {
+			Task postponedTask = tasks.get(Integer.parseInt(taskNum) - 1);
+			postponedTask.clearTimes();
+			postponedTask.setType(TaskType.FLOATING);
+		} catch (NumberFormatException e){
+			System.out.println("invalid number");
+		}
+	}
+	
+	/*
 	 * Displays the existing tasks to the user.
 	 * 
 	 * @return ArrayList<String>
@@ -371,11 +389,15 @@ public class ControllerClass implements Controller {
 	private ArrayList<String> display() {
 		ArrayList<String> displayTasks = new ArrayList<String>();
 		if (!tasks.isEmpty()) {
+			Collections.sort(tasks);
 			for (Task taskItem : tasks) {
 				String stringedTask = taskItem.toString().replace("%", " ");
-
-				displayTasks.add(stringedTask.substring(4));
-
+				
+				if(stringedTask.startsWith("!")) {
+					displayTasks.add(stringedTask.substring(1));
+				} else {
+					displayTasks.add(stringedTask);
+				}
 			}
 		}
 
@@ -840,6 +862,8 @@ public class ControllerClass implements Controller {
 			return CommandType.UNDO;
 		} else if (operation.equalsIgnoreCase("done")){ 
 			return CommandType.DONE;
+		} else if(operation.equalsIgnoreCase("pp")) {
+			return CommandType.POSTPONE;
 		}
 		else {
 			return CommandType.SEARCH;

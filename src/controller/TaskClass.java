@@ -1,12 +1,12 @@
 package controller;
 
-import java.text.ParseException;
+import TaskClass;
+
 import java.util.Date;
 
 class TaskClass implements Task {
 	boolean isPrioritized;
 	String description;
-	Date deadline;
 	Date startTime;
 	Date endTime;
 	TaskType type;
@@ -22,24 +22,23 @@ class TaskClass implements Task {
 		setDesc(attributes[1]);
 		
 		if(attributes[2].trim().isEmpty()) {
-			setDeadline(null);
+			setStartTime(null);
+			setType(TaskType.FLOATING);
 		} else {
-			setDeadline(new Date(Long.parseLong(attributes[2].trim())));
+			setStartTime(new Date(Long.parseLong(attributes[3].trim())));
+			setType(TaskType.DEADLINE);
 		}
 		
 		if(attributes[3].trim().isEmpty()) {
-			setStartTime(null);
-		} else {
-			setStartTime(new Date(Long.parseLong(attributes[3].trim())));
-		}
-		
-		if(attributes[4].trim().isEmpty()) {
 			setEndTime(null);
 		} else {
 			setEndTime(new Date(Long.parseLong(attributes[4].trim())));
+			setType(TaskType.TIMED);
 		}
-		
-		setType();
+	}
+	
+	public Date getDeadline() {
+		return startTime;
 	}
 	
 	public Date getStartTime() {
@@ -79,7 +78,7 @@ class TaskClass implements Task {
 	}
 	
 	public void setDeadline(Date date) {
-		deadline = date;
+		startTime = date;
 	}
 	
 	public void setStartTime(Date time) {
@@ -91,30 +90,46 @@ class TaskClass implements Task {
 	}
 	
 	public void clearTimes() {
-		deadline = null;
 		startTime = null;
 		endTime = null;
 	}
 	
-	public void setType() {
-		if(deadline == null && (startTime == null && endTime == null)) {
-			type = TaskType.FLOATING;
-		} else if(startTime == null && endTime == null) {
-			type = TaskType.DEADLINE;
-		} else {
-			type = TaskType.TIMED;
-		}
+	public void setType(TaskType tasktype) {
+		type = tasktype;
 	}
 	
 	
 	public String toString() {
 		boolean isNullStartTime =(startTime == null);
 		boolean isNullEndTime = (endTime == null);
-		boolean isNullDeadline = (deadline == null);
 		return isPrioritized + "%" +  
 				description + "%" + 
-				(isNullDeadline? " " : deadline.getTime()) + "%" +
 				(isNullStartTime? " " : startTime.getTime()) + "%" + 
 				(isNullEndTime? " " : endTime.getTime());
+	}
+	
+	public int compareTo(Object newTask) {
+		Task task = (Task) newTask;
+		
+		if(this.isPrioritized() && !task.isPrioritized()) {
+			return -1;
+		} else if(!this.isPrioritized() && task.isPrioritized()) {
+			return 1;
+		} else {
+			if(this.getStartTime() == null && task.getStartTime() != null) {
+				return 1;
+			} else if(this.getStartTime() != null && task.getStartTime() == null) {
+				return -1;
+			} else {
+				if(this.getStartTime() == null && task.getStartTime() == null) {
+					return this.getDesc().compareTo(task.getDesc());
+				} else {
+					Long thisDate = this.getStartTime().getTime();
+					Long taskDate = task.getStartTime().getTime();
+					
+					return thisDate.compareTo(taskDate);
+				}
+			}
+		}		
 	}
 }

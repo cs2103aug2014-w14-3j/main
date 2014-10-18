@@ -3,7 +3,6 @@
  */
 package controller;
 
-import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -47,7 +46,9 @@ public interface Task {
 	
 	public void clearTimes();
 	
-	public void setType();
+	public void setType(TaskType type);
 	
 	public String toString();
+	
+	public int compareTo(Object task);
 }
