@@ -6,7 +6,6 @@ import storage.StoragePlus;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,7 +31,7 @@ import com.joestelmach.natty.*;
 public class ControllerClass implements Controller {
 	
 	enum CommandType {
-		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH, DONE
+		ADD, DELETE, EDIT, DISPLAY,UNDO, SEARCH, DONE, CHANGEPAGE
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -63,17 +62,24 @@ public class ControllerClass implements Controller {
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
+	private ArrayList<String> displayList;
 	private Storage storage;
 	private Stack<ArrayList<Task>> undoList;
 	private Stack<ArrayList<Task>> undoArchiveList;
  	private ArrayList<Task> archiveTasks;
-	
+ 	private static int totalNumPages;
+	private static int currentPageNum;
+	private static int numFirstTaskOnPage;
+	private static int numLastTaskOnPage;
 
 	public ControllerClass() {
 		storage = createStorageObject();
 		tasks = new ArrayList<Task>();
+		displayList = new ArrayList<String>();
 		undoList=new Stack<ArrayList<Task>>();
 		getFileContent();
+		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
+		currentPageNum = 1;
 	}
 
 	// This method starts execution of each user command by first retrieving
@@ -81,7 +87,7 @@ public class ControllerClass implements Controller {
 	// which course of action to take.
 	public ArrayList<String> execCmd(String command) throws Exception {
 		parseCommand(command);
-		return taskStrings;
+		return displayList;
 	}
 
 	//
@@ -144,8 +150,8 @@ public class ControllerClass implements Controller {
 		String content = removeCommandType(command, operation);
 		processInput(commandType, content);
 		convertTaskListStringList();
-		addTaskNum();
 		updateStorage();
+		addTaskNum();
 	}
 
 	/**
@@ -154,15 +160,27 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void addTaskNum() {
-		int numPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
-		taskStrings.add(0,Integer.toString(numPages));
-		for (int i=1; i<taskStrings.size(); i++) {
-			int numTask = i%(numTasksInSinglePage);
-			if (numTask==0) {
-				numTask = numTasksInSinglePage;
-			}
-			String numberedTask = Integer.toString(numTask) + ". " + taskStrings.get(i);
-			taskStrings.set(i, numberedTask);
+		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
+		displayList.add(Integer.toString(totalNumPages));
+		copySectionTaskStringsDisplayList();
+		addNumDisplayList();
+	}
+
+	private void addNumDisplayList() {
+		for (int i=1; i<displayList.size(); i++) {
+			String numberedTask = Integer.toString(i) + "%" + displayList.get(i);
+			displayList.set(i, numberedTask);
+		}
+	}
+
+	/**
+	 * This method copies the specific strings to be displayed out of the whole list, to the display list.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void copySectionTaskStringsDisplayList() {
+		for(int i=numFirstTaskOnPage; i<=numLastTaskOnPage; i++) {
+			displayList.add(taskStrings.get(i));
 		}
 	}
 
@@ -203,6 +221,8 @@ public class ControllerClass implements Controller {
 			break;
 		case DISPLAY:
 			display();
+		case CHANGEPAGE:
+			changePage(content);
 			break;
 		default:
 			throw new Exception("Invalid command.");
@@ -210,6 +230,80 @@ public class ControllerClass implements Controller {
 	}
 	
 	
+	/**
+	 * This method changes the attributes related to the changing of a page.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 * @throws Exception 
+	 */
+	private void changePage(String content) throws Exception {
+		String direction = content.substring(0, 1);
+		changeCurrentPageNum(direction);
+		numFirstTaskOnPage = (numTasksInSinglePage * (currentPageNum-1)) + 1;
+		numLastTaskOnPage = getNumLastTaskOnPage();
+	}
+
+	/**
+	 * This method returns the number of the last task on the current page.
+	 * @return int
+	 * @author G. Vishnu Priya
+	 */
+	private int getNumLastTaskOnPage() {
+		if (currentPageNum < totalNumPages) {
+			 return numTasksInSinglePage * currentPageNum;
+		} else {
+			return (tasks.size() % numTasksInSinglePage) + ((currentPageNum-1) * (numTasksInSinglePage));
+		}
+	}
+	
+	/**
+	 * This method checks if it is valid to change the current page number and if so, changes the current page number.
+	 * @throws Exception
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void changeCurrentPageNum(String direction) throws Exception {
+		if(direction.equalsIgnoreCase("up")) {
+			if (checkValidPageUp()) {
+				currentPageNum--;
+			} else {
+				throw new Exception("On first page.");
+			}
+		} else {
+			if (checkValidPageDown()) {
+			currentPageNum++;
+			} else {
+				throw new Exception("On last page.");
+			}
+		}
+	}
+
+	/**
+	 * This method checks if it is possible to go to the next page by checking if there are more tasks in the list which are pushed to the next page.
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageDown() {
+		if (currentPageNum<= totalNumPages) {
+		return true;
+		}
+		return false;
+	}
+
+	/**
+	 * This method checks if it is possible to go to the previous page. If currently on first page, it will return false.
+	 * Otherwise, it will return true.
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageUp() {
+		if (currentPageNum == 1) {
+		return false;
+		} 
+		
+		return true;
+	}
+
 	// the format will be "done <number>"
 	private void done(String content){
 	
@@ -593,7 +687,10 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	public static int getTaskNum(String content) throws NumberFormatException {
-		return Integer.parseInt(content);
+		int numEntered = Integer.parseInt(content);
+		int numInTasksList = (numTasksInSinglePage*(currentPageNum-1)) + numEntered;
+		
+		return numInTasksList;
 	}
 
 	/**
@@ -836,10 +933,12 @@ public class ControllerClass implements Controller {
 		} else if ((operation.equalsIgnoreCase("display"))
 				|| (operation.equalsIgnoreCase("list"))) {
 			return CommandType.DISPLAY;
-		} else if (operation.equalsIgnoreCase("undo")){
+		} else if (operation.equalsIgnoreCase("undo")) {
 			return CommandType.UNDO;
-		} else if (operation.equalsIgnoreCase("done")){ 
+		} else if (operation.equalsIgnoreCase("done")) { 
 			return CommandType.DONE;
+		} else if(operation.equalsIgnoreCase("page")) {
+			return CommandType.TURNPAGE;
 		}
 		else {
 			return CommandType.SEARCH;
