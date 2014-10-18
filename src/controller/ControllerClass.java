@@ -592,8 +592,24 @@ public class ControllerClass implements Controller {
 			editDate(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
 			editStartEndTimes(taskToEdit, editDetails);
+		} else {
+			editPriority(taskToEdit);
 		}
 	}
+	/**
+	 * This methods edits the priority of a task by reversing the existing priority of the task.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void editPriority(Task taskToEdit) {
+		// TODO Auto-generated method stub
+		boolean priorityOfTask = taskToEdit.isPrioritized();
+		if (priorityOfTask) {
+			taskToEdit.setPriority("false");
+		} else {
+			taskToEdit.setPriority("true");
+		}
+		}
 
 	private Task editStartEndTimes(Task taskToEdit, String details) {
 		Task editedTask = null;
