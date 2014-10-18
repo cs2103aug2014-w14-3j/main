@@ -202,15 +202,15 @@ public class ControllerClass implements Controller {
 	private void processInput(CommandType commandType, String content) throws Exception {
 		switch (commandType) {
 		case ADD:
-			updateUndoList();
+			updateForUndo();
 			addTask(content);
 			break;
 		case DELETE:
-			updateUndoList();
+			updateForUndo();
 			deleteTask(content);
 			break;
 		case EDIT:
-			updateUndoList();
+			updateForUndo();
 			editTask(content);
 			break;
 		case UNDO:
@@ -225,6 +225,7 @@ public class ControllerClass implements Controller {
 			changePage(content);
 			break;
 		case POSTPONE:
+			updateForUndo();
 			postpone(content);
 			break;
 		default:
@@ -332,6 +333,7 @@ public class ControllerClass implements Controller {
 	 * else return the list of nearMatch search
 	 * @author: Tran Cong Thien
 	 */
+	
 	private  ArrayList<Task> search(String key) {
 		ArrayList<Task> resultList=new ArrayList<Task>();
 		int numOfTask=tasks.size();
@@ -435,6 +437,12 @@ public class ControllerClass implements Controller {
 	}
 		
 	 return editDistance[sourceStrLen][destStrLen];
+	}
+	
+	
+	private void updateForUndo(){
+		updateUndoList();
+		updateUndoArchiveList();
 	}
 	
 	
