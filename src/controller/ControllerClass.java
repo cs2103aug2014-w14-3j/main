@@ -198,7 +198,7 @@ public class ControllerClass implements Controller {
 			undo();
 			break;
 		case SEARCH:
-			search();
+			search(content);
 			break;
 		case DISPLAY:
 			display();
@@ -698,12 +698,13 @@ public class ControllerClass implements Controller {
 		String timeStr = content.replaceAll(regex, "");
 		Task task = new TaskClass();
 		task.setDesc(desc);
+		task.setType(TaskType.FLOATING);
 		processTime(task, timeStr);
 		
 		return task;
 	}
 	
-	//TODO 
+	 
 	private boolean processTime(Task task, String content) {
 		content = content.trim();
 		if (content.isEmpty()) {
@@ -724,13 +725,13 @@ public class ControllerClass implements Controller {
 		} else if (dates.size() == 1) {
 			task.clearTimes();
 			task.setDeadline(dates.get(0));
-			task.setType();
+			task.setType(TaskType.DEADLINE);
 			return true;
 		} else {
 			task.clearTimes();
 			task.setStartTime(dates.get(0));
 			task.setEndTime(dates.get(dates.size() - 1));
-			task.setType();
+			task.setType(TaskType.TIMED);
 			return true;
 		}
 }
@@ -808,17 +809,19 @@ public class ControllerClass implements Controller {
 		task = new TaskClass();
 		task.setDesc(content);
 		task.setPriority(priority.toString());
+		task.setType(TaskType.FLOATING);
 		if (date != null) {
 			if (timeEnd != null) {
 				timeStart = addDate(date, timeStart);
 				timeEnd = addDate(date, timeEnd);
 				task.setStartTime(timeStart);
 				task.setEndTime(timeEnd);
+				task.setType(TaskType.TIMED);
 			} else {
 				task.setDeadline(timeStart);
+				task.setType(TaskType.DEADLINE);
 			}
 		}
-		task.setType();
 		
 		return task;
 	}
