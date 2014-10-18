@@ -17,14 +17,17 @@ import javafx.scene.text.TextFlow;
  * @author Luo Shaohuai
  *
  */
-public class ListItemControl extends HBox {
+public class ListItem{
+	@FXML
+	private HBox hbox;
+	
 	@FXML
 	private Text desc; 
 	
 	@FXML
 	private TextFlow time;
 	
-	ListItemControl() {
+	ListItem() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ListItem.fxml"));
 		fxmlLoader.setController(this);
 		
@@ -36,6 +39,10 @@ public class ListItemControl extends HBox {
 		
 		time.getChildren().clear();
 		desc.setText("");
+	}
+	
+	public HBox getHBox() {
+		return hbox;
 	}
 	
 	public void setDesc(String text) {
@@ -69,4 +76,5 @@ public class ListItemControl extends HBox {
 		timeText.setText(timeobj.toString());
 		return timeText;
 	}
+	
 }
