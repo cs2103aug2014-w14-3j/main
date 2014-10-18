@@ -709,11 +709,21 @@ public class ControllerClass implements Controller {
 			desc += content.substring(matcher.start() + 1, matcher.end() - 1) + " ";
 		}
 		desc = desc.substring(0, desc.length() - 1);
-		String timeStr = content.replaceAll(regex, "");
+		content = content.replaceAll(regex, "");
+		
 		Task task = new TaskClass();
+		Boolean priority;
+		if (content.indexOf('!') != -1) {
+			content = content.replaceAll("!", "");
+			priority = true;
+		} else {
+			priority = false;
+		}
+		task.setPriority(priority.toString());
+		
 		task.setDesc(desc);
 		task.setType(TaskType.FLOATING);
-		processTime(task, timeStr);
+		processTime(task, content);
 		
 		return task;
 	}
