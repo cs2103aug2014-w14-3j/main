@@ -4,7 +4,7 @@ import TaskClass;
 
 import java.util.Date;
 
-class TaskClass implements Task {
+public class TaskClass implements Task {
 	boolean isPrioritized;
 	String description;
 	Date startTime;
@@ -108,9 +108,7 @@ class TaskClass implements Task {
 				(isNullEndTime? " " : endTime.getTime());
 	}
 	
-	public int compareTo(Object newTask) {
-		Task task = (Task) newTask;
-		
+	public int compareTo(Task task) {
 		if(this.isPrioritized() && !task.isPrioritized()) {
 			return -1;
 		} else if(!this.isPrioritized() && task.isPrioritized()) {

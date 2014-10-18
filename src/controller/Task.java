@@ -50,5 +50,5 @@ public interface Task {
 	
 	public String toString();
 	
-	public int compareTo(Object task);
+	public int compareTo(Task task);
 }
