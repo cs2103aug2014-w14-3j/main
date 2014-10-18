@@ -3,12 +3,14 @@
  */
 package ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -17,6 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -30,6 +33,7 @@ import controller.ControllerClass;
  */
 public class Main extends Application{
 	
+	private UIControl mainControl;
 	public Main() {
 		controller = ControllerClass.getInstance();
 		displayBuf = new ArrayList<String>();
@@ -37,9 +41,37 @@ public class Main extends Application{
 		log = new Log();
 	}
 	
-	/**
-	 * GUI entry
-	 */
+	@Override
+	public void start(Stage stage) { 
+		try {
+			stage.setScene(loadScene());
+		} catch (IOException e) {
+			e.printStackTrace();
+			Platform.exit();
+			System.exit(0);
+		}
+		stage.show();
+	}
+	
+	private Scene loadScene() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		Pane mainPane = (Pane) loader.load(getClass().getResourceAsStream(Config.main));
+		
+		mainControl = loader.getController();
+		
+		Scene scene = new Scene(mainPane);
+		scene.getStylesheets().setAll(
+	            getClass().getResource("main.css").toExternalForm()
+	        );
+		
+		return scene;
+	}
+	
+	
+	
+	
+	/*
+	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -150,7 +182,7 @@ public class Main extends Application{
 		ListView<String> list = creatCenter(displayBuf);
 		root.setCenter(list);
 	}
-	
+	*/
 	/**
 	 * Command line entry
 	 * @param args
