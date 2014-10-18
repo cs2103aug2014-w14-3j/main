@@ -1,6 +1,5 @@
 package controller;
 
-import TaskClass;
 
 import java.util.Date;
 
@@ -106,28 +105,5 @@ public class TaskClass implements Task {
 				description + "%" + 
 				(isNullStartTime? " " : startTime.getTime()) + "%" + 
 				(isNullEndTime? " " : endTime.getTime());
-	}
-	
-	public int compareTo(Task task) {
-		if(this.isPrioritized() && !task.isPrioritized()) {
-			return -1;
-		} else if(!this.isPrioritized() && task.isPrioritized()) {
-			return 1;
-		} else {
-			if(this.getStartTime() == null && task.getStartTime() != null) {
-				return 1;
-			} else if(this.getStartTime() != null && task.getStartTime() == null) {
-				return -1;
-			} else {
-				if(this.getStartTime() == null && task.getStartTime() == null) {
-					return this.getDesc().compareTo(task.getDesc());
-				} else {
-					Long thisDate = this.getStartTime().getTime();
-					Long taskDate = task.getStartTime().getTime();
-					
-					return thisDate.compareTo(taskDate);
-				}
-			}
-		}		
 	}
 }

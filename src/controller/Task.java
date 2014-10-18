@@ -49,6 +49,4 @@ public interface Task {
 	public void setType(TaskType type);
 	
 	public String toString();
-	
-	public int compareTo(Task task);
 }
