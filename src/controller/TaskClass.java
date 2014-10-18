@@ -1,10 +1,9 @@
 package controller;
 
-import TaskClass;
 
 import java.util.Date;
 
-class TaskClass implements Task {
+class TaskClass implements Task, Comparable<Task> {
 	boolean isPrioritized;
 	String description;
 	Date startTime;
@@ -108,8 +107,8 @@ class TaskClass implements Task {
 				(isNullEndTime? " " : endTime.getTime());
 	}
 	
-	public int compareTo(Object newTask) {
-		Task task = (Task) newTask;
+	@Override
+	public int compareTo(Task task) {
 		
 		if(this.isPrioritized() && !task.isPrioritized()) {
 			return -1;
@@ -132,4 +131,5 @@ class TaskClass implements Task {
 			}
 		}		
 	}
+	
 }
