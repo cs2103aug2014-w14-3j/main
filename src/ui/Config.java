@@ -16,6 +16,11 @@ public interface Config {
 	public static String logDateFormat = "yyyy/MM/dd HH:mm:ss";
 	
 	//UI
+	//fxml
+	public static String main = "Main.fxml";
+	
+	
+	//sytle
 	public static String title = "Forget-Me-Not";
 	
 	public static String titleStyle = "-fx-fill: #FFEEDD;";
