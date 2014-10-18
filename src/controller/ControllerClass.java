@@ -342,12 +342,14 @@ public class ControllerClass implements Controller {
 		{
 			Task task=tasks.get(i);
 			int searchScore=searchScore(key,task.getDesc() );
-			list.add(new Pair(searchScore,task));
+			if (searchScore>0){
+				list.add(new Pair(searchScore,task));
+			}
 		}
 		
 		Collections.sort(list);
 		
-		for (int i=numOfTask-1;i >=0;i--){
+		for (int i=list.size();i >=0;i--){
 			Task task=list.get(i).getSecond();
 			resultList.add(task);
 		}
@@ -375,33 +377,28 @@ public class ControllerClass implements Controller {
 	
 		String[] string=strToSearch.trim().split("\\s+");
 		int strLen=string.length;
-		boolean isMatch=false;
+		int maxScore=0;
 		
 		for (int i=0;i<strLen;i++){
-			if (isApproximateMatch(key,string[i])){
-				isMatch=true;
-				break;
+			int score=approximateMatchScore(key,string[i]);
+			if (maxScore< score){
+				maxScore=score;
 			}
 		}
 		
-		if (isMatch){
-			return 1;
-		}else {
-			return 0;
-		}
-			
+		return maxScore;
 	}
 	
 	
-	//Criteria to be matched between 2 words, if the editDistance/lenghOfKeyWord is <=0.4
+	//Criteria to be matched between 2 words, if the editDistance/lenghOfKeyWord is <=0.5
 	//the 2 strings are considered approximately matched
-	private boolean isApproximateMatch(String keyword, String string){
+	private int approximateMatchScore(String keyword, String string){
 		int editDist=editDistance(keyword,string);
 		int lenOfKey=keyword.length();
-		if (editDist/lenOfKey <=0.4)
-			return true;
+		if (editDist/lenOfKey <=0.5)
+			return 1000-1000*editDist/lenOfKey;
 		else
-			return false;
+			return 0;
 		
 	}
 	
