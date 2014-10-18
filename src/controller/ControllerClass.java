@@ -252,7 +252,7 @@ public class ControllerClass implements Controller {
 		
 		Collections.sort(list);
 		
-		for (int i=numOfTask;i >=0;i--){
+		for (int i=numOfTask-1;i >=0;i--){
 			Task task=list.get(i).getSecond();
 			resultList.add(task);
 		}
