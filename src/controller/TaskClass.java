@@ -1,10 +1,9 @@
 package controller;
 
-import TaskClass;
 
 import java.util.Date;
 
-class TaskClass implements Task {
+public class TaskClass implements Task {
 	boolean isPrioritized;
 	String description;
 	Date startTime;
@@ -106,30 +105,5 @@ class TaskClass implements Task {
 				description + "%" + 
 				(isNullStartTime? " " : startTime.getTime()) + "%" + 
 				(isNullEndTime? " " : endTime.getTime());
-	}
-	
-	public int compareTo(Object newTask) {
-		Task task = (Task) newTask;
-		
-		if(this.isPrioritized() && !task.isPrioritized()) {
-			return -1;
-		} else if(!this.isPrioritized() && task.isPrioritized()) {
-			return 1;
-		} else {
-			if(this.getStartTime() == null && task.getStartTime() != null) {
-				return 1;
-			} else if(this.getStartTime() != null && task.getStartTime() == null) {
-				return -1;
-			} else {
-				if(this.getStartTime() == null && task.getStartTime() == null) {
-					return this.getDesc().compareTo(task.getDesc());
-				} else {
-					Long thisDate = this.getStartTime().getTime();
-					Long taskDate = task.getStartTime().getTime();
-					
-					return thisDate.compareTo(taskDate);
-				}
-			}
-		}		
 	}
 }

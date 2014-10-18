@@ -6,7 +6,6 @@ import storage.StoragePlus;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -402,7 +401,7 @@ public class ControllerClass implements Controller {
 	private ArrayList<String> display() {
 		ArrayList<String> displayTasks = new ArrayList<String>();
 		if (!tasks.isEmpty()) {
-			Collections.sort(tasks);
+			sortTasks();
 			for (Task taskItem : tasks) {
 				String stringedTask = taskItem.toString().replace("%", " ");
 				
@@ -415,6 +414,35 @@ public class ControllerClass implements Controller {
 		}
 
 		return displayTasks;
+	}
+	
+	/**
+	 * 
+	 */
+	private void sortTasks() {
+		Collections.sort(tasks, (task1, task2) -> {
+			if(task1.isPrioritized() && !task2.isPrioritized()) {
+				return -1;
+			} else if(!task1.isPrioritized() && task2.isPrioritized()) {
+				return 1;
+			} 
+			
+			if(task1.getStartTime() == null && task2.getStartTime() != null) {
+				return 1;
+			} else if(task1.getStartTime() != null && task2.getStartTime() == null) {
+				return -1;
+			} 
+			
+			if(task1.getStartTime() == null && task2.getStartTime() == null) {
+				return task1.getDesc().compareTo(task2.getDesc());
+			} else {
+				Long thisDate = task1.getStartTime().getTime();
+				Long taskDate = task2.getStartTime().getTime();
+				
+				return thisDate.compareTo(taskDate);
+			}
+
+		});
 	}
 
 	/**
