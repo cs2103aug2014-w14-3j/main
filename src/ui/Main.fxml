@@ -37,11 +37,11 @@
 	<bottom>
 		<HBox>
 		   <children>
-		   		<TextField prefHeight="39.0" prefWidth="600.0" />
+		   		<TextField prefHeight="35.0" prefWidth="600.0" />
 		   </children>
 		</HBox>
 	</bottom>
 	<center>
-		<ListView />
+		<ListView fx:id="list" prefWidth="600.0" />
 	</center>
 </BorderPane>

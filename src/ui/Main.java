@@ -64,6 +64,10 @@ public class Main extends Application{
 	            getClass().getResource("main.css").toExternalForm()
 	        );
 		
+		ArrayList<String> test = new ArrayList<String>();
+		test.add("aaaa");
+		test.add("bbbb");
+		mainControl.loadList(test);
 		return scene;
 	}
 	
