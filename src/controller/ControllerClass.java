@@ -238,99 +238,112 @@ public class ControllerClass implements Controller {
 	 * else return the list of nearMatch search
 	 * @author: Tran Cong Thien
 	 */
-	private  ArrayList<Task> searchCommand(String key) {
-		ArrayList<Task> resultSearch=exactSearch(key);
-		
-		if (resultSearch!=null){
-			return resultSearch;
-		}else {
-			return nearMatchSearch(key);
-		}	
-	}
-	
-	
-	private ArrayList<Task> exactSearch(String key){
-		
+	private  ArrayList<Task> search(String key) {
 		ArrayList<Task> resultList=new ArrayList<Task>();
-		int sizeOfList=tasks.size();
-		
-		for (int i=0;i<sizeOfList;i++){
-			String currentTask=tasks.get(i).getDesc();
-			//if the key occurs in the description
-			if (currentTask.indexOf(key)!=-1){
-				resultList.add(tasks.get(i));
-			}
-		}
-		
-		if (resultList.isEmpty()){
-			return null;
-		}else {
-			return resultList;
-		}
-	}
-	
-	
-	private ArrayList<Task> nearMatchSearch(String key){
-		ArrayList<Task> resultList=new ArrayList<Task>();
-		ArrayList<Pair> list=new ArrayList<Pair>();
-		
 		int numOfTask=tasks.size();
 		
-		for (int i=0;i<numOfTask;i++){
+		ArrayList<Pair> list=new ArrayList<Pair>();
+		
+		for (int i=0;i<numOfTask;i++)
+		{
 			Task task=tasks.get(i);
-			int alignmentScore=AlignmentScore(key,task.getDesc());
-			list.add(new Pair(alignmentScore,task));
+			int searchScore=searchScore(key,task.getDesc() );
+			list.add(new Pair(searchScore,task));
 		}
 		
 		Collections.sort(list);
 		
-		for (int i=numOfTask;i>=0;i--){
+		for (int i=numOfTask;i >=0;i--){
 			Task task=list.get(i).getSecond();
 			resultList.add(task);
 		}
 		
 		return resultList;
+	}
+	
+	
+	private int searchScore(String keyword, String strToSearch){
+		String[] key=keyword.trim().split("\\s+");
+		int strLen=key.length;
+		int score=0;
+		
+		for (int i=0;i<strLen;i++){
+			score+=isMatch(key[i],strToSearch);
+		}
+		
+		return score;
+	}
+	
+	//keyword is one word only
+	//return 1 if the key appears exactly or approximately in the strToSearch
+	//0 otherwise
+	private int isMatch(String key, String strToSearch){
+	
+		String[] string=strToSearch.trim().split("\\s+");
+		int strLen=string.length;
+		boolean isMatch=false;
+		
+		for (int i=0;i<strLen;i++){
+			if (isApproximateMatch(key,string[i])){
+				isMatch=true;
+				break;
+			}
+		}
+		
+		if (isMatch){
+			return 1;
+		}else {
+			return 0;
+		}
 			
 	}
 	
 	
-	//the alignment score between 2 strings, used for nearMatch Search
-	//the higher, the better
+	//Criteria to be matched between 2 words, if the editDistance/lenghOfKeyWord is <=0.4
+	//the 2 strings are considered approximately matched
+	private boolean isApproximateMatch(String keyword, String string){
+		int editDist=editDistance(keyword,string);
+		int lenOfKey=keyword.length();
+		if (editDist/lenOfKey <=0.4)
+			return true;
+		else
+			return false;
+		
+	}
+	
+	
+	//the edit Distance score between 2 strings, used for nearMatch Search
+	//the lower, the better
 	//Tran Cong Thien
-	private int AlignmentScore(String sourceString, String destString){
+	private int editDistance(String sourceString, String destString){
 		int sourceStrLen=sourceString.length();
 		int destStrLen=destString.length();
 		
 		
 		//sourceString in for vertical axis
 		//destString in the horizontal axis
-		int[][] alignmentScore=new int[sourceStrLen+1][destStrLen+1];
+		int[][] editDistance=new int[sourceStrLen+1][destStrLen+1];
 		
 		for (int i=1;i<=sourceStrLen;i++){
-			alignmentScore[i][0]=i*-1;
+			editDistance[i][0]=i;
 		}
 		
 		for (int j=1;j<=destStrLen;j++){
-			alignmentScore[0][j]=j*-1;
+			editDistance[0][j]=j;
 		}
 		
-		for (int i=1;i<=sourceStrLen;i++){
-			for (int j=1;j<=destStrLen;j++){
-				//match=2 points, mismatch=-1 point
-				alignmentScore[i][j]=alignmentScore[i-1][j-1]+(sourceString.charAt(i-1)==destString.charAt(j-1) ? 2: -1);
-				//insert or delete=-1 point
-				alignmentScore[i][j]=Math.max(alignmentScore[i][j],alignmentScore[i-1][j]-1);
-				alignmentScore[i][j]=Math.max(alignmentScore[i][j],alignmentScore[i][j-1]-1);
+		for (int j=1;j<=destStrLen;j++){
+			for (int i=1;i<=sourceStrLen;i++){
+		
+				if (sourceString.charAt(i-1)==destString.charAt(j-1)){
+					editDistance[i][j]=editDistance[i-1][j-1];
+				} else {
+					editDistance[i][j]=Math.min(editDistance[i-1][j]+1, Math.min(editDistance[i][j-1]+1,editDistance[i-1][j-1]+1));
+				}
 		}
 	}
 		
-	 int max=alignmentScore[sourceStrLen][0];
-	 for (int i=0;i<= destStrLen;i++){
-		 if (max < alignmentScore[sourceStrLen][i]){
-			 max=alignmentScore[sourceStrLen][i];
-		 }
-	 }
-	 return max;
+	 return editDistance[sourceStrLen][destStrLen];
 	}
 	
 	
