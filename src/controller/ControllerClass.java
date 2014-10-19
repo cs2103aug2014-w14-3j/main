@@ -56,6 +56,7 @@ public class ControllerClass implements Controller {
 		tasks = new ArrayList<Task>();
 		displayList = new ArrayList<String>();
 		undoList=new Stack<ArrayList<Task>>();
+		undoArchiveList=new Stack<ArrayList<Task>>();
 		getFileContent();
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
 		currentPageNum = 1;
@@ -363,8 +364,7 @@ public class ControllerClass implements Controller {
 	}
 	
 	//keyword is one word only
-	//return 1 if the key appears exactly or approximately in the strToSearch
-	//0 otherwise
+	//return maxScore of matching of this keyword in the string
 	private int matchScore(String key, String strToSearch){
 	
 		String[] string=strToSearch.trim().split("\\s+");
