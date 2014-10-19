@@ -19,6 +19,7 @@ public interface Storage {
 	 * @return ArrayList<String>
 	 */
 	ArrayList<String> read();
+	ArrayList<String> readArchive();
 
 	/**
 	 * This method store the list of string into the storage
@@ -27,5 +28,6 @@ public interface Storage {
 	 *            : list of string representation of Tasks
 	 */
 	void write(ArrayList<String> list);
+	void writeArchive(ArrayList<String> archiveList);
 }
 

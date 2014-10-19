@@ -41,11 +41,12 @@ public class ControllerClass implements Controller {
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
+	private ArrayList<Task> archiveTasks;
+	private ArrayList<String> archiveTaskStrings;
 	private ArrayList<String> displayList;
 	private Storage storage;
 	private Stack<ArrayList<Task>> undoList;
 	private Stack<ArrayList<Task>> undoArchiveList;
- 	private ArrayList<Task> archiveTasks;
  	private static int totalNumPages;
 	private static int currentPageNum;
 	private static int numFirstTaskOnPage;
@@ -54,6 +55,7 @@ public class ControllerClass implements Controller {
 	public ControllerClass() {
 		storage = createStorageObject();
 		tasks = new ArrayList<Task>();
+		archiveTasks = new ArrayList<Task>();
 		displayList = new ArrayList<String>();
 		undoList=new Stack<ArrayList<Task>>();
 		undoArchiveList=new Stack<ArrayList<Task>>();
@@ -80,6 +82,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void getFileContent() {
 		taskStrings = storage.read();
+		archiveTaskStrings = storage.readArchive();
 		convertStringListTaskList();
 	}
 
@@ -99,6 +102,9 @@ public class ControllerClass implements Controller {
 			for (int i = 0; i < taskStrings.size(); i++) {
 				tasks.add(convertStringToTask(taskStrings.get(i)));
 			}
+			for (int i = 0; i < archiveTaskStrings.size(); i++) {
+				archiveTasks.add(convertStringToTask(archiveTaskStrings.get(i)));
+			}
 		} catch (ParseException e) {
 			// nothing
 		}
@@ -114,6 +120,11 @@ public class ControllerClass implements Controller {
 		taskStrings.clear();
 		for (int i = 0; i < tasks.size(); i++) {
 			taskStrings.add(convertTaskToString(tasks.get(i)));
+		}
+		
+		archiveTaskStrings.clear();
+		for (int i = 0; i < archiveTasks.size(); i++) {
+			archiveTaskStrings.add(convertTaskToString(archiveTasks.get(i)));
 		}
 	}
 
@@ -208,6 +219,9 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			postpone(content);
 			break;
+		case DONE:
+			updateForUndo();
+			markAsDone(content);
 		default:
 			throw new Exception("Invalid command.");
 		}
@@ -294,7 +308,7 @@ public class ControllerClass implements Controller {
 	}
 
 	// the format will be "done <number>"
-	private void done(String content){
+	private void markAsDone(String content){
 	
 		int taskID=Integer.parseInt(content.trim())-1;
 		
@@ -733,6 +747,7 @@ public class ControllerClass implements Controller {
 	private void updateStorage() {
 		convertTaskListStringList();
 		storage.write(taskStrings);
+		storage.writeArchive(archiveTaskStrings);
 	}
 
 	/**
