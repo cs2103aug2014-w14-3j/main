@@ -196,40 +196,40 @@ public class ControllerClass implements Controller {
 	 */
 	private void processInput(CommandType commandType, String content) throws Exception {
 		switch (commandType) {
-		case ADD:
-			updateForUndo();
-			addTask(content);
-			break;
-		case DELETE:
-			updateForUndo();
-			deleteTask(content);
-			break;
-		case EDIT:
-			updateForUndo();
-			editTask(content);
-			break;
-		case UNDO:
-			undo();
-			break;
-		case SEARCH:
-			search(content);
-			break;
-		case DISPLAY:
-			display();
-			break;
-		case CHANGEPAGE:
-			changePage(content);
-			break;
-		case POSTPONE:
-			updateForUndo();
-			postpone(content);
-			break;
-		case DONE:
-			updateForUndo();
-			markAsDone(content);
-		default:
-			throw new Exception("Invalid command.");
-		}
+			case ADD:
+				updateForUndo();
+				addTask(content);
+				break;
+			case DELETE:
+				updateForUndo();
+				deleteTask(content);
+				break;
+			case EDIT:
+				updateForUndo();
+				editTask(content);
+				break;
+			case UNDO:
+				undo();
+				break;
+			case SEARCH:
+				search(content);
+				break;
+			case DISPLAY:
+				display();
+				break;
+			case CHANGEPAGE:
+				changePage(content);
+				break;
+			case POSTPONE:
+				updateForUndo();
+				postpone(content);
+				break;
+			case DONE:
+				updateForUndo();
+				markAsDone(content);
+			default:
+				throw new Exception("Invalid command.");
+			}
 	}
 	
 	
@@ -590,7 +590,12 @@ public class ControllerClass implements Controller {
 		String[] words = content.split(" ");
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
-		String editDetails = content.substring(content.indexOf(words[2]));
+		String editDetails;
+		if (words.length > 3) {
+			editDetails = content.substring(content.indexOf(words[2]));
+		} else {
+			editDetails = null;
+		}
 		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange,
 				editDetails);
@@ -609,7 +614,7 @@ public class ControllerClass implements Controller {
 			String editDetails) {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("deadline")) {
+		} else if (attribute.equalsIgnoreCase("time")) {
 			processTime(taskToEdit, editDetails);
 		}
 		/*else if (attribute.equalsIgnoreCase("date")) {
@@ -630,7 +635,6 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void editPriority(Task taskToEdit) {
-		// TODO Auto-generated method stub
 		boolean priorityOfTask = taskToEdit.isPrioritized();
 		if (priorityOfTask) {
 			taskToEdit.setPriority("false");
