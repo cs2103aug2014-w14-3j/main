@@ -227,6 +227,7 @@ public class ControllerClass implements Controller {
 			case DONE:
 				updateForUndo();
 				markAsDone(content);
+				break;
 			default:
 				throw new Exception("Invalid command.");
 			}
@@ -364,7 +365,7 @@ public class ControllerClass implements Controller {
 		
 		Collections.sort(list);
 		
-		for (int i=list.size();i >=0;i--){
+		for (int i=list.size() - 1;i >=0;i--){
 			Task task=list.get(i).getThird();
 			resultList.add(task);
 		}
