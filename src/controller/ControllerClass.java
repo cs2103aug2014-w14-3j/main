@@ -36,28 +36,7 @@ public class ControllerClass implements Controller {
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int numTasksInSinglePage = 10;
-	private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<String, String>() {
-		private static final long serialVersionUID = -8905622371814695255L;
-
-		{
-			put("^\\d{8}$", "yyyyMMdd");
-			put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
-			put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
-			put("^\\d{1,2}/\\d{1,2}/\\d{4}$", "dd/MM/yyyy");
-			put("^\\d{4}/\\d{1,2}/\\d{1,2}$", "yyyy/MM/dd");
-			put("^\\d{1,2}-\\d{1,2}$", "dd-MM");
-			put("^\\d{1,2}/\\d{1,2}$", "dd/MM");
-		}
-	};
-
-	private static final Map<String, String> TIME_FORMAT_REGEXPS = new HashMap<String, String>() {
-		private static final long serialVersionUID = -1690161551539169383L;
-
-		{
-			put("^\\d{1,2}:\\d{2}$", "HH:mm");
-			put("^\\d{4}$", "HHmm");
-		}
-	};
+	
 	
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
@@ -600,9 +579,11 @@ public class ControllerClass implements Controller {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
-			editDate(taskToEdit, editDetails);
+			edit
 		} else if (attribute.equalsIgnoreCase("time")) {
-			editStartEndTimes(taskToEdit, editDetails);
+			
+		} else if (attribute.equalsIgnoreCase("from")) {
+			
 		} else {
 			editPriority(taskToEdit);
 		}
@@ -622,6 +603,7 @@ public class ControllerClass implements Controller {
 		}
 		}
 
+	/*
 	private Task editStartEndTimes(Task taskToEdit, String details) {
 		Task editedTask = null;
 		String[] times = details.split(" ");
@@ -644,6 +626,8 @@ public class ControllerClass implements Controller {
 	// if it's null or not
 	// Timed task no date? so only possible tasks are floating or deadline. If
 	// timed task given throw exception?
+	
+
 	private Task editDate(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
 		Task editedTask = null;
@@ -663,6 +647,7 @@ public class ControllerClass implements Controller {
 		}
 		return editedTask;
 	}
+*/
 
 	/**
 	 * Replaces the description of task with the desc string.
@@ -811,7 +796,9 @@ public class ControllerClass implements Controller {
 		singlePos = content.indexOf('\'', 0);
 		doublePos = content.indexOf('\"', 0);
 		if (singlePos == -1 && doublePos == -1) {
-			return processUserInputClassic(content);
+			//return processUserInputClassic(content);
+			desc = content;
+			content = "";
 		}
 		
 		String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
@@ -878,7 +865,7 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return Task Object
 	 */
-	private Task processUserInputClassic(String content) {
+	/*private Task processUserInputClassic(String content) {
 		Boolean priority = false;
 		if (content.contains("!")) {
 			priority = true;
@@ -964,48 +951,8 @@ public class ControllerClass implements Controller {
 	private Date addDate(Date date1, Date date2) {
 		long ms = date1.getTime() + date2.getTime();
 		return new Date(ms);
-	}
+	}*/
 
-	/**
-	 * Determine SimpleDateFormat pattern matching with the given date string.
-	 * Returns null if format is unknown.
-	 * 
-	 * @author Retrieved from
-	 *         http://stackoverflow.com/questions/3389348/parse-any-date-in-java
-	 *         and modified by Luo Shaohuai
-	 * @param dateString
-	 *            The date string to determine the SimpleDateFormat pattern for.
-	 * @return The matching SimpleDateFormat pattern, or null if format is
-	 *         unknown.
-	 * @see SimpleDateFormat
-	 */
-	private static String determineDateFormat(String dateString) {
-		for (String regexp : DATE_FORMAT_REGEXPS.keySet()) {
-			if (dateString.toLowerCase().matches(regexp)) {
-				return DATE_FORMAT_REGEXPS.get(regexp);
-			}
-		}
-		return null; // Unknown format.
-	}
-
-	/**
-	 * Determine SimpleDateFormat pattern matching with the given date string.
-	 * Returns null if format is unknown.
-	 * 
-	 * @author Luo Shaohuai
-	 * @param dateString
-	 *            The date string to determine the SimpleDateFormat pattern for.
-	 * @return The matching SimpleDateFormat pattern, or null if format is
-	 *         unknown.
-	 */
-	private static String determineTimeFormat(String dateString) {
-		for (String regexp : TIME_FORMAT_REGEXPS.keySet()) {
-			if (dateString.toLowerCase().matches(regexp)) {
-				return TIME_FORMAT_REGEXPS.get(regexp);
-			}
-		}
-		return null; // Unknown format.
-	}
 
 	/**
 	 * This method removes the command, either add, delete, edit or display,
