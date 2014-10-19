@@ -583,13 +583,17 @@ public class ControllerClass implements Controller {
 			String editDetails) {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("date")) {
-			edit
+		} else if (attribute.equalsIgnoreCase("deadline")) {
+			processTime(taskToEdit, editDetails);
+		}
+		/*else if (attribute.equalsIgnoreCase("date")) {
+			
 		} else if (attribute.equalsIgnoreCase("time")) {
 			
 		} else if (attribute.equalsIgnoreCase("from")) {
 				
-		} else {
+		} */
+		else {
 			editPriority(taskToEdit);
 		}
 	}
