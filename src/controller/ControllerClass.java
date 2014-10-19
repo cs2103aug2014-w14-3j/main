@@ -600,9 +600,11 @@ public class ControllerClass implements Controller {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
-			editDate(taskToEdit, editDetails);
+			edit
 		} else if (attribute.equalsIgnoreCase("time")) {
-			editStartEndTimes(taskToEdit, editDetails);
+			
+		} else if (attribute.equalsIgnoreCase("from")) {
+			
 		} else {
 			editPriority(taskToEdit);
 		}
@@ -622,6 +624,7 @@ public class ControllerClass implements Controller {
 		}
 		}
 
+	/*
 	private Task editStartEndTimes(Task taskToEdit, String details) {
 		Task editedTask = null;
 		String[] times = details.split(" ");
@@ -644,6 +647,8 @@ public class ControllerClass implements Controller {
 	// if it's null or not
 	// Timed task no date? so only possible tasks are floating or deadline. If
 	// timed task given throw exception?
+	
+
 	private Task editDate(Task taskToEdit, String details) {
 		TaskType type = taskToEdit.getType();
 		Task editedTask = null;
@@ -663,6 +668,7 @@ public class ControllerClass implements Controller {
 		}
 		return editedTask;
 	}
+*/
 
 	/**
 	 * Replaces the description of task with the desc string.
