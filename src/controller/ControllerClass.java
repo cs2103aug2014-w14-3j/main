@@ -62,6 +62,8 @@ public class ControllerClass implements Controller {
 		getFileContent();
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
 		currentPageNum = 1;
+		updateTaskNumOnPage();
+		
 	}
 
 	// This method starts execution of each user command by first retrieving
@@ -152,7 +154,9 @@ public class ControllerClass implements Controller {
 	 */
 	private void addTaskNum() {
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
+		displayList.clear();
 		displayList.add(Integer.toString(totalNumPages));
+		updateTaskNumOnPage();
 		copySectionTaskStringsDisplayList();
 		addNumDisplayList();
 	}
@@ -171,7 +175,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void copySectionTaskStringsDisplayList() {
 		for(int i=numFirstTaskOnPage; i<=numLastTaskOnPage; i++) {
-			displayList.add(taskStrings.get(i));
+			displayList.add(taskStrings.get(i-1));
 		}
 	}
 
@@ -212,6 +216,7 @@ public class ControllerClass implements Controller {
 			break;
 		case DISPLAY:
 			display();
+			break;
 		case CHANGEPAGE:
 			changePage(content);
 			break;
@@ -235,8 +240,12 @@ public class ControllerClass implements Controller {
 	 * @throws Exception 
 	 */
 	private void changePage(String content) throws Exception {
-		String direction = content.substring(0, 1);
+		String direction = content.trim();
 		changeCurrentPageNum(direction);
+		updateTaskNumOnPage();
+	}
+	
+	private void updateTaskNumOnPage() {
 		numFirstTaskOnPage = (numTasksInSinglePage * (currentPageNum-1)) + 1;
 		numLastTaskOnPage = getNumLastTaskOnPage();
 	}
@@ -247,6 +256,9 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private int getNumLastTaskOnPage() {
+		if(totalNumPages == 0) {
+			return 0;
+		}
 		if (currentPageNum < totalNumPages) {
 			 return numTasksInSinglePage * currentPageNum;
 		} else {
@@ -825,7 +837,7 @@ public class ControllerClass implements Controller {
 		doublePos = content.indexOf('\"', 0);
 		if (singlePos == -1 && doublePos == -1) {
 			//return processUserInputClassic(content);
-			desc = content;
+			desc = content + " ";
 			content = "";
 		}
 		
