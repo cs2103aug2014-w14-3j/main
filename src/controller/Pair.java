@@ -1,27 +1,27 @@
 package controller;
 
-public class Pair implements Comparable<Pair>{
-	Integer first;
-	Task second;
+public class Pair {
+	int first;
+	int second;
 	
-	public Pair( Integer _first, Task _second){
+	public Pair( int _first, int _second){
 		first=_first;
 		second=_second;
 	}
 	
-	public Integer getFirst(){
+	public int getFirst(){
 		return first;
 	}
 	
-	public Task getSecond(){
+	public int getSecond(){
 		return second;
 	}
 	
 	
-	public int compareTo(Pair pair){
+/*	public int compareTo(Pair pair){
 		return (int) this.getFirst()- (int)pair.getFirst();
 	}
 	
-
+*/
 	
 }

@@ -337,22 +337,24 @@ public class ControllerClass implements Controller {
 	private  ArrayList<Task> search(String key) {
 		ArrayList<Task> resultList=new ArrayList<Task>();
 		int numOfTask=tasks.size();
+		String[] str=key.trim().split("\\s+");
+		int keyLen=str.length;
 		
-		ArrayList<Pair> list=new ArrayList<Pair>();
+		ArrayList<Triple> list=new ArrayList<Triple>();
 		
 		for (int i=0;i<numOfTask;i++)
 		{
 			Task task=tasks.get(i);
-			int searchScore=searchScore(key,task.getDesc() );
-			if (searchScore>0){
-				list.add(new Pair(searchScore,task));
+			Pair result=searchScore(key,task.getDesc() );
+			if (result.getFirst()>keyLen/2){
+				list.add(new Triple(result.getFirst(),result.getSecond(),task));
 			}
 		}
 		
 		Collections.sort(list);
 		
 		for (int i=list.size();i >=0;i--){
-			Task task=list.get(i).getSecond();
+			Task task=list.get(i).getThird();
 			resultList.add(task);
 		}
 		
@@ -360,22 +362,26 @@ public class ControllerClass implements Controller {
 	}
 	
 	
-	private int searchScore(String keyword, String strToSearch){
+	private Pair searchScore(String keyword, String strToSearch){
 		String[] key=keyword.trim().split("\\s+");
 		int strLen=key.length;
-		int score=0;
+		int searchScore=0;
+		int numOfMatch=0;
 		
 		for (int i=0;i<strLen;i++){
-			score+=isMatch(key[i],strToSearch);
+			if(matchScore(key[i],strToSearch)!=0){
+				numOfMatch++;
+			}
+			searchScore+=matchScore(key[i],strToSearch);
 		}
 		
-		return score;
+		return new Pair(numOfMatch,searchScore);
 	}
 	
 	//keyword is one word only
 	//return 1 if the key appears exactly or approximately in the strToSearch
 	//0 otherwise
-	private int isMatch(String key, String strToSearch){
+	private int matchScore(String key, String strToSearch){
 	
 		String[] string=strToSearch.trim().split("\\s+");
 		int strLen=string.length;
