@@ -594,9 +594,9 @@ public class ControllerClass implements Controller {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("date")) {
-			editDate(taskToEdit, editDetails);
+			processTime(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
-			editStartEndTimes(taskToEdit, editDetails);
+			processTime(taskToEdit, editDetails);
 		} else {
 			editPriority(taskToEdit);
 		}
@@ -616,7 +616,7 @@ public class ControllerClass implements Controller {
 		}
 		}
 
-	private Task editStartEndTimes(Task taskToEdit, String details) {
+/*	private Task editStartEndTimes(Task taskToEdit, String details) {
 		Task editedTask = null;
 		String[] times = details.split(" ");
 		Date start;
@@ -657,7 +657,7 @@ public class ControllerClass implements Controller {
 		}
 		return editedTask;
 	}
-
+*/
 	/**
 	 * Replaces the description of task with the desc string.
 	 * 
