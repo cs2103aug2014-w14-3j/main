@@ -236,7 +236,12 @@ public class ControllerClass implements Controller {
 		if (currentPageNum < totalNumPages) {
 			 return numTasksInSinglePage * currentPageNum;
 		} else {
-			return (tasks.size() % numTasksInSinglePage) + ((currentPageNum-1) * (numTasksInSinglePage));
+			int remainder = tasks.size() % numTasksInSinglePage;
+			if (remainder==0) {
+				return numTasksInSinglePage + ((currentPageNum-1) * numTasksInSinglePage);
+			} else {
+			return remainder + ((currentPageNum-1) * numTasksInSinglePage);
+			}
 		}
 	}
 	
@@ -583,7 +588,7 @@ public class ControllerClass implements Controller {
 		} else if (attribute.equalsIgnoreCase("time")) {
 			
 		} else if (attribute.equalsIgnoreCase("from")) {
-			
+				
 		} else {
 			editPriority(taskToEdit);
 		}
