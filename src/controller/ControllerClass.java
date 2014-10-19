@@ -323,7 +323,7 @@ public class ControllerClass implements Controller {
 	// the format will be "done <number>"
 	private void markAsDone(String content){
 	
-		int taskID=Integer.parseInt(content.trim())-1;
+		int taskID=getTaskNum(content.trim())-1;
 		
 		
 		//move task from task List to archive
@@ -500,7 +500,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String taskNum) {
 		try {
-			Task postponedTask = tasks.get(Integer.parseInt(taskNum) - 1);
+			Task postponedTask = tasks.get(getTaskNum(taskNum) - 1);
 			postponedTask.clearTimes();
 			postponedTask.setType(TaskType.FLOATING);
 		} catch (NumberFormatException e){
@@ -592,7 +592,7 @@ public class ControllerClass implements Controller {
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
 		String editDetails;
-		if (words.length > 3) {
+		if (words.length >= 3) {
 			editDetails = content.substring(content.indexOf(words[2]));
 		} else {
 			editDetails = null;
@@ -702,7 +702,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void editDescription(Task taskToEdit, String desc) {
-			taskToEdit.setDesc(desc);
+		taskToEdit.setDesc(desc);
 	}
 
 	/**
