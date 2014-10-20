@@ -3,8 +3,6 @@
  */
 package ui;
 
-import java.time.LocalDateTime;
-
 import javafx.scene.control.ListCell;
 
 /**

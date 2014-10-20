@@ -5,14 +5,11 @@ import storage.Storage;
 import storage.StoragePlus;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TimeZone;
+
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -902,101 +899,6 @@ public class ControllerClass implements Controller {
 			return true;
 		}
 }
-
-	/**
-	 * Process user input for add task
-	 * 
-	 * @author Luo Shaohuai
-	 * @param content
-	 * @return Task Object
-	 */
-	/*private Task processUserInputClassic(String content) {
-		Boolean priority = false;
-		if (content.contains("!")) {
-			priority = true;
-		}
-
-		String words[] = content.split(" ");
-		content = "";
-		Date date = null;
-		Date timeStart = null;
-		Date timeEnd = null;
-		for (int i = 0; i < words.length; i++) {
-			String word = words[i].trim();
-
-			String format = determineDateFormat(word);
-			if (format != null) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-				try {
-					date = dateFormat.parse(word);
-					continue;
-				} catch (ParseException e) {
-					// do nothing
-				}
-			}
-
-			format = determineTimeFormat(word);
-			if (format != null) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-				try {
-					Date time = dateFormat.parse(word);
-					if (timeEnd == null) {
-						timeStart = time;
-						int timeStartPos = i;
-						int timeEndPos = timeStartPos;
-
-						while (timeEndPos < timeStartPos + 3) {
-							timeEndPos++;
-							format = determineTimeFormat(words[timeEndPos]
-									.trim());
-							if (format != null) {
-								dateFormat = new SimpleDateFormat(format);
-								dateFormat.setTimeZone(TimeZone
-										.getTimeZone("UTC"));
-								timeEnd = dateFormat.parse(words[timeEndPos]);
-								i = timeEndPos;
-								break;
-							}
-						}
-					}
-					if (timeEnd != null) {
-						continue;
-					}
-				} catch (ParseException e) {
-					// do nothing
-				}
-			}
-
-			content += word + " ";
-		}
-
-		Task task;
-		task = new TaskClass();
-		task.setDesc(content);
-		task.setPriority(priority.toString());
-		task.setType(TaskType.FLOATING);
-		if (date != null) {
-			if (timeEnd != null) {
-				timeStart = addDate(date, timeStart);
-				timeEnd = addDate(date, timeEnd);
-				task.setStartTime(timeStart);
-				task.setEndTime(timeEnd);
-				task.setType(TaskType.TIMED);
-			} else {
-				task.setDeadline(timeStart);
-				task.setType(TaskType.DEADLINE);
-			}
-		}
-		
-		return task;
-	}
-
-	private Date addDate(Date date1, Date date2) {
-		long ms = date1.getTime() + date2.getTime();
-		return new Date(ms);
-	}*/
 
 
 	/**

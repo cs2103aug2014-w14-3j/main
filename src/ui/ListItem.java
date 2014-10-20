@@ -5,7 +5,8 @@ package ui;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
+import java.util.Date;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -76,7 +77,8 @@ public class ListItem{
 	}
 	
 	private Text timeToText(Long timeInMilli) {
-		LocalDateTime timeobj = LocalDateTime.ofEpochSecond(timeInMilli, 0, ZoneOffset.UTC);
+		Date time = new Date(timeInMilli);
+		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
 		Text timeText = new Text();
 		timeText.setText(timeobj.toString());
 		return timeText;
