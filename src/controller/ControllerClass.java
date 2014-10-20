@@ -36,15 +36,15 @@ public class ControllerClass implements Controller {
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int numTasksInSinglePage = 10;
-	
+	private static final int maxNumOfUndo=40;
 	
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
 	private ArrayList<String> displayList;
 	private Storage storage;
-	private Stack<ArrayList<Task>> undoList;
-	private Stack<ArrayList<Task>> undoArchiveList;
+	private FixedSizeStack<ArrayList<Task>> undoList;
+	private FixedSizeStack<ArrayList<Task>> undoArchiveList;
  	private ArrayList<Task> archiveTasks;
  	private static int totalNumPages;
 	private static int currentPageNum;
@@ -55,8 +55,8 @@ public class ControllerClass implements Controller {
 		storage = createStorageObject();
 		tasks = new ArrayList<Task>();
 		displayList = new ArrayList<String>();
-		undoList=new Stack<ArrayList<Task>>();
-		undoArchiveList=new Stack<ArrayList<Task>>();
+		undoList=new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
+		undoArchiveList=new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
 		getFileContent();
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
 		currentPageNum = 1;

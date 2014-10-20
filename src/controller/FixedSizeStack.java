@@ -1,5 +1,6 @@
 package controller;
 import java.util.Deque;
+import java.util.LinkedList;
 
 
 
@@ -10,6 +11,8 @@ public class FixedSizeStack<E> {
 	
 	public FixedSizeStack(int _maxSize){
 		maxSize=_maxSize;
+		stack=new LinkedList<E>();
+		
 	}
 	
 	public int getMaxSize(){
