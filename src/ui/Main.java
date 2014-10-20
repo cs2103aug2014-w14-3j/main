@@ -73,7 +73,6 @@ public class Main extends Application{
 			if (displayBuf == null) {
 				return;
 			}
-			System.out.println(displayBuf);
 			assert displayBuf.size() <= Controller.taskPerPage;
 		} catch (Exception e) {
 			if (Config.onDevelopment) {

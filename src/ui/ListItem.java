@@ -53,6 +53,11 @@ public class ListItem{
 		time.getChildren().clear();
 	}
 	
+	public void setTimes() {
+		clearTime();
+		time.getChildren().add(new Text("Floating"));
+	}
+	
 	public void setTimes(Long timeInMilli) {
 		clearTime();
 		
