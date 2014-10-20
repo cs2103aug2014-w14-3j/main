@@ -565,12 +565,18 @@ public class ControllerClass implements Controller {
 	 */
 	private void proceedWithEdit(String content) throws Exception {
 		String[] words = content.split(" ");
+		if(words[0].contains("!")) {
+			String numTask = words[0].substring(0,1);
+			int positionOfTask = getTaskNum(numTask) - 1;
+			editAttribute(tasks.get(positionOfTask), "priority", null);
+		} else {
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
 		String editDetails = content.substring(content.indexOf(words[2]));
 		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange,
 				editDetails);
+		}
 	}
 
 	/**
@@ -598,7 +604,7 @@ public class ControllerClass implements Controller {
 
 				
 		} */
-		else if (attribute.equalsIgnoreCase("!")) {
+		else if (attribute.equalsIgnoreCase("priority")) {
 			editPriority(taskToEdit);
 		} else {
 			throw new Exception("Please enter valid edit command.");
