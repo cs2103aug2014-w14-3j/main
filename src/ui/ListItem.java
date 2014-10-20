@@ -6,6 +6,7 @@ package ui;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javafx.fxml.FXML;
@@ -70,9 +71,8 @@ public class ListItem{
 		time.getChildren().add(timeToText(timeStart));
 		
 		Text to = new Text();
-		to.setText(" to ");
+		to.setText("\n");
 		time.getChildren().add(to);
-		
 		time.getChildren().add(timeToText(timeEnd));	
 	}
 	
@@ -80,7 +80,8 @@ public class ListItem{
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
 		Text timeText = new Text();
-		timeText.setText(timeobj.toString());
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm LLL d");
+		timeText.setText(format.format(timeobj));
 		return timeText;
 	}
 	

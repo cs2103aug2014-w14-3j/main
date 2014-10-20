@@ -3,22 +3,22 @@
  */
 package ui;
 
-import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
+import javafx.util.Duration;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 
 /**
  * @author Luo Shaohuai
@@ -33,16 +33,15 @@ public class UIControl extends BorderPane {
 	
 	@FXML
 	private TextField input;
-	/*
+	
 	public UIControl() {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Main.fxml"));
-		fxmlLoader.setController(this);
-		try {
-            fxmlLoader.load();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-	}*/
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("LLL d ccc HH:mm:ss");
+		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
+			time.setText(format.format(LocalDateTime.now()));
+		}));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		timeline.play();
+	}
 	
 	public void loadList(ArrayList<String> strList) {
 		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
