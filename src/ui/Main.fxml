@@ -37,7 +37,7 @@
 	<bottom>
 		<HBox>
 		   <children>
-		   		<TextField prefHeight="35.0" prefWidth="600.0" />
+		   		<TextField fx:id="input" prefHeight="35.0" prefWidth="600.0" />
 		   </children>
 		</HBox>
 	</bottom>

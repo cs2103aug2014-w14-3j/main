@@ -8,11 +8,15 @@ import java.util.ArrayList;
 
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 
@@ -26,6 +30,9 @@ public class UIControl extends BorderPane {
 	
 	@FXML
 	private ListView<String> list;
+	
+	@FXML
+	private TextField input;
 	/*
 	public UIControl() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Main.fxml"));
@@ -45,6 +52,13 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
-	
+	public void setInputOnEnter(OnEnterEvent value) {
+		input.setOnKeyReleased((event) -> {
+			if (event.getCode() == KeyCode.ENTER) {
+				value.onEnter(input.getText());
+				input.clear();
+			}
+		});
+	}
 	
 }
