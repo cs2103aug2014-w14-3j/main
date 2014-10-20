@@ -310,7 +310,6 @@ public class ControllerClass implements Controller {
 			tasks.remove(taskID);
 			
 		}
-
 	}
 	
 	
@@ -549,12 +548,11 @@ public class ControllerClass implements Controller {
 	 * @throws Exception 
 	 */
 	private void editTask(String content) throws Exception {
-			if (isEmptyCommand(content)) {
+			if ((isEmptyCommand(content)) || ((content.length()== 1) && (Character.isDigit(content.charAt(0))))) {
 				throw new Exception("Please specify what to edit.");
 			} else {
 				proceedWithEdit(content);
-			}
-
+			} 
 	}
 
 	/**
