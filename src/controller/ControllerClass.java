@@ -135,7 +135,7 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Appends the task number to the beginning of each string in taskStrings.
+	 * Appends the task number to the beginning of each string in displayList.
 	 * @return void
 	 * @author G. Vishnu Priya
 	 */
