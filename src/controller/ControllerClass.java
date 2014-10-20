@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +32,7 @@ public class ControllerClass implements Controller {
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int numTasksInSinglePage = 10;
-	
+	private static final int maxNumOfUndo=40;
 	
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
@@ -43,8 +41,8 @@ public class ControllerClass implements Controller {
 	private ArrayList<String> archiveTaskStrings;
 	private ArrayList<String> displayList;
 	private Storage storage;
-	private Stack<ArrayList<Task>> undoList;
-	private Stack<ArrayList<Task>> undoArchiveList;
+	private FixedSizeStack<ArrayList<Task>> undoList;
+	private FixedSizeStack<ArrayList<Task>> undoArchiveList;
  	private static int totalNumPages;
 	private static int currentPageNum;
 	private static int numFirstTaskOnPage;
@@ -55,8 +53,8 @@ public class ControllerClass implements Controller {
 		tasks = new ArrayList<Task>();
 		archiveTasks = new ArrayList<Task>();
 		displayList = new ArrayList<String>();
-		undoList=new Stack<ArrayList<Task>>();
-		undoArchiveList=new Stack<ArrayList<Task>>();
+		undoList=new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
+		undoArchiveList=new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
 		getFileContent();
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
 		currentPageNum = 1;
