@@ -24,14 +24,14 @@ public class TaskClass implements Task {
 			setStartTime(null);
 			setType(TaskType.FLOATING);
 		} else {
-			setStartTime(new Date(Long.parseLong(attributes[3].trim())));
+			setStartTime(new Date(Long.parseLong(attributes[2].trim())));
 			setType(TaskType.DEADLINE);
 		}
 		
 		if(attributes[3].trim().isEmpty()) {
 			setEndTime(null);
 		} else {
-			setEndTime(new Date(Long.parseLong(attributes[4].trim())));
+			setEndTime(new Date(Long.parseLong(attributes[3].trim())));
 			setType(TaskType.TIMED);
 		}
 	}

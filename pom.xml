@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>forget-me-not</groupId>
   <artifactId>forget-me-not</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.9-SNAPSHOT</version>
   <name>forget-me-not</name>
   <description>to-list</description>
   <build>

@@ -3,24 +3,15 @@
  */
 package ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
-import javafx.stage.Screen;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import controller.Controller;
 import controller.ControllerClass;
 
@@ -30,97 +21,45 @@ import controller.ControllerClass;
  */
 public class Main extends Application{
 	
+	private UIControl mainControl;
 	public Main() {
 		controller = ControllerClass.getInstance();
 		displayBuf = new ArrayList<String>();
-		root = new BorderPane();
 		log = new Log();
 	}
 	
-	/**
-	 * GUI entry
-	 */
 	@Override
-	public void start(Stage primaryStage) {
+	public void start(Stage stage) { 
 		try {
-			log.log("Initializing...");
-			primaryStage.initStyle(StageStyle.UNDECORATED);
-			
-			Scene scene = new Scene(root, Config.width, Config.height);
-			root.setStyle(Config.rootStyle);
-			
-			HBox top = createTop();
-			top.setStyle(Config.topStyle);
-			root.setTop(top);
-			
-			HBox bottom = createBottom();
-			bottom.setStyle(Config.bottomStyle);
-			root.setBottom(bottom);
-			
-			ListView<String> list = creatCenter(new ArrayList<String>());
-			root.setCenter(list);
-			
-			primaryStage.setScene(scene);
-			primaryStage.show();
-			log.log("Initialized");
-			
-			resetStagePosition(primaryStage);
-		} catch(Exception e) {
+			stage.setScene(loadScene());
+		} catch (IOException e) {
 			e.printStackTrace();
+			Platform.exit();
+			System.exit(0);
 		}
+		stage.show();
 	}
 	
-	private void resetStagePosition(Stage stage) {
-		Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-        stage.setX((screenBounds.getWidth() - stage.getWidth()) / 2); 
-        stage.setY((screenBounds.getHeight() - stage.getHeight()) / 6 * 5);
-	}
-	
-	private HBox createTop() {
-		HBox top = new HBox();
-		top.setPadding(new Insets(15, 15, 15, 15));
+	private Scene loadScene() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		Pane mainPane = (Pane) loader.load(getClass().getResourceAsStream(Config.main));
 		
-		Text title = new Text(Config.title);
-		title.setStyle(Config.titleStyle);
-		top.getChildren().add(title);
+		mainControl = loader.getController();
 		
-		return top;
-	}
-	
-	private HBox createBottom() {
-		HBox bottom = new HBox();
-		bottom.setPadding(new Insets(5, 5, 5, 5));
+		Scene scene = new Scene(mainPane);
+		scene.getStylesheets().setAll(
+	            getClass().getResource("main.css").toExternalForm()
+	        );
 		
-		TextField commandInput = new TextField();
-		commandInput.setPrefWidth(590);
-		commandInput.setStyle(Config.inputFieldStyle);
-		commandInput.setPromptText(Config.inputFieldPlaceholder);
-		commandInput.setOnKeyReleased((event) -> {
-			if (event.getCode() == KeyCode.ENTER) {
-				onEnter(commandInput.getText());
-				commandInput.clear();
-			}
+		mainControl.setInputOnEnter((command) -> {
+			onEnter(command);
 		});
-		bottom.getChildren().add(commandInput);
 		
-		return bottom;
+		execCmd("list");
+		mainControl.loadList(displayBuf);
+		return scene;
 	}
 	
-	private ListView<String> creatCenter(ArrayList<String> data) {
-		ListView<String> center = new ListView<String>();
-		center.setItems(loadList(data));
-		return center;
-	}
-	
-	private ObservableList<String> loadList(ArrayList<String> data) {
-		for (int i = 0; i < data.size(); i++) {
-		}
-		return FXCollections.observableList(data);
-	}
-	
-	private void onEnter(String command) {
-		execCmd(command);
-	}
 	
 	private void execCmd(String cmd) {
 		if(cmd.trim().compareToIgnoreCase(Config.cmdExit) == 0) {
@@ -135,7 +74,6 @@ public class Main extends Application{
 				return;
 			}
 			assert displayBuf.size() <= Controller.taskPerPage;
-			updateDisplay();
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
 				e.printStackTrace();
@@ -145,9 +83,9 @@ public class Main extends Application{
 
 	}
 	
-	private void updateDisplay() {
-		ListView<String> list = creatCenter(displayBuf);
-		root.setCenter(list);
+	private void onEnter(String command) {
+		execCmd(command);
+		mainControl.loadList(displayBuf);
 	}
 	
 	/**
@@ -161,6 +99,5 @@ public class Main extends Application{
 
 	private Controller controller;
 	private ArrayList<String> displayBuf;
-	private BorderPane root;
 	private Log log;
 }

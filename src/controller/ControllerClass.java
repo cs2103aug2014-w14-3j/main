@@ -5,14 +5,11 @@ import storage.Storage;
 import storage.StoragePlus;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TimeZone;
+
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,11 +38,12 @@ public class ControllerClass implements Controller {
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
 	private ArrayList<String> taskStrings;
+	private ArrayList<Task> archiveTasks;
+	private ArrayList<String> archiveTaskStrings;
 	private ArrayList<String> displayList;
 	private Storage storage;
 	private Stack<ArrayList<Task>> undoList;
 	private Stack<ArrayList<Task>> undoArchiveList;
- 	private ArrayList<Task> archiveTasks;
  	private static int totalNumPages;
 	private static int currentPageNum;
 	private static int numFirstTaskOnPage;
@@ -54,12 +52,15 @@ public class ControllerClass implements Controller {
 	public ControllerClass() {
 		storage = createStorageObject();
 		tasks = new ArrayList<Task>();
+		archiveTasks = new ArrayList<Task>();
 		displayList = new ArrayList<String>();
 		undoList=new Stack<ArrayList<Task>>();
 		undoArchiveList=new Stack<ArrayList<Task>>();
 		getFileContent();
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
 		currentPageNum = 1;
+		updateTaskNumOnPage();
+		
 	}
 
 	// This method starts execution of each user command by first retrieving
@@ -80,6 +81,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void getFileContent() {
 		taskStrings = storage.read();
+		archiveTaskStrings = storage.readArchive();
 		convertStringListTaskList();
 	}
 
@@ -99,6 +101,9 @@ public class ControllerClass implements Controller {
 			for (int i = 0; i < taskStrings.size(); i++) {
 				tasks.add(convertStringToTask(taskStrings.get(i)));
 			}
+			for (int i = 0; i < archiveTaskStrings.size(); i++) {
+				archiveTasks.add(convertStringToTask(archiveTaskStrings.get(i)));
+			}
 		} catch (ParseException e) {
 			// nothing
 		}
@@ -114,6 +119,11 @@ public class ControllerClass implements Controller {
 		taskStrings.clear();
 		for (int i = 0; i < tasks.size(); i++) {
 			taskStrings.add(convertTaskToString(tasks.get(i)));
+		}
+		
+		archiveTaskStrings.clear();
+		for (int i = 0; i < archiveTasks.size(); i++) {
+			archiveTaskStrings.add(convertTaskToString(archiveTasks.get(i)));
 		}
 	}
 
@@ -141,7 +151,9 @@ public class ControllerClass implements Controller {
 	 */
 	private void addTaskNum() {
 		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
+		displayList.clear();
 		displayList.add(Integer.toString(totalNumPages));
+		updateTaskNumOnPage();
 		copySectionTaskStringsDisplayList();
 		addNumDisplayList();
 	}
@@ -160,7 +172,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void copySectionTaskStringsDisplayList() {
 		for(int i=numFirstTaskOnPage; i<=numLastTaskOnPage; i++) {
-			displayList.add(taskStrings.get(i));
+			displayList.add(taskStrings.get(i-1));
 		}
 	}
 
@@ -181,36 +193,41 @@ public class ControllerClass implements Controller {
 	 */
 	private void processInput(CommandType commandType, String content) throws Exception {
 		switch (commandType) {
-		case ADD:
-			updateForUndo();
-			addTask(content);
-			break;
-		case DELETE:
-			updateForUndo();
-			deleteTask(content);
-			break;
-		case EDIT:
-			updateForUndo();
-			editTask(content);
-			break;
-		case UNDO:
-			undo();
-			break;
-		case SEARCH:
-			search(content);
-			break;
-		case DISPLAY:
-			display();
-		case CHANGEPAGE:
-			changePage(content);
-			break;
-		case POSTPONE:
-			updateForUndo();
-			postpone(content);
-			break;
-		default:
-			throw new Exception("Invalid command.");
-		}
+			case ADD:
+				updateForUndo();
+				addTask(content);
+				break;
+			case DELETE:
+				updateForUndo();
+				deleteTask(content);
+				break;
+			case EDIT:
+				updateForUndo();
+				editTask(content);
+				break;
+			case UNDO:
+				undo();
+				break;
+			case SEARCH:
+				search(content);
+				break;
+			case DISPLAY:
+				display();
+				break;
+			case CHANGEPAGE:
+				changePage(content);
+				break;
+			case POSTPONE:
+				updateForUndo();
+				postpone(content);
+				break;
+			case DONE:
+				updateForUndo();
+				markAsDone(content);
+				break;
+			default:
+				throw new Exception("Invalid command.");
+			}
 	}
 	
 	
@@ -221,8 +238,12 @@ public class ControllerClass implements Controller {
 	 * @throws Exception 
 	 */
 	private void changePage(String content) throws Exception {
-		String direction = content.substring(0, 1);
+		String direction = content.trim();
 		changeCurrentPageNum(direction);
+		updateTaskNumOnPage();
+	}
+	
+	private void updateTaskNumOnPage() {
 		numFirstTaskOnPage = (numTasksInSinglePage * (currentPageNum-1)) + 1;
 		numLastTaskOnPage = getNumLastTaskOnPage();
 	}
@@ -233,6 +254,9 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private int getNumLastTaskOnPage() {
+		if(totalNumPages == 0) {
+			return 0;
+		}
 		if (currentPageNum < totalNumPages) {
 			 return numTasksInSinglePage * currentPageNum;
 		} else {
@@ -294,9 +318,9 @@ public class ControllerClass implements Controller {
 	}
 
 	// the format will be "done <number>"
-	private void done(String content){
+	private void markAsDone(String content){
 	
-		int taskID=Integer.parseInt(content.trim())-1;
+		int taskID=getTaskNum(content.trim())-1;
 		
 		
 		//move task from task List to archive
@@ -338,7 +362,7 @@ public class ControllerClass implements Controller {
 		
 		Collections.sort(list);
 		
-		for (int i=list.size();i >=0;i--){
+		for (int i=list.size() - 1;i >=0;i--){
 			Task task=list.get(i).getThird();
 			resultList.add(task);
 		}
@@ -473,7 +497,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String taskNum) {
 		try {
-			Task postponedTask = tasks.get(Integer.parseInt(taskNum) - 1);
+			Task postponedTask = tasks.get(getTaskNum(taskNum) - 1);
 			postponedTask.clearTimes();
 			postponedTask.setType(TaskType.FLOATING);
 		} catch (NumberFormatException e){
@@ -564,7 +588,12 @@ public class ControllerClass implements Controller {
 		String[] words = content.split(" ");
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
-		String editDetails = content.substring(content.indexOf(words[2]));
+		String editDetails;
+		if (words.length >= 3) {
+			editDetails = content.substring(content.indexOf(words[2]));
+		} else {
+			editDetails = null;
+		}
 		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange,
 				editDetails);
@@ -583,7 +612,7 @@ public class ControllerClass implements Controller {
 			String editDetails) {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("deadline")) {
+		} else if (attribute.equalsIgnoreCase("time")) {
 			processTime(taskToEdit, editDetails);
 		}
 		/*else if (attribute.equalsIgnoreCase("date")) {
@@ -604,7 +633,6 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void editPriority(Task taskToEdit) {
-		// TODO Auto-generated method stub
 		boolean priorityOfTask = taskToEdit.isPrioritized();
 		if (priorityOfTask) {
 			taskToEdit.setPriority("false");
@@ -671,7 +699,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void editDescription(Task taskToEdit, String desc) {
-			taskToEdit.setDesc(desc);
+		taskToEdit.setDesc(desc);
 	}
 
 	/**
@@ -733,6 +761,7 @@ public class ControllerClass implements Controller {
 	private void updateStorage() {
 		convertTaskListStringList();
 		storage.write(taskStrings);
+		storage.writeArchive(archiveTaskStrings);
 	}
 
 	/**
@@ -810,7 +839,7 @@ public class ControllerClass implements Controller {
 		doublePos = content.indexOf('\"', 0);
 		if (singlePos == -1 && doublePos == -1) {
 			//return processUserInputClassic(content);
-			desc = content;
+			desc = content + " ";
 			content = "";
 		}
 		
@@ -870,101 +899,6 @@ public class ControllerClass implements Controller {
 			return true;
 		}
 }
-
-	/**
-	 * Process user input for add task
-	 * 
-	 * @author Luo Shaohuai
-	 * @param content
-	 * @return Task Object
-	 */
-	/*private Task processUserInputClassic(String content) {
-		Boolean priority = false;
-		if (content.contains("!")) {
-			priority = true;
-		}
-
-		String words[] = content.split(" ");
-		content = "";
-		Date date = null;
-		Date timeStart = null;
-		Date timeEnd = null;
-		for (int i = 0; i < words.length; i++) {
-			String word = words[i].trim();
-
-			String format = determineDateFormat(word);
-			if (format != null) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-				try {
-					date = dateFormat.parse(word);
-					continue;
-				} catch (ParseException e) {
-					// do nothing
-				}
-			}
-
-			format = determineTimeFormat(word);
-			if (format != null) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-				try {
-					Date time = dateFormat.parse(word);
-					if (timeEnd == null) {
-						timeStart = time;
-						int timeStartPos = i;
-						int timeEndPos = timeStartPos;
-
-						while (timeEndPos < timeStartPos + 3) {
-							timeEndPos++;
-							format = determineTimeFormat(words[timeEndPos]
-									.trim());
-							if (format != null) {
-								dateFormat = new SimpleDateFormat(format);
-								dateFormat.setTimeZone(TimeZone
-										.getTimeZone("UTC"));
-								timeEnd = dateFormat.parse(words[timeEndPos]);
-								i = timeEndPos;
-								break;
-							}
-						}
-					}
-					if (timeEnd != null) {
-						continue;
-					}
-				} catch (ParseException e) {
-					// do nothing
-				}
-			}
-
-			content += word + " ";
-		}
-
-		Task task;
-		task = new TaskClass();
-		task.setDesc(content);
-		task.setPriority(priority.toString());
-		task.setType(TaskType.FLOATING);
-		if (date != null) {
-			if (timeEnd != null) {
-				timeStart = addDate(date, timeStart);
-				timeEnd = addDate(date, timeEnd);
-				task.setStartTime(timeStart);
-				task.setEndTime(timeEnd);
-				task.setType(TaskType.TIMED);
-			} else {
-				task.setDeadline(timeStart);
-				task.setType(TaskType.DEADLINE);
-			}
-		}
-		
-		return task;
-	}
-
-	private Date addDate(Date date1, Date date2) {
-		long ms = date1.getTime() + date2.getTime();
-		return new Date(ms);
-	}*/
 
 
 	/**
