@@ -25,7 +25,7 @@ public class ListViewCell extends ListCell<String> {
 			return;
 		}
 		Boolean priority = Boolean.parseBoolean(split[1].trim());
-		String desc = split[2].trim();
+		String desc = split[0].trim() + ". " + split[2].trim();
 		Long timeStart = null;
 		if (!split[3].trim().isEmpty()) {
 			timeStart = Long.parseLong(split[3].trim());
@@ -35,6 +35,7 @@ public class ListViewCell extends ListCell<String> {
 			timeEnd = Long.parseLong(split[4].trim());
 		}
 		item.setDesc(desc);
+		item.setPriority(priority);
 		
 		if (timeStart != null) {
 			if (timeEnd != null) {

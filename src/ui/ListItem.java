@@ -51,6 +51,14 @@ public class ListItem{
 		desc.setText(text);
 	}
 	
+	public void setPriority(boolean priority) {
+		if (priority) {
+			hbox.setStyle("-fx-background-color: #FFFACD");
+		} else {
+			hbox.setStyle("");
+		}
+	}
+	
 	public void clearTime() {
 		time.getChildren().clear();
 	}

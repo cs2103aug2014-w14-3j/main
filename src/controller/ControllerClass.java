@@ -136,8 +136,12 @@ public class ControllerClass implements Controller {
 	private void parseCommand(String command) throws Exception {
 		String operation = getOperation(command);
 		CommandType commandType = matchCommandType(operation);
-		String content = removeCommandType(command, operation);
-		processInput(commandType, content);
+		if (commandType == CommandType.SEARCH) {
+			processInput(commandType, command);
+		} else {
+			String content = removeCommandType(command, operation);
+			processInput(commandType, content);
+		}
 		convertTaskListStringList();
 		updateStorage();
 		addTaskNum();
