@@ -468,7 +468,7 @@ public class ControllerClass implements Controller {
 		ArrayList<Task> item=new ArrayList<Task>();
 		
 		for (int i=0;i<archiveTasks.size();i++)
-			item.add(archiveTasks.get(i));
+			item.add(cloneTask(archiveTasks.get(i)));
 		
 		undoArchiveList.push(item);
 	}
