@@ -88,7 +88,7 @@ public class ListItem{
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
 		Text timeText = new Text();
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm LLL d");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm MMM d");
 		timeText.setText(format.format(timeobj));
 		return timeText;
 	}
