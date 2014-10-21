@@ -115,6 +115,7 @@ public class ControllerClass implements Controller {
 
 	// This method converts tasks from tasks list to taskStrings list.
 	private void convertTaskListStringList() {
+		sortTasks();
 		taskStrings.clear();
 		for (int i = 0; i < tasks.size(); i++) {
 			taskStrings.add(convertTaskToString(tasks.get(i)));
@@ -174,7 +175,6 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void copySectionTaskStringsDisplayList() {
-		sortTasks();
 		for(int i=numFirstTaskOnPage; i<=numLastTaskOnPage; i++) {
 			displayList.add(taskStrings.get(i-1));
 		}
