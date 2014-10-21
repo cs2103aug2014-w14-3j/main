@@ -174,6 +174,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void copySectionTaskStringsDisplayList() {
+		sortTasks();
 		for(int i=numFirstTaskOnPage; i<=numLastTaskOnPage; i++) {
 			displayList.add(taskStrings.get(i-1));
 		}
@@ -369,7 +370,7 @@ public class ControllerClass implements Controller {
 			Task task=list.get(i).getThird();
 			resultList.add(task);
 		}
-		
+		System.out.println(resultList);
 		return resultList;
 	}
 	

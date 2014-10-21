@@ -35,7 +35,7 @@ public class UIControl extends BorderPane {
 	private TextField input;
 	
 	public UIControl() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("LLL d ccc HH:mm:ss");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d ccc HH:mm:ss");
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
 			time.setText(format.format(LocalDateTime.now()));
 		}));
