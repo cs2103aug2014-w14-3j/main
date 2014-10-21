@@ -479,9 +479,15 @@ public class ControllerClass implements Controller {
 		ArrayList<Task> item=new ArrayList<Task>();
 		//copy content of tasks to item
 		for (int i=0;i<tasks.size();i++)
-			item.add(tasks.get(i));
+			item.add(
+				cloneTask(tasks.get(i))
+				);
 		
 		undoList.push(item);
+	}
+	
+	private Task cloneTask(Task task) {
+		return new TaskClass(task.toString());
 	}
 	
 	//undo command, the tasks will be replaced by the previous state
