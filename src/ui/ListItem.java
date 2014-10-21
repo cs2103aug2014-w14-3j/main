@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Date;
 
 import javafx.fxml.FXML;
@@ -88,7 +89,7 @@ public class ListItem{
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
 		Text timeText = new Text();
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm MMM d");
+		DateTimeFormatter format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 		timeText.setText(format.format(timeobj));
 		return timeText;
 	}

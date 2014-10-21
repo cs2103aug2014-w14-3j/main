@@ -5,6 +5,7 @@ package ui;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 
 import javafx.scene.control.ListView;
@@ -35,7 +36,7 @@ public class UIControl extends BorderPane {
 	private TextField input;
 	
 	public UIControl() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d ccc HH:mm:ss");
+		DateTimeFormatter format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL);
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
 			time.setText(format.format(LocalDateTime.now()));
 		}));
