@@ -593,8 +593,9 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
-	private void proceedWithEdit(String content) {
+	private void proceedWithEdit(String content) throws Exception {
 		String[] words = content.split(" ");
 		int positionOfTask = getTaskNum(words[0]) - 1;
 		String attributeToChange = words[1];
@@ -617,9 +618,10 @@ public class ControllerClass implements Controller {
 	 * @param editDetails
 	 * @return void
 	 * @author G. Vishnu Priya
+	 * @throws Exception 
 	 */
 	private void editAttribute(Task taskToEdit, String attribute,
-			String editDetails) {
+			String editDetails) throws Exception {
 		if (attribute.equalsIgnoreCase("desc")) {
 			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
@@ -633,8 +635,10 @@ public class ControllerClass implements Controller {
 
 				
 		} */
-		else {
+		else if (attribute.equalsIgnoreCase("!")){
 			editPriority(taskToEdit);
+		} else {
+			throw new Exception("Please specify what to edit (time/desc/!)");
 		}
 	}
 	/**
