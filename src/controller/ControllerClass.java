@@ -287,7 +287,7 @@ public class ControllerClass implements Controller {
 		{
 			Task task=tasks.get(i);
 			Pair result=searchScore(key,task.getDesc() );
-			if (result.getFirst()> 2*keyLen/3){
+			if (result.getFirst()==keyLen){
 				list.add(new Triple(result.getFirst(),result.getSecond(),task));
 			}
 		}
@@ -344,7 +344,7 @@ public class ControllerClass implements Controller {
 	private int approximateMatchScore(String keyword, String string){
 		int editDist=editDistance(keyword,string);
 		int lenOfKey=keyword.length();
-		if (editDist/lenOfKey <=0.3)
+		if (editDist/lenOfKey <=0.5)
 			return 1000-1000*editDist/lenOfKey;
 		else
 			return 0;
