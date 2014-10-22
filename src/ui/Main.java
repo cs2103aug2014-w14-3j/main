@@ -69,7 +69,8 @@ public class Main extends Application{
 		
 		try {
 			log.log("Command: " + cmd);
-			displayBuf = controller.execCmd(cmd);
+			recentChange = controller.execCmd(cmd);
+			displayBuf = controller.getCurrentList();
 			if (displayBuf == null) {
 				return;
 			}
@@ -85,7 +86,7 @@ public class Main extends Application{
 	
 	private void onEnter(String command) {
 		execCmd(command);
-		mainControl.loadList(displayBuf);
+		mainControl.loadList(displayBuf, recentChange);
 	}
 	
 	/**
@@ -99,5 +100,6 @@ public class Main extends Application{
 
 	private Controller controller;
 	private ArrayList<String> displayBuf;
+	private Integer recentChange;
 	private Log log;
 }

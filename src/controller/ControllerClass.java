@@ -5,7 +5,6 @@ import controller.Task.TaskType;
 import storage.Storage;
 import storage.StoragePlus;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -27,50 +26,48 @@ import com.joestelmach.natty.*;
 public class ControllerClass implements Controller {
 	
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY,UNDO, SEARCH, DONE, CHANGEPAGE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY,UNDO, SEARCH, DONE
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
-	private static final int numTasksInSinglePage = 10;
 	private static final int maxNumOfUndo=40;
 	
 	private static Controller theController = null;
 	private ArrayList<Task> tasks;
-	private ArrayList<String> taskStrings;
 	private ArrayList<Task> archiveTasks;
-	private ArrayList<String> archiveTaskStrings;
+	
 	private ArrayList<String> displayList;
+	private Integer recentChange;
+	
 	private Storage storage;
 	private FixedSizeStack<ArrayList<Task>> undoList;
 	private FixedSizeStack<ArrayList<Task>> undoArchiveList;
- 	private static int totalNumPages;
-	private static int currentPageNum;
-	private static int numFirstTaskOnPage;
-	private static int numLastTaskOnPage;
+	private FixedSizeStack<Integer> undoRecentChanges;
+
 
 	public ControllerClass() {
 		storage = createStorageObject();
 		tasks = new ArrayList<Task>();
 		archiveTasks = new ArrayList<Task>();
-		displayList = new ArrayList<String>();
+		recentChange = 0;
 		undoList=new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
 		undoArchiveList=new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
-		getFileContent();
-		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
-		currentPageNum = 1;
-		updateTaskNumOnPage();
-		
+		undoRecentChanges = new FixedSizeStack<Integer>(maxNumOfUndo);
+		getFileContent();		
 	}
 
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
-	public ArrayList<String> execCmd(String command) throws Exception {
+	public Integer execCmd(String command) throws Exception {
 		parseCommand(command);
+		return recentChange;
+	}
+	
+	public ArrayList<String> getCurrentList() {
 		return displayList;
 	}
 
-	//
 
 	/**
 	 * This method returns all the existing tasks in the list, if any.
@@ -79,9 +76,11 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void getFileContent() {
-		taskStrings = storage.read();
-		archiveTaskStrings = storage.readArchive();
-		convertStringListTaskList();
+		ArrayList<String> stringList;
+		stringList = storage.read();
+		tasks = convertStringListTaskList(stringList);
+		stringList = storage.readArchive();
+		archiveTasks = convertStringListTaskList(stringList);
 	}
 
 	/**
@@ -94,42 +93,50 @@ public class ControllerClass implements Controller {
 		return new StoragePlus();
 	}
 
-	private void convertStringListTaskList() {
-		tasks.clear();
-		try {
-			for (int i = 0; i < taskStrings.size(); i++) {
-				tasks.add(convertStringToTask(taskStrings.get(i)));
-			}
-			for (int i = 0; i < archiveTaskStrings.size(); i++) {
-				archiveTasks.add(convertStringToTask(archiveTaskStrings.get(i)));
-			}
-		} catch (ParseException e) {
-			// nothing
+	private ArrayList<Task> convertStringListTaskList(ArrayList<String> taskStrings) {
+		ArrayList<Task> result = new ArrayList<Task>();
+		
+		for (String str : taskStrings) {
+			result.add(convertStringToTask(str));
 		}
+		
+		return result;
 	}
 
-	private Task convertStringToTask(String taskString) throws ParseException {
-		 
+	private Task convertStringToTask(String taskString) {
 		return new TaskClass(taskString);
 	}
 
 	// This method converts tasks from tasks list to taskStrings list.
-	private void convertTaskListStringList() {
-		sortTasks();
-		taskStrings.clear();
-		for (int i = 0; i < tasks.size(); i++) {
-			taskStrings.add(convertTaskToString(tasks.get(i)));
+	private ArrayList<String> convertTaskListStringList(ArrayList<Task> taskList) {
+		ArrayList<String> taskStrings = new ArrayList<String>();
+		for (Task task : taskList) {
+			taskStrings.add(convertTaskToString(task));
 		}
 		
-		archiveTaskStrings.clear();
-		for (int i = 0; i < archiveTasks.size(); i++) {
-			archiveTaskStrings.add(convertTaskToString(archiveTasks.get(i)));
-		}
+		return taskStrings;
 	}
 
 	// This method converts tasks to strings to be stored in taskStrings list.
 	private String convertTaskToString(Task task) {
 		return task.toString();
+	}
+	
+	/**
+	 * @author Luo Shaohuai
+	 * @param taskList
+	 */
+	private void setDisplayList(ArrayList<Task> taskList) {
+		displayList = convertTaskListStringList(taskList);
+		recentChange = 0;
+	}
+	
+	private void setRecentChange(Task task, ArrayList<Task> taskList) {
+		recentChange = taskList.indexOf(task);
+	}
+	
+	private void setRecentChange(Integer recent) {
+		recentChange = recent;
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -143,41 +150,8 @@ public class ControllerClass implements Controller {
 			String content = removeCommandType(command, operation);
 			processInput(commandType, content);
 		}
-		convertTaskListStringList();
 		updateStorage();
-		addTaskNum();
-	}
 
-	/**
-	 * Appends the task number to the beginning of each string in taskStrings.
-	 * @return void
-	 * @author G. Vishnu Priya
-	 */
-	private void addTaskNum() {
-		totalNumPages = (int)Math.ceil((double)(taskStrings.size())/(numTasksInSinglePage));
-		displayList.clear();
-		displayList.add(Integer.toString(totalNumPages));
-		updateTaskNumOnPage();
-		copySectionTaskStringsDisplayList();
-		addNumDisplayList();
-	}
-
-	private void addNumDisplayList() {
-		for (int i=1; i<displayList.size(); i++) {
-			String numberedTask = Integer.toString(i) + "%" + displayList.get(i);
-			displayList.set(i, numberedTask);
-		}
-	}
-
-	/**
-	 * This method copies the specific strings to be displayed out of the whole list, to the display list.
-	 * @return void
-	 * @author G. Vishnu Priya
-	 */
-	private void copySectionTaskStringsDisplayList() {
-		for(int i=numFirstTaskOnPage; i<=numLastTaskOnPage; i++) {
-			displayList.add(taskStrings.get(i-1));
-		}
 	}
 
 	// This method returns the type of operation to be carried out, either add,
@@ -216,10 +190,7 @@ public class ControllerClass implements Controller {
 				search(content);
 				break;
 			case DISPLAY:
-				display();
-				break;
-			case CHANGEPAGE:
-				changePage(content);
+				displayMainList();
 				break;
 			case POSTPONE:
 				updateForUndo();
@@ -234,112 +205,24 @@ public class ControllerClass implements Controller {
 			}
 	}
 	
-	
-	/**
-	 * This method changes the attributes related to the changing of a page.
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception 
-	 */
-	private void changePage(String content) throws Exception {
-		String direction = content.trim();
-		changeCurrentPageNum(direction);
-		updateTaskNumOnPage();
-	}
-	
-	private void updateTaskNumOnPage() {
-		numFirstTaskOnPage = (numTasksInSinglePage * (currentPageNum-1)) + 1;
-		numLastTaskOnPage = getNumLastTaskOnPage();
-	}
-
-	/**
-	 * This method returns the number of the last task on the current page.
-	 * @return int
-	 * @author G. Vishnu Priya
-	 */
-	private int getNumLastTaskOnPage() {
-		if(totalNumPages == 0) {
-			return 0;
-		}
-		if (currentPageNum < totalNumPages) {
-			 return numTasksInSinglePage * currentPageNum;
-		} else {
-			int remainder = tasks.size() % numTasksInSinglePage;
-			if (remainder==0) {
-				return numTasksInSinglePage + ((currentPageNum-1) * numTasksInSinglePage);
-			} else {
-			return remainder + ((currentPageNum-1) * numTasksInSinglePage);
-			}
-		}
-	}
-	
-	/**
-	 * This method checks if it is valid to change the current page number and if so, changes the current page number.
-	 * @throws Exception
-	 * @return void
-	 * @author G. Vishnu Priya
-	 */
-	private void changeCurrentPageNum(String direction) throws Exception {
-		if(direction.equalsIgnoreCase("up")) {
-			if (checkValidPageUp()) {
-				currentPageNum--;
-			} else {
-				throw new Exception("On first page.");
-			}
-		} else {
-			if (checkValidPageDown()) {
-			currentPageNum++;
-			} else {
-				throw new Exception("On last page.");
-			}
-		}
-	}
-
-	/**
-	 * This method checks if it is possible to go to the next page by checking if there are more tasks in the list which are pushed to the next page.
-	 * @return boolean
-	 * @author G. Vishnu Priya
-	 */
-	private boolean checkValidPageDown() {
-		if (currentPageNum<= totalNumPages) {
-		return true;
-		}
-		return false;
-	}
-
-	/**
-	 * This method checks if it is possible to go to the previous page. If currently on first page, it will return false.
-	 * Otherwise, it will return true.
-	 * @return boolean
-	 * @author G. Vishnu Priya
-	 */
-	private boolean checkValidPageUp() {
-		if (currentPageNum == 1) {
-		return false;
-		} 
-		
-		return true;
-	}
-
 	// the format will be "done <number>"
-	private void markAsDone(String content){
-	
-		int taskID=getTaskNum(content.trim())-1;
-		
-		
+	private void markAsDone(String content) throws Exception{
+		int taskID=Integer.parseInt(content.trim())-1;
 		//move task from task List to archive
 		if (taskID>=0 && taskID<tasks.size()){
 			Task task=tasks.get(taskID);
 			archiveTasks.add(task);
 			tasks.remove(taskID);
-			
+			displayMainList();
+			setRecentChange(taskID);
+		} else {
+			throw new Exception("Invalid arguments");
 		}
-
 	}
 	
 	
 	
-			/**
+	/**
 	 * 
 	 * @return: the result list of task
 	 * if the key appears in the list of task, return the list of exact search
@@ -347,7 +230,7 @@ public class ControllerClass implements Controller {
 	 * @author: Tran Cong Thien
 	 */
 	
-	private  ArrayList<Task> search(String key) {
+	private  void search(String key) {
 		ArrayList<Task> resultList=new ArrayList<Task>();
 		int numOfTask=tasks.size();
 		String[] str=key.trim().split("\\s+");
@@ -370,8 +253,7 @@ public class ControllerClass implements Controller {
 			Task task=list.get(i).getThird();
 			resultList.add(task);
 		}
-		System.out.println(resultList);
-		return resultList;
+		setDisplayList(resultList);
 	}
 	
 	
@@ -461,14 +343,21 @@ public class ControllerClass implements Controller {
 	private void updateForUndo(){
 		updateUndoList();
 		updateUndoArchiveList();
+		updateUndoRecentChanges();
 	}
 	
 	
+	private void updateUndoRecentChanges() {
+		undoRecentChanges.push(recentChange);
+	}
+
 	private void updateUndoArchiveList(){
 		ArrayList<Task> item=new ArrayList<Task>();
 		
 		for (int i=0;i<archiveTasks.size();i++)
-			item.add(cloneTask(archiveTasks.get(i)));
+			item.add(
+					cloneTask(archiveTasks.get(i))
+					);
 		
 		undoArchiveList.push(item);
 	}
@@ -505,11 +394,14 @@ public class ControllerClass implements Controller {
 	 *
 	 * @author Koh Xian Hui
 	 */
-	private void postpone(String taskNum) {
+	private void postpone(String content) {
 		try {
-			Task postponedTask = tasks.get(getTaskNum(taskNum) - 1);
+			Integer taskNum = Integer.parseInt(content) - 1;
+			Task postponedTask = tasks.get(taskNum);
 			postponedTask.clearTimes();
 			postponedTask.setType(TaskType.FLOATING);
+			displayMainList();
+			setRecentChange(postponedTask, tasks);
 		} catch (NumberFormatException e){
 			System.out.println("invalid number");
 		}
@@ -522,29 +414,16 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @author Koh Xian Hui
 	 */
-	private ArrayList<String> display() {
-		ArrayList<String> displayTasks = new ArrayList<String>();
-		if (!tasks.isEmpty()) {
-			sortTasks();
-			for (Task taskItem : tasks) {
-				String stringedTask = taskItem.toString().replace("%", " ");
-				
-				if(stringedTask.startsWith("!")) {
-					displayTasks.add(stringedTask.substring(1));
-				} else {
-					displayTasks.add(stringedTask);
-				}
-			}
-		}
-
-		return displayTasks;
+	private void displayMainList() {
+		sortTasks(tasks);
+		setDisplayList(tasks);
 	}
 	
 	/**
 	 * 
 	 */
-	private void sortTasks() {
-		Collections.sort(tasks, (task1, task2) -> {
+	private void sortTasks(ArrayList<Task> taskList) {
+		Collections.sort(taskList, (task1, task2) -> {
 			if(task1.isPrioritized() && !task2.isPrioritized()) {
 				return -1;
 			} else if(!task1.isPrioritized() && task2.isPrioritized()) {
@@ -597,17 +476,27 @@ public class ControllerClass implements Controller {
 	 */
 	private void proceedWithEdit(String content) throws Exception {
 		String[] words = content.split(" ");
-		int positionOfTask = getTaskNum(words[0]) - 1;
+		int positionOfTask = Integer.parseInt(words[0]) - 1;
+		
+		if (positionOfTask < 0 
+				|| positionOfTask >= tasks.size() 
+				|| words.length < 2) {
+			throw new Exception("Invalid arguments");
+		}
+		
 		String attributeToChange = words[1];
 		String editDetails;
 		if (words.length >= 3) {
-			editDetails = content.substring(content.indexOf(words[2]));
+			editDetails = words[2];
 		} else {
 			editDetails = null;
 		}
 		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange,
 				editDetails);
+		
+		displayMainList();
+		setRecentChange(taskToEdit, tasks);
 	}
 
 	/**
@@ -648,61 +537,12 @@ public class ControllerClass implements Controller {
 	 */
 	private void editPriority(Task taskToEdit) {
 		boolean priorityOfTask = taskToEdit.isPrioritized();
-		if (priorityOfTask) {
-			taskToEdit.setPriority("false");
-		} else {
-			taskToEdit.setPriority("true");
-		}
-		}
-
-/*	private Task editStartEndTimes(Task taskToEdit, String details) {
-=======
-	/*
-	private Task editStartEndTimes(Task taskToEdit, String details) {
->>>>>>> 9c45c50f5f0174cff1a320c6b11a2a7d32a16649
-		Task editedTask = null;
-		String[] times = details.split(" ");
-		Date start;
-		Date end;
-		SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
-		try {
-			start = timeFormat.parse(times[0]);
-			end = timeFormat.parse(times[2]);
-			editedTask = new TimedTask(taskToEdit.isPrioritized(),
-					taskToEdit.getDesc(), start, end);
-		} catch (ParseException e) {
-			// nothing
-		}
-
-		return editedTask;
-	}
-
-	// First initialize editedTask is null, then when use the method, just check
-	// if it's null or not
-	// Timed task no date? so only possible tasks are floating or deadline. If
-	// timed task given throw exception?
-	
-
-	private Task editDate(Task taskToEdit, String details) {
-		TaskType type = taskToEdit.getType();
-		Task editedTask = null;
-		SimpleDateFormat timeFormat = new SimpleDateFormat("ddMMyy");
-		try {
-			Date date = timeFormat.parse(details);
-			if (type == TaskType.DEADLINE) {
-				editedTask = new DeadlineTask(taskToEdit.isPrioritized(),
-						taskToEdit.getDesc(), date);
-			} else if (type == TaskType.TIMED) {
-				editedTask = new TimedTask(taskToEdit.isPrioritized(),
-						taskToEdit.getDesc(), taskToEdit.getStartTime(),
-						taskToEdit.getEndTime());
+			if (priorityOfTask) {
+				taskToEdit.setPriority("false");
+			} else {
+				taskToEdit.setPriority("true");
 			}
-		} catch (ParseException e) {
-			// nothing
 		}
-		return editedTask;
-	}
-*/
 
 	/**
 	 * Replaces the description of task with the desc string.
@@ -713,7 +553,9 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void editDescription(Task taskToEdit, String desc) {
-		taskToEdit.setDesc(desc);
+		if (desc != null) {
+			taskToEdit.setDesc(desc);
+		}
 	}
 
 	/**
@@ -725,9 +567,9 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void deleteTask(String content) throws Exception {
-			if (isValidDelete(content)) {
-				proceedWithDelete(content);
-			}
+		if (isValidDelete(content)) {
+			proceedWithDelete(content);
+		}
 	}
 
 	/**
@@ -742,8 +584,17 @@ public class ControllerClass implements Controller {
 	 */
 	private void proceedWithDelete(String content) throws Exception {
 		try {
-			int taskNum = getTaskNum(content);
+			int taskNum = Integer.parseInt(content);
 			executeDelete(taskNum);
+			displayMainList();
+			
+			taskNum -= 1;
+			if (taskNum >= tasks.size()) {
+				setRecentChange(tasks.size() - 1);
+			} else {
+				setRecentChange(taskNum);
+			}
+			
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid delete format. Please enter task number.");
 		}
@@ -773,9 +624,13 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void updateStorage() {
-		convertTaskListStringList();
-		storage.write(taskStrings);
-		storage.writeArchive(archiveTaskStrings);
+		
+		storage.write(
+				convertTaskListStringList(tasks)
+				);
+		storage.writeArchive(
+				convertTaskListStringList(archiveTasks)
+				);
 	}
 
 	/**
@@ -810,20 +665,6 @@ public class ControllerClass implements Controller {
 		return content.trim().equals("");
 	}
 
-	/**
-	 * This method gets the number of the task.
-	 * 
-	 * @param content
-	 * @return integer
-	 * @throws NumberFormatException
-	 * @author G. Vishnu Priya
-	 */
-	public static int getTaskNum(String content) throws NumberFormatException {
-		int numEntered = Integer.parseInt(content);
-		int numInTasksList = (numTasksInSinglePage*(currentPageNum-1)) + numEntered;
-		
-		return numInTasksList;
-	}
 
 	/**
 	 * @author Luo Shaohuai
@@ -831,12 +672,15 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void addTask(String content) throws Exception {
-			if (isEmptyCommand(content)) {
-				throw new Exception("Please specify what to add.");
-			} else {
-				Task task = processUserInput(content);
-				this.tasks.add(task);
-			}
+		if (isEmptyCommand(content)) {
+			throw new Exception("Please specify what to add.");
+		}
+		
+		Task task = processUserInput(content);
+		this.tasks.add(task);
+
+		displayMainList();
+		setRecentChange(task, tasks);
 	}
 
 	
@@ -949,8 +793,6 @@ public class ControllerClass implements Controller {
 			return CommandType.UNDO;
 		} else if (operation.equalsIgnoreCase("done")) { 
 			return CommandType.DONE;
-		} else if(operation.equalsIgnoreCase("page")) {
-			return CommandType.CHANGEPAGE;
 		} else if(operation.equalsIgnoreCase("pp")) {
 			return CommandType.POSTPONE;
 		}

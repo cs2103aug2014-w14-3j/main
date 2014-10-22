@@ -29,8 +29,9 @@ public interface Controller {
 	 * @param cmd
 	 * @throws Exception
 	 */
-	public ArrayList<String> execCmd(String cmd) throws Exception;
+	public Integer execCmd(String cmd) throws Exception;
 	
+	public ArrayList<String> getCurrentList();
 	
 	/**
 	 * List of commands

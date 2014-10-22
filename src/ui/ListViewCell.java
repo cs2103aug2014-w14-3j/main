@@ -19,20 +19,20 @@ public class ListViewCell extends ListCell<String> {
         }
 		ListItem item = new ListItem();
 		String[] split = str.split("%");
-		if (split.length < 5) {
+		if (split.length < 4) {
 			item.setDesc(str);
 			setGraphic(item.getHBox());
 			return;
 		}
-		Boolean priority = Boolean.parseBoolean(split[1].trim());
-		String desc = split[0].trim() + ". " + split[2].trim();
+		Boolean priority = Boolean.parseBoolean(split[0].trim());
+		String desc = split[1].trim();
 		Long timeStart = null;
-		if (!split[3].trim().isEmpty()) {
-			timeStart = Long.parseLong(split[3].trim());
+		if (!split[2].trim().isEmpty()) {
+			timeStart = Long.parseLong(split[2].trim());
 		}
 		Long timeEnd = null;
-		if (!split[4].trim().isEmpty()) {
-			timeEnd = Long.parseLong(split[4].trim());
+		if (!split[3].trim().isEmpty()) {
+			timeEnd = Long.parseLong(split[3].trim());
 		}
 		item.setDesc(desc);
 		item.setPriority(priority);

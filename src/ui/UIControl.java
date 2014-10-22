@@ -45,11 +45,29 @@ public class UIControl extends BorderPane {
 	}
 	
 	public void loadList(ArrayList<String> strList) {
+		loadList(strList, 0);
+	}
+	
+	public void loadList(ArrayList<String> strList, Integer recentChange) {
 		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
 		list.setItems(observableList);
 		list.setCellFactory((list) -> {
 			return new ListViewCell();
 		});
+		
+		if (strList.isEmpty()) {
+			return;
+		}
+		
+		if (recentChange < 0) {
+			recentChange = 0;
+		}
+		if (recentChange >= strList.size()) {
+			recentChange = strList.size() - 1;
+		}
+		
+		list.scrollTo(recentChange);
+		list.getSelectionModel().select(recentChange);
 	}
 	
 	public void setInputOnEnter(OnEnterEvent value) {
