@@ -65,7 +65,7 @@ public class TestControllerClassSortAndPostpone {
 	}
 	
 	@Test
-	// This is case above the boundary for sorting the displayed list by date & time partition - sorting by priority with date & time
+	// This is boundary case for sorting the displayed list by date & time partition - sorting by priority with date & time
 	public void testSortTasksWithPriority() throws Exception {
 		controller.execCmd("add \"jumped over blue moon\" 10/15 23:50");
 		controller.execCmd("add ! \"little brown fox\" 10/14 23:00");
