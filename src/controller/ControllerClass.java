@@ -187,7 +187,7 @@ public class ControllerClass implements Controller {
 				undo();
 				break;
 			case SEARCH:
-				search(content);
+				searchDesc(content);
 				break;
 			case DISPLAY:
 				displayMainList();
@@ -230,7 +230,52 @@ public class ControllerClass implements Controller {
 	 * @author: Tran Cong Thien
 	 */
 	
-	private  void search(String key) {
+	private void searchDesc(String keyWord){
+		ArrayList<Task> resultList=exactSearch(keyWord);
+		
+		if (resultList.size()==0){
+			//exactSearch list is empty
+			setDisplayList(nearMatchSearch(keyWord));
+		} else {
+			setDisplayList(resultList);
+		}
+		
+	}
+	
+	private ArrayList<Task> exactSearch(String keyWord){
+		ArrayList<Task> resultList=new ArrayList<Task>();
+		
+		int numOfTask=tasks.size();
+		for (int i=0;i<numOfTask;i++){
+			if (isExact(keyWord,tasks.get(i).getDesc())){
+				resultList.add(tasks.get(i));
+			}
+		}
+		
+		return resultList;
+	}
+	
+	
+	private boolean isExact(String keyword, String strToSearch){
+		String[] str=keyword.trim().split("\\s+");
+		int lenOfKey=str.length;
+		int numOfMatch=0;
+		
+		for (int i=0;i<lenOfKey;i++){
+			//match exactly in the string
+			if (strToSearch.indexOf(str[i]) !=-1){
+				numOfMatch++;
+			}
+		}
+		
+		if (numOfMatch==lenOfKey){
+			return true;	
+		}else{
+			return false;
+		}
+	}
+	
+	private  ArrayList<Task> nearMatchSearch(String key) {
 		ArrayList<Task> resultList=new ArrayList<Task>();
 		int numOfTask=tasks.size();
 		String[] str=key.trim().split("\\s+");
@@ -242,7 +287,7 @@ public class ControllerClass implements Controller {
 		{
 			Task task=tasks.get(i);
 			Pair result=searchScore(key,task.getDesc() );
-			if (result.getFirst()>keyLen/2){
+			if (result.getFirst()> 2*keyLen/3){
 				list.add(new Triple(result.getFirst(),result.getSecond(),task));
 			}
 		}
@@ -253,7 +298,9 @@ public class ControllerClass implements Controller {
 			Task task=list.get(i).getThird();
 			resultList.add(task);
 		}
-		setDisplayList(resultList);
+		
+		return resultList;
+		//setDisplayList(resultList);
 	}
 	
 	
@@ -292,12 +339,12 @@ public class ControllerClass implements Controller {
 	}
 	
 	
-	//Criteria to be matched between 2 words, if the editDistance/lenghOfKeyWord is <=0.5
+	//Criteria to be matched between 2 words, if the editDistance/lenghOfKeyWord is <=0.3
 	//the 2 strings are considered approximately matched
 	private int approximateMatchScore(String keyword, String string){
 		int editDist=editDistance(keyword,string);
 		int lenOfKey=keyword.length();
-		if (editDist/lenOfKey <=0.5)
+		if (editDist/lenOfKey <=0.3)
 			return 1000-1000*editDist/lenOfKey;
 		else
 			return 0;
