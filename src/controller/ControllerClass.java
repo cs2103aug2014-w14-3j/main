@@ -533,9 +533,10 @@ public class ControllerClass implements Controller {
 		
 		String attributeToChange = words[1];
 		String editDetails = "";
-		for (int i = 3; i< words.length; i++) {
-			editDetails += words[i];
+		for (int i = 2; i< words.length; i++) {
+			editDetails += words[i] + " ";
 		}
+		editDetails = editDetails.substring(0, editDetails.length() - 1);
 		
 		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange,
