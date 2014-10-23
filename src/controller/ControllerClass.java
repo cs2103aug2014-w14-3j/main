@@ -222,6 +222,37 @@ public class ControllerClass implements Controller {
 	
 	
 	
+	private ArrayList<Task> searchOnDate(Date deadline){
+		int numOfTask=tasks.size();
+		ArrayList<Task> resultList=new ArrayList<Task>();
+		
+		for (int i=0;i<numOfTask;i++){
+			Task task=tasks.get(i);
+			if (task.getDeadline().compareTo(deadline)==0){
+				resultList.add(task);
+			}
+		}
+		
+		return resultList;
+	}
+	
+	
+	
+	
+	private ArrayList<Task> searchByDate(Date deadline){
+		int numOfTask=tasks.size();
+		ArrayList<Task> resultList=new ArrayList<Task>();
+		
+		for (int i=0;i<numOfTask;i++){
+			Task task=tasks.get(i);
+			if (task.getDeadline().compareTo(deadline)<=0){
+				resultList.add(task);
+			}
+		}
+		
+		return resultList;
+	}
+	
 	/**
 	 * 
 	 * @return: the result list of task

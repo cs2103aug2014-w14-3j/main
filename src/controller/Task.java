@@ -22,6 +22,8 @@ public interface Task {
 		FLOATING, TIMED, DEADLINE
 	}
 	
+	public Date getDeadline();
+	
 	public Date getStartTime();
 	
 	public Date getEndTime();
