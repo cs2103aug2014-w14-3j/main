@@ -24,6 +24,8 @@ import com.joestelmach.natty.*;
  * 
  *
  */
+
+
 public class ControllerClass implements Controller {
 
 	enum CommandType {
@@ -254,37 +256,21 @@ public class ControllerClass implements Controller {
 	// the software will understand as search for date
 	private void search(String content) {
 		ArrayList<Task> listToDisplay = null;
+		String[] para=content.split("\\s+");
+		
 		Date date = timeParser(content);
 		if (date == null) {
 			listToDisplay = searchDesc(content);
+		} else if (para[0].equalsIgnoreCase("by")) {
+			listToDisplay = searchByDate(date);
 		} else {
-			listToDisplay = searchOnDate(date);
-			System.out.println("Search date");
+			listToDisplay = searchByDate(date);
+			
 		}
 
 		setDisplayList(listToDisplay);
 	}
 
-	// Author: Tran Cong Thien
-	// return true if the 2 dates are the same date
-	// return false if not
-	private boolean isSameDate(Date date1, Date date2) {
-
-		Calendar cal1 = Calendar.getInstance();
-		cal1.setTime(date1);
-
-		Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(date2);
-
-		if (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
-				&& cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
-				&& cal1.get(Calendar.DAY_OF_MONTH) == cal2
-						.get(Calendar.DAY_OF_MONTH)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 
 	// search on the exact date
 	private ArrayList<Task> searchOnDate(Date deadline) {
@@ -295,7 +281,7 @@ public class ControllerClass implements Controller {
 			Task task = tasks.get(i);
 			if (task.getDeadline() != null) {
 
-				if (isSameDate(task.getDeadline(), deadline)) {
+				if (compare(task.getDeadline(), deadline)==0) {
 					resultList.add(task);
 				}
 			}
@@ -310,12 +296,39 @@ public class ControllerClass implements Controller {
 
 		for (int i = 0; i < numOfTask; i++) {
 			Task task = tasks.get(i);
-			if (task.getDeadline().compareTo(deadline) <= 0) {
+			if (task.getDeadline()!=null){
+				
+			if (compare(task.getDeadline(),deadline) <= 0) {
 				resultList.add(task);
 			}
 		}
+		}
 
 		return resultList;
+	}
+	
+	
+	//return negative if  date1 is before date2
+	//positive if date1 is after date2
+	//0 if they are the same
+	
+	private int compare(Date date1, Date date2){
+		
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date1);
+
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+		
+		if (cal1.get(Calendar.YEAR) !=cal2.get(Calendar.YEAR)){
+			return cal1.get(Calendar.YEAR)-cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)){
+			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		} else {
+			return cal1.get(Calendar.DAY_OF_MONTH)- cal2.get(Calendar.DAY_OF_MONTH);
+		}
+		
+		
 	}
 
 	/**
