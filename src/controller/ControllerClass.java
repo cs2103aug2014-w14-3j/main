@@ -8,6 +8,7 @@ import storage.StoragePlus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -187,7 +188,7 @@ public class ControllerClass implements Controller {
 				undo();
 				break;
 			case SEARCH:
-				searchDesc(content);
+				search(content);
 				break;
 			case DISPLAY:
 				displayMainList();
@@ -230,16 +231,75 @@ public class ControllerClass implements Controller {
 	}
 	
 	
+	//used for searching date
+	//if this method returns null, it means that user is typing in a description
 	
+	private Date timeParser(String input){
+		Parser parser = new Parser();
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for(DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+		
+		if (dates.size()==1){
+			return dates.get(0);
+		}else {
+			return null;
+		}
+		
+	}
+	
+	
+	//search for date and description
+	// if the user types in one date only, 
+	//the software will understand as search for date
+	private void search(String content){
+		ArrayList<Task> listToDisplay=null;
+		Date date=timeParser(content);
+		if (date==null) {
+			listToDisplay= searchDesc(content);
+		} else {
+			listToDisplay= searchOnDate(date);
+		}
+		
+		setDisplayList(listToDisplay);
+	}
+	
+	
+	//Author: Tran Cong Thien
+	//return true if the 2 dates are the same date
+	//return false if not
+	private boolean isSameDate(Date date1, Date date2){
+		
+		Calendar cal1=Calendar.getInstance();
+		cal1.setTime(date1);
+		
+		Calendar cal2=Calendar.getInstance();
+		cal2.setTime(date2);
+		
+		if (cal1.get(Calendar.YEAR)==cal2.get(Calendar.YEAR) 
+			&& cal1.get(Calendar.MONTH)==cal2.get(Calendar.MONTH)
+			&& cal1.get(Calendar.DAY_OF_MONTH)==cal2.get(Calendar.DAY_OF_MONTH)){
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	//search on the exact date
 	private ArrayList<Task> searchOnDate(Date deadline){
 		int numOfTask=tasks.size();
 		ArrayList<Task> resultList=new ArrayList<Task>();
 		
 		for (int i=0;i<numOfTask;i++){
 			Task task=tasks.get(i);
-			if (task.getDeadline().compareTo(deadline)==0){
-				resultList.add(task);
-			}
+			if (task.getDeadline()!=null ) {
+			
+			   if (isSameDate(task.getDeadline(),deadline)){
+				    resultList.add(task);
+			   }
+		    }
 		}
 		
 		return resultList;
@@ -270,14 +330,14 @@ public class ControllerClass implements Controller {
 	 * @author: Tran Cong Thien
 	 */
 	
-	private void searchDesc(String keyWord){
+	private ArrayList<Task> searchDesc(String keyWord){
 		ArrayList<Task> resultList=exactSearch(keyWord);
 		
 		if (resultList.size()==0){
 			//exactSearch list is empty
-			setDisplayList(nearMatchSearch(keyWord));
+			return nearMatchSearch(keyWord);
 		} else {
-			setDisplayList(resultList);
+			return resultList;
 		}
 		
 	}
