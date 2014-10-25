@@ -15,6 +15,10 @@ public class FixedSizeStack<E> {
 		
 	}
 	
+	public int size(){
+		return stack.size();
+	}
+	
 	public int getMaxSize(){
 		return maxSize;
 	}

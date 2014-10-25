@@ -54,9 +54,9 @@ public class ListItem{
 	
 	public void setPriority(boolean priority) {
 		if (priority) {
-			hbox.setStyle("-fx-background-color: #FFFACD");
+			hbox.setStyle("-fx-background-color: #F89406");
 		} else {
-			hbox.setStyle("");
+			hbox.setStyle("-fx-background-color: #EEEEEE");
 		}
 	}
 	

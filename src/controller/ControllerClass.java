@@ -26,7 +26,7 @@ import com.joestelmach.natty.*;
 public class ControllerClass implements Controller {
 	
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY,UNDO, SEARCH, DONE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY,UNDO, ARCHIVE, SEARCH, DONE
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -192,6 +192,9 @@ public class ControllerClass implements Controller {
 			case DISPLAY:
 				displayMainList();
 				break;
+			case ARCHIVE:
+				moveToArchive();
+				break;
 			case POSTPONE:
 				updateForUndo();
 				postpone(content);
@@ -205,6 +208,12 @@ public class ControllerClass implements Controller {
 			}
 	}
 	
+	
+	
+	private void moveToArchive(){
+		setDisplayList(archiveTasks);
+		
+	}
 	// the format will be "done <number>"
 	private void markAsDone(String content) throws Exception{
 		int taskID=Integer.parseInt(content.trim())-1;
@@ -467,6 +476,7 @@ public class ControllerClass implements Controller {
 		if(!undoList.empty()){
 			tasks=undoList.pop();
 			archiveTasks=undoArchiveList.pop();
+			setDisplayList(tasks);
 		}
 	}
 	
@@ -878,6 +888,8 @@ public class ControllerClass implements Controller {
 			return CommandType.DONE;
 		} else if(operation.equalsIgnoreCase("pp")) {
 			return CommandType.POSTPONE;
+		} else if (operation.equalsIgnoreCase("archive")){
+			return CommandType.ARCHIVE;
 		}
 		else {
 			return CommandType.SEARCH;
