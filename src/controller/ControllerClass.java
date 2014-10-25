@@ -264,7 +264,7 @@ public class ControllerClass implements Controller {
 		} else if (para[0].equalsIgnoreCase("by")) {
 			listToDisplay = searchByDate(date);
 		} else {
-			listToDisplay = searchByDate(date);
+			listToDisplay = searchOnDate(date);
 			
 		}
 
