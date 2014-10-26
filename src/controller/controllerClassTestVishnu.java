@@ -29,7 +29,7 @@ public class controllerClassTestVishnu {
 	
 	public String getDescription(String displayString) {
 		String[] splitDisplayString = displayString.split("%");
-		return splitDisplayString[1];
+		return splitDisplayString[0];
 	}
 	
 	@Test
