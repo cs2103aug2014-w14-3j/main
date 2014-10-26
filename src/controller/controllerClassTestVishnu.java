@@ -62,5 +62,16 @@ public class controllerClassTestVishnu {
 		}
 	}
 	
+	@Test
+	public void testEditDescription() throws Exception {
+		controller.execCmd("add have lunch at school");
+		controller.execCmd("edit 1 desc have lunch at home");
+		controller.execCmd("list");
+		taskDisplayList = controller.getCurrentList();
+		
+		assertEquals("have lunch at home", getDescription(taskDisplayList.get(0)));
+		controller.execCmd("delete 1");
+	}
+	
 	
 }
