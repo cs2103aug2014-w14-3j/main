@@ -17,23 +17,24 @@ public class TaskClass implements Task {
 	TaskClass(String stringedTask) {
 		String[] attributes = stringedTask.split("%");
 		
-		setPriority(attributes[0]);
-		setDesc(attributes[1]);
+		setDesc(attributes[0]);
 		
-		if(attributes[2].trim().isEmpty()) {
+		if(attributes[1].trim().isEmpty()) {
 			setStartTime(null);
 			setType(TaskType.FLOATING);
 		} else {
-			setStartTime(new Date(Long.parseLong(attributes[2].trim())));
+			setStartTime(new Date(Long.parseLong(attributes[1].trim())));
 			setType(TaskType.DEADLINE);
 		}
 		
-		if(attributes[3].trim().isEmpty()) {
+		if(attributes[2].trim().isEmpty()) {
 			setEndTime(null);
 		} else {
-			setEndTime(new Date(Long.parseLong(attributes[3].trim())));
+			setEndTime(new Date(Long.parseLong(attributes[2].trim())));
 			setType(TaskType.TIMED);
 		}
+		
+		setPriority(attributes[3]);
 	}
 	
 	public Date getDeadline() {
@@ -101,9 +102,9 @@ public class TaskClass implements Task {
 	public String toString() {
 		boolean isNullStartTime =(startTime == null);
 		boolean isNullEndTime = (endTime == null);
-		return isPrioritized + "%" +  
-				description + "%" + 
+		return   description + "%" + 
 				(isNullStartTime? " " : startTime.getTime()) + "%" + 
-				(isNullEndTime? " " : endTime.getTime());
+				(isNullEndTime? " " : endTime.getTime()) + "%" +
+				isPrioritized;
 	}
 }

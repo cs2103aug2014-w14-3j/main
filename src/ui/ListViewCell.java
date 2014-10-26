@@ -24,15 +24,16 @@ public class ListViewCell extends ListCell<String> {
 			setGraphic(item.getHBox());
 			return;
 		}
-		Boolean priority = Boolean.parseBoolean(split[0].trim());
-		String desc = split[1].trim();
+		
+		String desc = split[0].trim();
+		Boolean priority = Boolean.parseBoolean(split[3].trim());
 		Long timeStart = null;
-		if (!split[2].trim().isEmpty()) {
-			timeStart = Long.parseLong(split[2].trim());
+		if (!split[1].trim().isEmpty()) {
+			timeStart = Long.parseLong(split[1].trim());
 		}
 		Long timeEnd = null;
-		if (!split[3].trim().isEmpty()) {
-			timeEnd = Long.parseLong(split[3].trim());
+		if (!split[2].trim().isEmpty()) {
+			timeEnd = Long.parseLong(split[2].trim());
 		}
 		item.setDesc(desc);
 		item.setPriority(priority);

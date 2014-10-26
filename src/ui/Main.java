@@ -26,6 +26,7 @@ public class Main extends Application{
 		controller = ControllerClass.getInstance();
 		displayBuf = new ArrayList<String>();
 		log = new Log();
+		commandHistory = new ArrayList<String>();
 	}
 	
 	@Override
@@ -51,9 +52,8 @@ public class Main extends Application{
 	            getClass().getResource("main.css").toExternalForm()
 	        );
 		
-		mainControl.setInputOnEnter((command) -> {
-			onEnter(command);
-		});
+		mainControl.setInputOnEnter((command) -> onEnter(command));
+		mainControl.setInputOnKeyUPDown((direction) -> onUpDown(direction));
 		
 		execCmd("list");
 		mainControl.loadList(displayBuf);
@@ -84,9 +84,29 @@ public class Main extends Application{
 
 	}
 	
-	private void onEnter(String command) {
+	private String onEnter(String command) {
 		execCmd(command);
+		pushHistory(command);
 		mainControl.loadList(displayBuf, recentChange);
+		return command;
+	}
+	
+	private String onUpDown(String direction) {
+		if (historyPos > 0 && direction.trim().equalsIgnoreCase("UP")) {
+			historyPos--;
+		} else if (historyPos < commandHistory.size() && direction.trim().equalsIgnoreCase("DOWN")) {
+			historyPos++;
+		}
+		
+		if (historyPos >= 0 && historyPos < commandHistory.size()) {
+			return commandHistory.get(historyPos);
+		}
+		return null;
+	}
+	
+	private void pushHistory(String command) {
+		commandHistory.add(command);
+		historyPos = commandHistory.size();
 	}
 	
 	/**
@@ -97,7 +117,9 @@ public class Main extends Application{
 		launch(args);
 	}
 	
-
+	private ArrayList<String> commandHistory;
+	private Integer historyPos;
+	
 	private Controller controller;
 	private ArrayList<String> displayBuf;
 	private Integer recentChange;

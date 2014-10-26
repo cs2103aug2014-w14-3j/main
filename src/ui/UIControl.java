@@ -5,7 +5,6 @@ package ui;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 
 import javafx.scene.control.ListView;
@@ -48,8 +47,8 @@ public class UIControl extends BorderPane {
 		loadList(strList, 0);
 	}
 	
-	public void loadList(ArrayList<String> strList, Integer recentChange) {
-		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
+	public void loadList(ArrayList<String> strList, Integer recentChange) { 
+		ObservableList<String> observableList = FXCollections.observableArrayList(addNum(strList));
 		list.setItems(observableList);
 		list.setCellFactory((list) -> {
 			return new ListViewCell();
@@ -70,13 +69,32 @@ public class UIControl extends BorderPane {
 		list.getSelectionModel().select(recentChange);
 	}
 	
-	public void setInputOnEnter(OnEnterEvent value) {
+	public void setInputOnEnter(OnKeyEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
-				value.onEnter(input.getText());
+				value.onKey(input.getText());
 				input.clear();
 			}
 		});
 	}
 	
+	public void setInputOnKeyUPDown(OnKeyEvent value) {
+		input.setOnKeyPressed((event) -> {
+			if (event.getCode() == KeyCode.UP) {
+				input.setText(value.onKey("UP"));
+			}
+			if (event.getCode() == KeyCode.DOWN) {
+				input.setText(value.onKey("DOWN"));
+			}
+		});
+	}
+	
+	
+	private ArrayList<String> addNum(ArrayList<String> before) {
+		ArrayList<String> after = new ArrayList<String>();
+		for (int i = 0; i < before.size(); i++) {
+			after.add((i + 1) + ". " + before.get(i));
+		}
+		return after;
+	}
 }
