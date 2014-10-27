@@ -11,6 +11,10 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import controller.Controller;
 import controller.ControllerClass;
@@ -20,25 +24,30 @@ import controller.ControllerClass;
  *
  */
 public class Main extends Application{
-	
+	private Popup noti;
+	private Stage stage;
 	private UIControl mainControl;
 	public Main() {
 		controller = ControllerClass.getInstance();
 		displayBuf = new ArrayList<String>();
 		log = new Log();
 		commandHistory = new ArrayList<String>();
+		noti = new Popup();	
 	}
 	
 	@Override
 	public void start(Stage stage) { 
 		try {
+			this.stage = stage;
 			stage.setScene(loadScene());
 		} catch (IOException e) {
 			e.printStackTrace();
 			Platform.exit();
 			System.exit(0);
 		}
+		
 		stage.show();
+		log.log("Initialized");
 	}
 	
 	private Scene loadScene() throws IOException {
@@ -57,18 +66,22 @@ public class Main extends Application{
 		
 		execCmd("list");
 		mainControl.loadList(displayBuf);
+		
 		return scene;
 	}
 	
 	
 	private void execCmd(String cmd) {
 		if(cmd.trim().compareToIgnoreCase(Config.cmdExit) == 0) {
+			log.log("exit");
 			Platform.exit();
 			System.exit(0);
 		}
 		
 		try {
 			log.log("Command: " + cmd);
+			noti.hide();
+			
 			recentChange = controller.execCmd(cmd);
 			displayBuf = controller.getCurrentList();
 			if (displayBuf == null) {
@@ -79,12 +92,21 @@ public class Main extends Application{
 			if (Config.onDevelopment) {
 				e.printStackTrace();
 			}
+			Text text = new Text(e.getMessage());
+			noti.getContent().clear();
+			noti.getContent().add(text);
+			noti.setX(stage.getX() + mainControl.getInputPosition().getX());
+			noti.setY(stage.getY() + mainControl.getInputPosition().getY());
+			noti.show(stage);
 			log.log(e.getMessage());
 		}
 
 	}
 	
 	private String onEnter(String command) {
+		if (command.isEmpty()) {
+			return command;
+		}
 		execCmd(command);
 		pushHistory(command);
 		mainControl.loadList(displayBuf, recentChange);

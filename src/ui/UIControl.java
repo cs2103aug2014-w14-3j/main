@@ -19,6 +19,7 @@ import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 
 /**
  * @author Luo Shaohuai
@@ -33,14 +34,9 @@ public class UIControl extends BorderPane {
 	
 	@FXML
 	private TextField input;
-	
+		
 	public UIControl() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss a");
-		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
-			time.setText(format.format(LocalDateTime.now()));
-		}));
-		timeline.setCycleCount(Animation.INDEFINITE);
-		timeline.play();
+		displayCurTime();
 	}
 	
 	public void loadList(ArrayList<String> strList) {
@@ -69,26 +65,29 @@ public class UIControl extends BorderPane {
 		list.getSelectionModel().select(recentChange);
 	}
 	
-	public void setInputOnEnter(OnKeyEvent value) {
+	public Point2D getInputPosition() {
+		return input.localToScene(0.0, 0.0);
+	}
+	
+	public void setInputOnEnter(OnEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
-				value.onKey(input.getText());
+				value.onEventExec(input.getText());
 				input.clear();
 			}
 		});
 	}
 	
-	public void setInputOnKeyUPDown(OnKeyEvent value) {
+	public void setInputOnKeyUPDown(OnEvent value) {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
-				input.setText(value.onKey("UP"));
+				input.setText(value.onEventExec("UP"));
 			}
 			if (event.getCode() == KeyCode.DOWN) {
-				input.setText(value.onKey("DOWN"));
+				input.setText(value.onEventExec("DOWN"));
 			}
 		});
 	}
-	
 	
 	private ArrayList<String> addNum(ArrayList<String> before) {
 		ArrayList<String> after = new ArrayList<String>();
@@ -96,5 +95,14 @@ public class UIControl extends BorderPane {
 			after.add((i + 1) + ". " + before.get(i));
 		}
 		return after;
+	}
+	
+	private void displayCurTime() {
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss a");
+		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
+			time.setText(format.format(LocalDateTime.now()));
+		}));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		timeline.play();
 	}
 }
