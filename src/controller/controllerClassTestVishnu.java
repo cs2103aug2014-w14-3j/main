@@ -29,7 +29,7 @@ public class controllerClassTestVishnu {
 	
 	public String getDescription(String displayString) {
 		String[] splitDisplayString = displayString.split("%");
-		return splitDisplayString[1];
+		return splitDisplayString[0];
 	}
 	
 	@Test
@@ -60,6 +60,17 @@ public class controllerClassTestVishnu {
 			controller.execCmd("delete 2");
 			controller.execCmd("delete 1");
 		}
+	}
+	
+	@Test
+	public void testEditDescription() throws Exception {
+		controller.execCmd("add have lunch at school");
+		controller.execCmd("edit 1 desc have lunch at home");
+		controller.execCmd("list");
+		taskDisplayList = controller.getCurrentList();
+		
+		assertEquals("have lunch at home", getDescription(taskDisplayList.get(0)));
+		controller.execCmd("delete 1");
 	}
 	
 	
