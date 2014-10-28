@@ -19,7 +19,7 @@ public class TestControllerClassSortAndPostpone {
 
 	public String getDescFromTaskStrings(String stringedTask) {
 		String[] splitStringedTasks = stringedTask.split("%");
-		return splitStringedTasks[1];
+		return splitStringedTasks[0];
 	}
 	
 	@Test
