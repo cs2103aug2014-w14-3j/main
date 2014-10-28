@@ -29,4 +29,16 @@ public interface TaskList {
 	List<String> getNumberedStringList();
 
 	void clear();
+	
+	void setNumTaskOnPage(Integer number);
+	
+	List<String> getPage(Integer pageNum);
+	
+	List<String> getNumberedPage(Integer pageNum);
+	
+	Integer getTotalPageNum();
+	
+	Integer getIndexPageContainTask(Integer taskIndex);
+	
+	Integer getIndexTaskOnPage(Integer taskIndex);
 }

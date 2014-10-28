@@ -19,7 +19,7 @@ import javafx.scene.text.TextFlow;
  * @author Luo Shaohuai
  *
  */
-public class ListItem{
+class ListItem{
 	@FXML
 	private HBox hbox;
 	

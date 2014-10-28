@@ -14,13 +14,15 @@ import java.util.List;
 public class SimpleTaskList implements TaskList {
 	
 	private List<Task> tasks;
+	private Integer numTaskOnPage;
 	
 	public SimpleTaskList() {
 		tasks = new ArrayList<Task>();
+		numTaskOnPage = null;
 	}
 	
 	public SimpleTaskList(List<String> strList) {
-		tasks = new ArrayList<Task>();
+		this();
 		addAll(strList);
 	}
 	
@@ -123,6 +125,77 @@ public class SimpleTaskList implements TaskList {
 	@Override
 	public int size() {
 		return tasks.size();
+	}
+
+	@Override
+	public void setNumTaskOnPage(Integer number) {
+		assert number > 0;
+		
+		numTaskOnPage = number;
+	}
+
+	@Override
+	public List<String> getPage(Integer pageNum) {
+		assert numTaskOnPage != null;
+		
+		if (pageNum < 0 || pageNum > getTotalPageNum()) {
+			throw new IndexOutOfBoundsException("Invalid Page Number");
+		}
+		
+		System.out.println("mark");
+		ArrayList<String> taskStrings = new ArrayList<String>();
+		Integer from = (pageNum - 1) * numTaskOnPage;
+		Integer to = Math.min(pageNum * numTaskOnPage, tasks.size());
+		for (Task task : tasks.subList(from, to)) {
+			taskStrings.add(task.toString());
+		}
+		
+		return taskStrings;
+	}
+
+	@Override
+	public Integer getTotalPageNum() {
+		assert numTaskOnPage != null;
+		
+		Integer totalPage = tasks.size() / numTaskOnPage;
+		totalPage += tasks.size() % numTaskOnPage != 0 ? 1 : 0;
+		return totalPage;
+	}
+
+	@Override
+	public List<String> getNumberedPage(Integer pageNum) {
+		assert numTaskOnPage != null;
+		
+		if (pageNum < 0 || pageNum > getTotalPageNum()) {
+			throw new IndexOutOfBoundsException("Invalid Page Number");
+		}
+		
+		ArrayList<String> taskStrings = new ArrayList<String>();
+		Integer from = (pageNum - 1) * numTaskOnPage;
+		Integer to = Math.min(pageNum * numTaskOnPage, tasks.size());
+		for (int i = from; i < to; i++) {
+			taskStrings.add((i + 1) + ". " + tasks.get(i).toString());
+		}
+		
+		return taskStrings;
+	}
+
+	@Override
+	public Integer getIndexPageContainTask(Integer taskIndex) {
+		if (taskIndex < 0 || taskIndex >= tasks.size()) {
+			throw new IndexOutOfBoundsException("Invalid Index");
+		}
+		
+		return taskIndex / numTaskOnPage + 1;
+	}
+
+	@Override
+	public Integer getIndexTaskOnPage(Integer taskIndex) {
+		if (taskIndex < 0 || taskIndex >= tasks.size()) {
+			throw new IndexOutOfBoundsException("Invalid Index");
+		}
+		
+		return taskIndex % numTaskOnPage;
 	}
 
 }

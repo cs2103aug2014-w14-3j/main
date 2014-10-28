@@ -25,7 +25,7 @@ import javafx.geometry.Point2D;
  * @author Luo Shaohuai
  *
  */
-public class UIControl extends BorderPane {
+public class UIControl extends BorderPane {	
 	@FXML
 	private Text time;
 	
@@ -63,6 +63,8 @@ public class UIControl extends BorderPane {
 		
 		list.scrollTo(recentChange);
 		list.getSelectionModel().select(recentChange);
+		list.getSelectionModel().clearSelection();
+		input.requestFocus();
 	}
 	
 	public Point2D getInputPosition() {

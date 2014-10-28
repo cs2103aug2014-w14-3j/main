@@ -29,7 +29,7 @@ import com.joestelmach.natty.*;
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE
 	};
 	
 	enum DisplayList {
@@ -38,6 +38,7 @@ public class ControllerClass implements Controller {
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int maxNumOfUndo = 40;
+	private static final int numTasksInSinglePage = 10;
 
 	private static Controller theController = null;
 	private TaskList tasks;
@@ -46,6 +47,7 @@ public class ControllerClass implements Controller {
 
 	private DisplayList displayListType;
 	private Integer recentChange;
+	private Integer currentPageNum;
 
 	private Storage storage;
 	private FixedSizeStack<TaskList> undoList;
@@ -54,11 +56,14 @@ public class ControllerClass implements Controller {
 
 	public ControllerClass() {
 		storage = createStorageObject();
-		recentChange = 0;
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoRecentChanges = new FixedSizeStack<Integer>(maxNumOfUndo);
+		
 		getFileContent();
+		setNumTaskOnPage(numTasksInSinglePage);
+		displayListType = DisplayList.MAIN;
+		resetRecentChange();
 	}
 
 	// This method starts execution of each user command by first retrieving
@@ -72,15 +77,20 @@ public class ControllerClass implements Controller {
 	public List<String> getCurrentList() {
 		switch (displayListType) {
 			case MAIN:
-				return tasks.getNumberedStringList();
+				return tasks.getNumberedPage(currentPageNum);
 				
 			case ARCHIVE:
-				return archiveTasks.getNumberedStringList();
+				return archiveTasks.getNumberedPage(currentPageNum);
 				
 			case SEARCH:
 				return resultTasks;
 		}
 		return null;
+	}
+	
+	private void setNumTaskOnPage(Integer number) {
+		tasks.setNumTaskOnPage(number);
+		archiveTasks.setNumTaskOnPage(number);
 	}
 
 	/**
@@ -110,21 +120,28 @@ public class ControllerClass implements Controller {
 	 */
 	private void setDisplayList(DisplayList listType) {
 		this.displayListType = listType;
-		setRecentChange(0);
+		resetRecentChange();
 	}
 	
 	private void setResultList(List<String> list) {
 		this.resultTasks = list;
 		setDisplayList(DisplayList.SEARCH);
 	}
-
+	
+	private void resetRecentChange() {
+		currentPageNum = 1;
+		recentChange = 0;
+	}
+	
 	private void setRecentChange(Task task, TaskList taskList) {
 		taskList.sort();
-		recentChange = taskList.indexOf(task);
+		Integer index = taskList.indexOf(task);
+		setRecentChange(index, taskList);
 	}
 
-	private void setRecentChange(Integer recent) {
-		recentChange = recent;
+	private void setRecentChange(Integer recent, TaskList taskList) {
+		currentPageNum = taskList.getIndexPageContainTask(recent);
+		recentChange = taskList.getIndexTaskOnPage(recent);
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -139,12 +156,11 @@ public class ControllerClass implements Controller {
 			processInput(commandType, content);
 		}
 		updateStorage();
-
 	}
 
 	// This method returns the type of operation to be carried out, either add,
 	// delete, edit or display.
-	public String getOperation(String command) {
+	private String getOperation(String command) {
 		String[] splitCommandIntoWords = command.split(" ");
 		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
 		return operation;
@@ -192,6 +208,9 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
+		case CHANGEPAGE:
+			changePage(content);
+			break;
 		default:
 			throw new Exception("Invalid command.");
 		}
@@ -210,7 +229,7 @@ public class ControllerClass implements Controller {
 			archiveTasks.add(task);
 			tasks.remove(taskID);
 			displayMainList();
-			setRecentChange(taskID);
+			setRecentChange(taskID, tasks);
 		} else {
 			throw new Exception("Invalid arguments");
 		}
@@ -253,7 +272,9 @@ public class ControllerClass implements Controller {
 		}
 		
 		//this is a quick fix
-		//TODO: generate and setResultList with string list with number(in origin list)
+		//TODO: generate and setResultList with string list with index(in origin list)
+		//with form [index]. [original string] (e.g. "1. desc%e%t%c")
+		//TODO: change TaskList to be able to store index
 		List<String> resultList = new ArrayList<String>();
 		for (Task task : listToDisplay) {
 			resultList.add(task.toString());
@@ -696,9 +717,9 @@ public class ControllerClass implements Controller {
 
 			taskNum -= 1;
 			if (taskNum >= tasks.size()) {
-				setRecentChange(tasks.size() - 1);
+				setRecentChange(tasks.size() - 1, tasks);
 			} else {
-				setRecentChange(taskNum);
+				setRecentChange(taskNum, tasks);
 			}
 
 		} catch (NumberFormatException e) {
@@ -725,6 +746,81 @@ public class ControllerClass implements Controller {
 		}
 	}
 
+	/**
+	 * This method changes the attributes related to the changing of a page.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 * @throws Exception 
+	 */
+	private void changePage(String content) throws Exception {
+		String direction = content.trim();
+		changeCurrentPageNum(direction);
+	}
+	
+	/**
+	 * This method checks if it is valid to change the current page number and if so, changes the current page number.
+	 * @throws Exception
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void changeCurrentPageNum(String direction) throws Exception {
+		if(direction.equalsIgnoreCase("up")) {
+			if (checkValidPageUp()) {
+				currentPageNum--;
+				recentChange = 0;
+			} else {
+				throw new Exception("On first page.");
+			}
+		} else {
+			if (checkValidPageDown()) {
+				currentPageNum++;
+				recentChange = 0;
+			} else {
+				throw new Exception("On last page.");
+			}
+		}
+	}
+	
+	/**
+	 * This method checks if it is possible to go to the next page by checking if there are more tasks in the list which are pushed to the next page.
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageDown() {
+		Integer totalNumPages;
+		//quick fix 
+		//TODO: getCurDisplayList() after fix search
+		switch (displayListType) {
+			case MAIN:
+				totalNumPages = tasks.getTotalPageNum();
+				break;
+			case ARCHIVE:
+				totalNumPages = archiveTasks.getTotalPageNum();
+				break;
+			default:
+				totalNumPages = 0;
+				break;
+		}
+		if (currentPageNum < totalNumPages) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * This method checks if it is possible to go to the previous page. If currently on first page, it will return false.
+	 * Otherwise, it will return true.
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageUp() {
+		if (currentPageNum <= 1) {
+		return false;
+		} 
+		
+		return true;
+	}
+	
 	/**
 	 * This method updates the content stored.
 	 * 
@@ -898,6 +994,8 @@ public class ControllerClass implements Controller {
 			return CommandType.POSTPONE;
 		} else if (operation.equalsIgnoreCase("archive")) {
 			return CommandType.ARCHIVE;
+		} else if (operation.equalsIgnoreCase("page")) {
+			return CommandType.CHANGEPAGE;
 		} else {
 			return CommandType.SEARCH;
 		}
