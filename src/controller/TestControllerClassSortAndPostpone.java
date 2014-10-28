@@ -2,7 +2,7 @@ package controller;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.junit.Test;
 public class TestControllerClassSortAndPostpone {
 
 	Controller controller;
-	ArrayList<String> displayTaskList;
+	List<String> displayTaskList;
 	
 	@Before
 	public void setup() {

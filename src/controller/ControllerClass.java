@@ -22,7 +22,7 @@ import com.joestelmach.natty.*;
 
 /**
  * 
- *
+ * 
  */
 
 
@@ -31,29 +31,32 @@ public class ControllerClass implements Controller {
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE
 	};
+	
+	enum DisplayList {
+		MAIN, ARCHIVE, SEARCH
+	};
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int maxNumOfUndo = 40;
 
 	private static Controller theController = null;
-	private ArrayList<Task> tasks;
-	private ArrayList<Task> archiveTasks;
+	private TaskList tasks;
+	private TaskList archiveTasks;
+	private List<String> resultTasks;
 
-	private ArrayList<String> displayList;
+	private DisplayList displayListType;
 	private Integer recentChange;
 
 	private Storage storage;
-	private FixedSizeStack<ArrayList<Task>> undoList;
-	private FixedSizeStack<ArrayList<Task>> undoArchiveList;
+	private FixedSizeStack<TaskList> undoList;
+	private FixedSizeStack<TaskList> undoArchiveList;
 	private FixedSizeStack<Integer> undoRecentChanges;
 
 	public ControllerClass() {
 		storage = createStorageObject();
-		tasks = new ArrayList<Task>();
-		archiveTasks = new ArrayList<Task>();
 		recentChange = 0;
-		undoList = new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
-		undoArchiveList = new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
+		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
+		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoRecentChanges = new FixedSizeStack<Integer>(maxNumOfUndo);
 		getFileContent();
 	}
@@ -66,8 +69,18 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	public ArrayList<String> getCurrentList() {
-		return displayList;
+	public List<String> getCurrentList() {
+		switch (displayListType) {
+			case MAIN:
+				return tasks.getNumberedStringList();
+				
+			case ARCHIVE:
+				return archiveTasks.getNumberedStringList();
+				
+			case SEARCH:
+				return resultTasks;
+		}
+		return null;
 	}
 
 	/**
@@ -77,11 +90,8 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void getFileContent() {
-		ArrayList<String> stringList;
-		stringList = storage.read();
-		tasks = convertStringListTaskList(stringList);
-		stringList = storage.readArchive();
-		archiveTasks = convertStringListTaskList(stringList);
+		tasks = new SimpleTaskList(storage.read());
+		archiveTasks = new SimpleTaskList(storage.readArchive());
 	}
 
 	/**
@@ -90,50 +100,26 @@ public class ControllerClass implements Controller {
 	 * @return StoragePlus Object
 	 * @author G. Vishnu Priya
 	 */
-	private StoragePlus createStorageObject() {
+	private Storage createStorageObject() {
 		return new StoragePlus();
-	}
-
-	private ArrayList<Task> convertStringListTaskList(
-			ArrayList<String> taskStrings) {
-		ArrayList<Task> result = new ArrayList<Task>();
-
-		for (String str : taskStrings) {
-			result.add(convertStringToTask(str));
-		}
-
-		return result;
-	}
-
-	private Task convertStringToTask(String taskString) {
-		return new TaskClass(taskString);
-	}
-
-	// This method converts tasks from tasks list to taskStrings list.
-	private ArrayList<String> convertTaskListStringList(ArrayList<Task> taskList) {
-		ArrayList<String> taskStrings = new ArrayList<String>();
-		for (Task task : taskList) {
-			taskStrings.add(convertTaskToString(task));
-		}
-
-		return taskStrings;
-	}
-
-	// This method converts tasks to strings to be stored in taskStrings list.
-	private String convertTaskToString(Task task) {
-		return task.toString();
 	}
 
 	/**
 	 * @author Luo Shaohuai
 	 * @param taskList
 	 */
-	private void setDisplayList(ArrayList<Task> taskList) {
-		displayList = convertTaskListStringList(taskList);
-		recentChange = 0;
+	private void setDisplayList(DisplayList listType) {
+		this.displayListType = listType;
+		setRecentChange(0);
+	}
+	
+	private void setResultList(List<String> list) {
+		this.resultTasks = list;
+		setDisplayList(DisplayList.SEARCH);
 	}
 
-	private void setRecentChange(Task task, ArrayList<Task> taskList) {
+	private void setRecentChange(Task task, TaskList taskList) {
+		taskList.sort();
 		recentChange = taskList.indexOf(task);
 	}
 
@@ -212,8 +198,7 @@ public class ControllerClass implements Controller {
 	}
 
 	private void moveToArchive() {
-		setDisplayList(archiveTasks);
-
+		setDisplayList(DisplayList.ARCHIVE);
 	}
 
 	// the format will be "done <number>"
@@ -248,7 +233,6 @@ public class ControllerClass implements Controller {
 		} else {
 			return null;
 		}
-
 	}
 
 	// search for date and description
@@ -267,8 +251,14 @@ public class ControllerClass implements Controller {
 			listToDisplay = searchOnDate(date);
 			
 		}
-
-		setDisplayList(listToDisplay);
+		
+		//this is a quick fix
+		//TODO: generate and setResultList with string list with number(in origin list)
+		List<String> resultList = new ArrayList<String>();
+		for (Task task : listToDisplay) {
+			resultList.add(task.toString());
+		}
+		setResultList(resultList);
 	}
 
 
@@ -509,27 +499,13 @@ public class ControllerClass implements Controller {
 	}
 
 	private void updateUndoArchiveList() {
-		ArrayList<Task> item = new ArrayList<Task>();
-
-		for (int i = 0; i < archiveTasks.size(); i++)
-			item.add(cloneTask(archiveTasks.get(i)));
-
-		undoArchiveList.push(item);
+		undoArchiveList.push(archiveTasks.clone());
 	}
 
 	// push the current state to the undoList
 	// Tran Cong Thien
 	private void updateUndoList() {
-		ArrayList<Task> item = new ArrayList<Task>();
-		// copy content of tasks to item
-		for (int i = 0; i < tasks.size(); i++)
-			item.add(cloneTask(tasks.get(i)));
-
-		undoList.push(item);
-	}
-
-	private Task cloneTask(Task task) {
-		return new TaskClass(task.toString());
+		undoList.push(tasks.clone());
 	}
 
 	// undo command, the tasks will be replaced by the previous state
@@ -539,7 +515,7 @@ public class ControllerClass implements Controller {
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
-			setDisplayList(tasks);
+			setDisplayList(DisplayList.MAIN);
 		}
 	}
 
@@ -569,38 +545,8 @@ public class ControllerClass implements Controller {
 	 * @author Koh Xian Hui
 	 */
 	private void displayMainList() {
-		sortTasks(tasks);
-		setDisplayList(tasks);
-	}
-
-	/**
-	 * 
-	 */
-	private void sortTasks(ArrayList<Task> taskList) {
-		Collections.sort(taskList, (task1, task2) -> {
-			if (task1.isPrioritized() && !task2.isPrioritized()) {
-				return -1;
-			} else if (!task1.isPrioritized() && task2.isPrioritized()) {
-				return 1;
-			}
-
-			if (task1.getStartTime() == null && task2.getStartTime() != null) {
-				return 1;
-			} else if (task1.getStartTime() != null
-					&& task2.getStartTime() == null) {
-				return -1;
-			}
-
-			if (task1.getStartTime() == null && task2.getStartTime() == null) {
-				return task1.getDesc().compareTo(task2.getDesc());
-			} else {
-				Long thisDate = task1.getStartTime().getTime();
-				Long taskDate = task2.getStartTime().getTime();
-
-				return thisDate.compareTo(taskDate);
-			}
-
-		});
+		tasks.sort();
+		setDisplayList(DisplayList.MAIN);
 	}
 
 	/**
@@ -787,8 +733,8 @@ public class ControllerClass implements Controller {
 	 */
 	private void updateStorage() {
 
-		storage.write(convertTaskListStringList(tasks));
-		storage.writeArchive(convertTaskListStringList(archiveTasks));
+		storage.write(tasks.getStringList());
+		storage.writeArchive(archiveTasks.getStringList());
 	}
 
 	/**
