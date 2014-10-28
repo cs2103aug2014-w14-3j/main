@@ -1,6 +1,6 @@
 package controller;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class controllerClassTestVishnu {
 	
 	Controller controller;
-	ArrayList<String> taskDisplayList;
+	List<String> taskDisplayList;
 	
 	@Before
 	public void initialize() {

@@ -22,40 +22,48 @@ import com.joestelmach.natty.*;
 
 /**
  * 
- *
+ * 
  */
 
 
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE
+	};
+	
+	enum DisplayList {
+		MAIN, ARCHIVE, SEARCH
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int maxNumOfUndo = 40;
+	private static final int numTasksInSinglePage = 10;
 
 	private static Controller theController = null;
-	private ArrayList<Task> tasks;
-	private ArrayList<Task> archiveTasks;
+	private TaskList tasks;
+	private TaskList archiveTasks;
+	private List<String> resultTasks;
 
-	private ArrayList<String> displayList;
+	private DisplayList displayListType;
 	private Integer recentChange;
+	private Integer currentPageNum;
 
 	private Storage storage;
-	private FixedSizeStack<ArrayList<Task>> undoList;
-	private FixedSizeStack<ArrayList<Task>> undoArchiveList;
+	private FixedSizeStack<TaskList> undoList;
+	private FixedSizeStack<TaskList> undoArchiveList;
 	private FixedSizeStack<Integer> undoRecentChanges;
 
 	public ControllerClass() {
 		storage = createStorageObject();
-		tasks = new ArrayList<Task>();
-		archiveTasks = new ArrayList<Task>();
-		recentChange = 0;
-		undoList = new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
-		undoArchiveList = new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
+		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
+		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoRecentChanges = new FixedSizeStack<Integer>(maxNumOfUndo);
+		
 		getFileContent();
+		setNumTaskOnPage(numTasksInSinglePage);
+		displayListType = DisplayList.MAIN;
+		resetRecentChange();
 	}
 
 	// This method starts execution of each user command by first retrieving
@@ -66,8 +74,23 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	public ArrayList<String> getCurrentList() {
-		return displayList;
+	public List<String> getCurrentList() {
+		switch (displayListType) {
+			case MAIN:
+				return tasks.getNumberedPage(currentPageNum);
+				
+			case ARCHIVE:
+				return archiveTasks.getNumberedPage(currentPageNum);
+				
+			case SEARCH:
+				return resultTasks;
+		}
+		return null;
+	}
+	
+	private void setNumTaskOnPage(Integer number) {
+		tasks.setNumTaskOnPage(number);
+		archiveTasks.setNumTaskOnPage(number);
 	}
 
 	/**
@@ -77,11 +100,8 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void getFileContent() {
-		ArrayList<String> stringList;
-		stringList = storage.read();
-		tasks = convertStringListTaskList(stringList);
-		stringList = storage.readArchive();
-		archiveTasks = convertStringListTaskList(stringList);
+		tasks = new SimpleTaskList(storage.read());
+		archiveTasks = new SimpleTaskList(storage.readArchive());
 	}
 
 	/**
@@ -90,55 +110,38 @@ public class ControllerClass implements Controller {
 	 * @return StoragePlus Object
 	 * @author G. Vishnu Priya
 	 */
-	private StoragePlus createStorageObject() {
+	private Storage createStorageObject() {
 		return new StoragePlus();
-	}
-
-	private ArrayList<Task> convertStringListTaskList(
-			ArrayList<String> taskStrings) {
-		ArrayList<Task> result = new ArrayList<Task>();
-
-		for (String str : taskStrings) {
-			result.add(convertStringToTask(str));
-		}
-
-		return result;
-	}
-
-	private Task convertStringToTask(String taskString) {
-		return new TaskClass(taskString);
-	}
-
-	// This method converts tasks from tasks list to taskStrings list.
-	private ArrayList<String> convertTaskListStringList(ArrayList<Task> taskList) {
-		ArrayList<String> taskStrings = new ArrayList<String>();
-		for (Task task : taskList) {
-			taskStrings.add(convertTaskToString(task));
-		}
-
-		return taskStrings;
-	}
-
-	// This method converts tasks to strings to be stored in taskStrings list.
-	private String convertTaskToString(Task task) {
-		return task.toString();
 	}
 
 	/**
 	 * @author Luo Shaohuai
 	 * @param taskList
 	 */
-	private void setDisplayList(ArrayList<Task> taskList) {
-		displayList = convertTaskListStringList(taskList);
+	private void setDisplayList(DisplayList listType) {
+		this.displayListType = listType;
+		resetRecentChange();
+	}
+	
+	private void setResultList(List<String> list) {
+		this.resultTasks = list;
+		setDisplayList(DisplayList.SEARCH);
+	}
+	
+	private void resetRecentChange() {
+		currentPageNum = 1;
 		recentChange = 0;
 	}
-
-	private void setRecentChange(Task task, ArrayList<Task> taskList) {
-		recentChange = taskList.indexOf(task);
+	
+	private void setRecentChange(Task task, TaskList taskList) {
+		taskList.sort();
+		Integer index = taskList.indexOf(task);
+		setRecentChange(index, taskList);
 	}
 
-	private void setRecentChange(Integer recent) {
-		recentChange = recent;
+	private void setRecentChange(Integer recent, TaskList taskList) {
+		currentPageNum = taskList.getIndexPageContainTask(recent);
+		recentChange = taskList.getIndexTaskOnPage(recent);
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -153,12 +156,11 @@ public class ControllerClass implements Controller {
 			processInput(commandType, content);
 		}
 		updateStorage();
-
 	}
 
 	// This method returns the type of operation to be carried out, either add,
 	// delete, edit or display.
-	public String getOperation(String command) {
+	private String getOperation(String command) {
 		String[] splitCommandIntoWords = command.split(" ");
 		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
 		return operation;
@@ -206,14 +208,16 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
+		case CHANGEPAGE:
+			changePage(content);
+			break;
 		default:
 			throw new Exception("Invalid command.");
 		}
 	}
 
 	private void moveToArchive() {
-		setDisplayList(archiveTasks);
-
+		setDisplayList(DisplayList.ARCHIVE);
 	}
 
 	// the format will be "done <number>"
@@ -225,7 +229,7 @@ public class ControllerClass implements Controller {
 			archiveTasks.add(task);
 			tasks.remove(taskID);
 			displayMainList();
-			setRecentChange(taskID);
+			setRecentChange(taskID, tasks);
 		} else {
 			throw new Exception("Invalid arguments");
 		}
@@ -248,7 +252,6 @@ public class ControllerClass implements Controller {
 		} else {
 			return null;
 		}
-
 	}
 
 	// search for date and description
@@ -267,8 +270,16 @@ public class ControllerClass implements Controller {
 			listToDisplay = searchOnDate(date);
 			
 		}
-
-		setDisplayList(listToDisplay);
+		
+		//this is a quick fix
+		//TODO: generate and setResultList with string list with index(in origin list)
+		//with form [index]. [original string] (e.g. "1. desc%e%t%c")
+		//TODO: change TaskList to be able to store index
+		List<String> resultList = new ArrayList<String>();
+		for (Task task : listToDisplay) {
+			resultList.add(task.toString());
+		}
+		setResultList(resultList);
 	}
 
 
@@ -509,27 +520,13 @@ public class ControllerClass implements Controller {
 	}
 
 	private void updateUndoArchiveList() {
-		ArrayList<Task> item = new ArrayList<Task>();
-
-		for (int i = 0; i < archiveTasks.size(); i++)
-			item.add(cloneTask(archiveTasks.get(i)));
-
-		undoArchiveList.push(item);
+		undoArchiveList.push(archiveTasks.clone());
 	}
 
 	// push the current state to the undoList
 	// Tran Cong Thien
 	private void updateUndoList() {
-		ArrayList<Task> item = new ArrayList<Task>();
-		// copy content of tasks to item
-		for (int i = 0; i < tasks.size(); i++)
-			item.add(cloneTask(tasks.get(i)));
-
-		undoList.push(item);
-	}
-
-	private Task cloneTask(Task task) {
-		return new TaskClass(task.toString());
+		undoList.push(tasks.clone());
 	}
 
 	// undo command, the tasks will be replaced by the previous state
@@ -539,7 +536,7 @@ public class ControllerClass implements Controller {
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
-			setDisplayList(tasks);
+			setDisplayList(DisplayList.MAIN);
 		}
 	}
 
@@ -569,38 +566,8 @@ public class ControllerClass implements Controller {
 	 * @author Koh Xian Hui
 	 */
 	private void displayMainList() {
-		sortTasks(tasks);
-		setDisplayList(tasks);
-	}
-
-	/**
-	 * 
-	 */
-	private void sortTasks(ArrayList<Task> taskList) {
-		Collections.sort(taskList, (task1, task2) -> {
-			if (task1.isPrioritized() && !task2.isPrioritized()) {
-				return -1;
-			} else if (!task1.isPrioritized() && task2.isPrioritized()) {
-				return 1;
-			}
-
-			if (task1.getStartTime() == null && task2.getStartTime() != null) {
-				return 1;
-			} else if (task1.getStartTime() != null
-					&& task2.getStartTime() == null) {
-				return -1;
-			}
-
-			if (task1.getStartTime() == null && task2.getStartTime() == null) {
-				return task1.getDesc().compareTo(task2.getDesc());
-			} else {
-				Long thisDate = task1.getStartTime().getTime();
-				Long taskDate = task2.getStartTime().getTime();
-
-				return thisDate.compareTo(taskDate);
-			}
-
-		});
+		tasks.sort();
+		setDisplayList(DisplayList.MAIN);
 	}
 
 	/**
@@ -750,9 +717,9 @@ public class ControllerClass implements Controller {
 
 			taskNum -= 1;
 			if (taskNum >= tasks.size()) {
-				setRecentChange(tasks.size() - 1);
+				setRecentChange(tasks.size() - 1, tasks);
 			} else {
-				setRecentChange(taskNum);
+				setRecentChange(taskNum, tasks);
 			}
 
 		} catch (NumberFormatException e) {
@@ -780,6 +747,81 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
+	 * This method changes the attributes related to the changing of a page.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 * @throws Exception 
+	 */
+	private void changePage(String content) throws Exception {
+		String direction = content.trim();
+		changeCurrentPageNum(direction);
+	}
+	
+	/**
+	 * This method checks if it is valid to change the current page number and if so, changes the current page number.
+	 * @throws Exception
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void changeCurrentPageNum(String direction) throws Exception {
+		if(direction.equalsIgnoreCase("up")) {
+			if (checkValidPageUp()) {
+				currentPageNum--;
+				recentChange = 0;
+			} else {
+				throw new Exception("On first page.");
+			}
+		} else {
+			if (checkValidPageDown()) {
+				currentPageNum++;
+				recentChange = 0;
+			} else {
+				throw new Exception("On last page.");
+			}
+		}
+	}
+	
+	/**
+	 * This method checks if it is possible to go to the next page by checking if there are more tasks in the list which are pushed to the next page.
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageDown() {
+		Integer totalNumPages;
+		//quick fix 
+		//TODO: getCurDisplayList() after fix search
+		switch (displayListType) {
+			case MAIN:
+				totalNumPages = tasks.getTotalPageNum();
+				break;
+			case ARCHIVE:
+				totalNumPages = archiveTasks.getTotalPageNum();
+				break;
+			default:
+				totalNumPages = 0;
+				break;
+		}
+		if (currentPageNum < totalNumPages) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * This method checks if it is possible to go to the previous page. If currently on first page, it will return false.
+	 * Otherwise, it will return true.
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageUp() {
+		if (currentPageNum <= 1) {
+		return false;
+		} 
+		
+		return true;
+	}
+	
+	/**
 	 * This method updates the content stored.
 	 * 
 	 * @return void
@@ -787,8 +829,8 @@ public class ControllerClass implements Controller {
 	 */
 	private void updateStorage() {
 
-		storage.write(convertTaskListStringList(tasks));
-		storage.writeArchive(convertTaskListStringList(archiveTasks));
+		storage.write(tasks.getStringList());
+		storage.writeArchive(archiveTasks.getStringList());
 	}
 
 	/**
@@ -952,6 +994,8 @@ public class ControllerClass implements Controller {
 			return CommandType.POSTPONE;
 		} else if (operation.equalsIgnoreCase("archive")) {
 			return CommandType.ARCHIVE;
+		} else if (operation.equalsIgnoreCase("page")) {
+			return CommandType.CHANGEPAGE;
 		} else {
 			return CommandType.SEARCH;
 		}

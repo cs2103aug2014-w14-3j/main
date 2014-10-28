@@ -3,6 +3,7 @@ package storage;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,10 +22,10 @@ public class StoragePlusTest {
 	
 	@Test 
 	public void testEmptyListStorage() {
-		ArrayList<String> emptyList = new ArrayList<String>();
+		List<String> emptyList = new ArrayList<String>();
 		Storage storage = new StoragePlus();
 		storage.write(emptyList);
-		ArrayList<String> result = storage.read();
+		List<String> result = storage.read();
 		Assert.assertTrue("failure - should be empty", result.isEmpty());
 	}
 

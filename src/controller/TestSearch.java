@@ -1,7 +1,9 @@
 package controller;
 
 import static org.junit.Assert.*;
-import java.util.ArrayList;
+
+import java.util.List;
+
 import org.junit.Test;
 
 public class TestSearch {
@@ -18,7 +20,7 @@ public class TestSearch {
 	//return the task list
 	public void tesExactSearch() throws Exception{
 		Controller controller=new ControllerClass();
-		ArrayList<String> list;
+		List<String> list;
 		controller.execCmd("add go home");
 		controller.execCmd("add go to school and eat lunch");
 		//search for "go home"
@@ -35,7 +37,7 @@ public class TestSearch {
 	//the keyword is typed wrongly and the software will give the list of the tasks which are nearly matched
 	public void testNearMatchSearch() throws Exception{
 		Controller controller=new ControllerClass();
-		ArrayList<String> list;
+		List<String> list;
 		controller.execCmd("add go home");
 		controller.execCmd("add go to school and eat lunch");
 		//search for "eat lunch" but user types it as "ate lunchh";

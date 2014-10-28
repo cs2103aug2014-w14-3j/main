@@ -5,14 +5,13 @@ package ui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
@@ -29,7 +28,6 @@ public class Main extends Application{
 	private UIControl mainControl;
 	public Main() {
 		controller = ControllerClass.getInstance();
-		displayBuf = new ArrayList<String>();
 		log = new Log();
 		commandHistory = new ArrayList<String>();
 		noti = new Popup();	
@@ -143,7 +141,7 @@ public class Main extends Application{
 	private Integer historyPos;
 	
 	private Controller controller;
-	private ArrayList<String> displayBuf;
+	private List<String> displayBuf;
 	private Integer recentChange;
 	private Log log;
 }

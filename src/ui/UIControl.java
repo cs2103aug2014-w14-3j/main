@@ -5,7 +5,7 @@ package ui;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.List;
 
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -25,7 +25,7 @@ import javafx.geometry.Point2D;
  * @author Luo Shaohuai
  *
  */
-public class UIControl extends BorderPane {
+public class UIControl extends BorderPane {	
 	@FXML
 	private Text time;
 	
@@ -39,12 +39,12 @@ public class UIControl extends BorderPane {
 		displayCurTime();
 	}
 	
-	public void loadList(ArrayList<String> strList) {
-		loadList(strList, 0);
+	public void loadList(List<String> displayBuf) {
+		loadList(displayBuf, 0);
 	}
 	
-	public void loadList(ArrayList<String> strList, Integer recentChange) { 
-		ObservableList<String> observableList = FXCollections.observableArrayList(addNum(strList));
+	public void loadList(List<String> strList, Integer recentChange) { 
+		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
 		list.setItems(observableList);
 		list.setCellFactory((list) -> {
 			return new ListViewCell();
@@ -63,6 +63,8 @@ public class UIControl extends BorderPane {
 		
 		list.scrollTo(recentChange);
 		list.getSelectionModel().select(recentChange);
+		list.getSelectionModel().clearSelection();
+		input.requestFocus();
 	}
 	
 	public Point2D getInputPosition() {
@@ -87,14 +89,6 @@ public class UIControl extends BorderPane {
 				input.setText(value.onEventExec("DOWN"));
 			}
 		});
-	}
-	
-	private ArrayList<String> addNum(ArrayList<String> before) {
-		ArrayList<String> after = new ArrayList<String>();
-		for (int i = 0; i < before.size(); i++) {
-			after.add((i + 1) + ". " + before.get(i));
-		}
-		return after;
 	}
 	
 	private void displayCurTime() {
