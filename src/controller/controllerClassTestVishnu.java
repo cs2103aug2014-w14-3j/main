@@ -10,7 +10,7 @@ import org.junit.rules.ExpectedException;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for controller class for delete functionality 
+ * Unit tests for controller class for delete and edit functionality.
  * @author G. Vishnu Priya
  *
  */
