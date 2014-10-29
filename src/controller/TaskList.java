@@ -8,9 +8,9 @@ public interface TaskList {
 	
 	void addAll(List<String> strList);
 		
-	void update(Integer pos, Task task);
+	void set(int pos, Task task);
 	
-	void remove(Integer pos);
+	void remove(int pos);
 	
 	void sort();
 	
@@ -41,4 +41,6 @@ public interface TaskList {
 	Integer getIndexPageContainTask(Integer taskIndex);
 	
 	Integer getIndexTaskOnPage(Integer taskIndex);
+	
+	TaskList getOverdueTasks();
 }
