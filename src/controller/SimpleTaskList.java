@@ -5,6 +5,7 @@ package controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -140,11 +141,14 @@ public class SimpleTaskList implements TaskList {
 	public List<String> getPage(Integer pageNum) {
 		assert numTaskOnPage != null;
 		
+		if (getTotalPageNum() == 0) {
+			return new ArrayList<String>();
+		}
+		
 		if (pageNum < 0 || pageNum > getTotalPageNum()) {
 			throw new IndexOutOfBoundsException("Invalid Page Number");
 		}
 		
-		System.out.println("mark");
 		ArrayList<String> taskStrings = new ArrayList<String>();
 		Integer from = (pageNum - 1) * numTaskOnPage;
 		Integer to = Math.min(pageNum * numTaskOnPage, tasks.size());
@@ -167,6 +171,10 @@ public class SimpleTaskList implements TaskList {
 	@Override
 	public List<String> getNumberedPage(Integer pageNum) {
 		assert numTaskOnPage != null;
+		
+		if (getTotalPageNum() == 0) {
+			return new ArrayList<String>();
+		}
 		
 		if (pageNum < 0 || pageNum > getTotalPageNum()) {
 			throw new IndexOutOfBoundsException("Invalid Page Number");
@@ -198,6 +206,26 @@ public class SimpleTaskList implements TaskList {
 		}
 		
 		return taskIndex % numTaskOnPage;
+	}
+
+	@Override
+	public TaskList getOverdueTasks() {
+		int numOfTask = tasks.size();
+		Date current = new Date();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = tasks.get(i);
+			if (task.getDeadline() != null) {
+				if (task.getDeadline().compareTo(current) <= 0) {
+					Task withNum = task.clone();
+					withNum.setDesc((i + 1) + ". " + withNum.getDesc());
+					resultList.add(task);
+				}
+			}
+		}
+
+		return resultList;
 	}
 
 }
