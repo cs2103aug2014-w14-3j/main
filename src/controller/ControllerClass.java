@@ -41,7 +41,7 @@ public class ControllerClass implements Controller {
 	private static Controller theController = null;
 	private TaskList tasks;
 	private TaskList archiveTasks;
-	private List<String> resultTasks;
+	private TaskList resultTasks;
 
 	private DisplayList displayListType;
 	private Integer recentChange;
@@ -50,6 +50,7 @@ public class ControllerClass implements Controller {
 	private Storage storage;
 	private FixedSizeStack<TaskList> undoList;
 	private FixedSizeStack<TaskList> undoArchiveList;
+	//TODO: find a way to track recent changes
 	private FixedSizeStack<Integer> undoRecentChanges;
 
 	public ControllerClass() {
@@ -81,7 +82,7 @@ public class ControllerClass implements Controller {
 			return archiveTasks.getNumberedPage(currentPageNum);
 
 		case SEARCH:
-			return resultTasks;
+			return resultTasks.getPage(currentPageNum);
 		}
 		return null;
 	}
@@ -121,7 +122,7 @@ public class ControllerClass implements Controller {
 		resetRecentChange();
 	}
 
-	private void setResultList(List<String> list) {
+	private void setResultList(TaskList list) {
 		this.resultTasks = list;
 		setDisplayList(DisplayList.SEARCH);
 	}
@@ -257,8 +258,9 @@ public class ControllerClass implements Controller {
 
 	private void search(String content) {
 		TaskList resultList = processSearch(content);
-
-		setResultList(resultList.getStringList());
+		//TODO: move search to tasklist class
+		//TODO: add num in desc
+		setResultList(resultList);
 	}
 
 	private TaskList processSearch(String content) {
@@ -550,25 +552,7 @@ public class ControllerClass implements Controller {
 	// return the list of tasks that are overdue at current time
 	// Author: Tran Cong Thien
 	private void overDue() {
-		int numOfTask = tasks.size();
-		Date current = new Date();
-		ArrayList<Task> resultList = new ArrayList<Task>();
-
-		for (int i = 0; i < numOfTask; i++) {
-			Task task = tasks.get(i);
-			if (task.getDeadline() != null) {
-
-				if (task.getDeadline().compareTo(current) <= 0) {
-					resultList.add(task);
-				}
-			}
-		}
-
-		List<String> listToDisplay = new ArrayList<String>();
-		for (Task task : resultList) {
-			listToDisplay.add(task.toString());
-		}
-		setResultList(listToDisplay);
+		setResultList(tasks.getOverdueTasks());
 	}
 
 	private void updateForUndo() {

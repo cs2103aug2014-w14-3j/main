@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import controller.Controller;
 import controller.ControllerClass;
 
@@ -37,6 +38,7 @@ public class Main extends Application{
 	public void start(Stage stage) { 
 		try {
 			this.stage = stage;
+			//stage.initStyle(StageStyle.UNDECORATED);
 			stage.setScene(loadScene());
 		} catch (IOException e) {
 			e.printStackTrace();
