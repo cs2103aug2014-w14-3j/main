@@ -124,6 +124,8 @@ public class ControllerClass implements Controller {
 
 	private void setResultList(TaskList list) {
 		this.resultTasks = list;
+		resultTasks.setNumTaskOnPage(numTasksInSinglePage);
+		resetRecentChange();
 		setDisplayList(DisplayList.SEARCH);
 	}
 
@@ -820,13 +822,15 @@ public class ControllerClass implements Controller {
 			} else {
 				throw new Exception("On first page.");
 			}
-		} else {
+		} else if (direction.equalsIgnoreCase("down")) {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
 			} else {
 				throw new Exception("On last page.");
 			}
+		} else {
+			throw new Exception("Page up/down");
 		}
 	}
 
