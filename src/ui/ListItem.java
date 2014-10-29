@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Date;
 
 import javafx.fxml.FXML;
@@ -20,7 +19,7 @@ import javafx.scene.text.TextFlow;
  * @author Luo Shaohuai
  *
  */
-public class ListItem{
+class ListItem{
 	@FXML
 	private HBox hbox;
 	

@@ -107,4 +107,8 @@ public class TaskClass implements Task {
 				(isNullEndTime? " " : endTime.getTime()) + "%" +
 				isPrioritized;
 	}
+	
+	public Task clone() {
+		return new TaskClass(toString());
+	}
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class StoragePlus implements Storage {
@@ -15,9 +16,9 @@ public class StoragePlus implements Storage {
 	
 	private final static String archiveFile="Archive.txt";
 
-	public ArrayList<String> read() {
+	public List<String> read() {
 
-		ArrayList<String> toDoList = new ArrayList<String>();
+		List<String> toDoList = new ArrayList<String>();
 
 		try {
 			Scanner scanner = new Scanner(new File(fileName));
@@ -40,9 +41,9 @@ public class StoragePlus implements Storage {
 	}
 	
 	
-	public ArrayList<String> readArchive(){
+	public List<String> readArchive(){
 		
-		ArrayList<String> archiveList=new ArrayList<String>();
+		List<String> archiveList=new ArrayList<String>();
 		
 		try{
 			Scanner scanner=new Scanner(new File(archiveFile));
@@ -66,7 +67,7 @@ public class StoragePlus implements Storage {
 	// before write to the list, move the content of current list to
 	// "ToDoList.backup"
 
-	public void write(ArrayList<String> list) {
+	public void write(List<String> list) {
 
 		File backUp = new File(backUpFile);
 		File file = new File(fileName);
@@ -113,7 +114,7 @@ public class StoragePlus implements Storage {
 	
 	
 	//wrtie the archive list to the storage file
-	public void writeArchive(ArrayList<String> archiveList){
+	public void writeArchive(List<String> archiveList){
 		
 		File archive=new File(archiveFile);
 		

@@ -5,7 +5,7 @@ package ui;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.List;
 
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -19,12 +19,13 @@ import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 
 /**
  * @author Luo Shaohuai
  *
  */
-public class UIControl extends BorderPane {
+public class UIControl extends BorderPane {	
 	@FXML
 	private Text time;
 	
@@ -33,22 +34,17 @@ public class UIControl extends BorderPane {
 	
 	@FXML
 	private TextField input;
-	
+		
 	public UIControl() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss a");
-		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
-			time.setText(format.format(LocalDateTime.now()));
-		}));
-		timeline.setCycleCount(Animation.INDEFINITE);
-		timeline.play();
+		displayCurTime();
 	}
 	
-	public void loadList(ArrayList<String> strList) {
-		loadList(strList, 0);
+	public void loadList(List<String> displayBuf) {
+		loadList(displayBuf, 0);
 	}
 	
-	public void loadList(ArrayList<String> strList, Integer recentChange) { 
-		ObservableList<String> observableList = FXCollections.observableArrayList(addNum(strList));
+	public void loadList(List<String> strList, Integer recentChange) { 
+		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
 		list.setItems(observableList);
 		list.setCellFactory((list) -> {
 			return new ListViewCell();
@@ -67,34 +63,40 @@ public class UIControl extends BorderPane {
 		
 		list.scrollTo(recentChange);
 		list.getSelectionModel().select(recentChange);
+		list.getSelectionModel().clearSelection();
+		input.requestFocus();
 	}
 	
-	public void setInputOnEnter(OnKeyEvent value) {
+	public Point2D getInputPosition() {
+		return input.localToScene(0.0, 0.0);
+	}
+	
+	public void setInputOnEnter(OnEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
-				value.onKey(input.getText());
+				value.onEventExec(input.getText());
 				input.clear();
 			}
 		});
 	}
 	
-	public void setInputOnKeyUPDown(OnKeyEvent value) {
+	public void setInputOnKeyUPDown(OnEvent value) {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
-				input.setText(value.onKey("UP"));
+				input.setText(value.onEventExec("UP"));
 			}
 			if (event.getCode() == KeyCode.DOWN) {
-				input.setText(value.onKey("DOWN"));
+				input.setText(value.onEventExec("DOWN"));
 			}
 		});
 	}
 	
-	
-	private ArrayList<String> addNum(ArrayList<String> before) {
-		ArrayList<String> after = new ArrayList<String>();
-		for (int i = 0; i < before.size(); i++) {
-			after.add((i + 1) + ". " + before.get(i));
-		}
-		return after;
+	private void displayCurTime() {
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss a");
+		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
+			time.setText(format.format(LocalDateTime.now()));
+		}));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		timeline.play();
 	}
 }

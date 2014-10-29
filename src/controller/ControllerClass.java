@@ -3,7 +3,6 @@ package controller;
 import controller.Task.TaskType;
 import storage.Storage;
 import storage.StoragePlus;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -22,40 +21,47 @@ import com.joestelmach.natty.*;
 
 /**
  * 
- *
+ * 
  */
-
 
 public class ControllerClass implements Controller {
 
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE
+	};
+
+	enum DisplayList {
+		MAIN, ARCHIVE, SEARCH
 	};
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int maxNumOfUndo = 40;
+	private static final int numTasksInSinglePage = 10;
 
 	private static Controller theController = null;
-	private ArrayList<Task> tasks;
-	private ArrayList<Task> archiveTasks;
+	private TaskList tasks;
+	private TaskList archiveTasks;
+	private List<String> resultTasks;
 
-	private ArrayList<String> displayList;
+	private DisplayList displayListType;
 	private Integer recentChange;
+	private Integer currentPageNum;
 
 	private Storage storage;
-	private FixedSizeStack<ArrayList<Task>> undoList;
-	private FixedSizeStack<ArrayList<Task>> undoArchiveList;
+	private FixedSizeStack<TaskList> undoList;
+	private FixedSizeStack<TaskList> undoArchiveList;
 	private FixedSizeStack<Integer> undoRecentChanges;
 
 	public ControllerClass() {
 		storage = createStorageObject();
-		tasks = new ArrayList<Task>();
-		archiveTasks = new ArrayList<Task>();
-		recentChange = 0;
-		undoList = new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
-		undoArchiveList = new FixedSizeStack<ArrayList<Task>>(maxNumOfUndo);
+		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
+		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoRecentChanges = new FixedSizeStack<Integer>(maxNumOfUndo);
+
 		getFileContent();
+		setNumTaskOnPage(numTasksInSinglePage);
+		displayListType = DisplayList.MAIN;
+		resetRecentChange();
 	}
 
 	// This method starts execution of each user command by first retrieving
@@ -66,8 +72,23 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	public ArrayList<String> getCurrentList() {
-		return displayList;
+	public List<String> getCurrentList() {
+		switch (displayListType) {
+		case MAIN:
+			return tasks.getNumberedPage(currentPageNum);
+
+		case ARCHIVE:
+			return archiveTasks.getNumberedPage(currentPageNum);
+
+		case SEARCH:
+			return resultTasks;
+		}
+		return null;
+	}
+
+	private void setNumTaskOnPage(Integer number) {
+		tasks.setNumTaskOnPage(number);
+		archiveTasks.setNumTaskOnPage(number);
 	}
 
 	/**
@@ -77,11 +98,8 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void getFileContent() {
-		ArrayList<String> stringList;
-		stringList = storage.read();
-		tasks = convertStringListTaskList(stringList);
-		stringList = storage.readArchive();
-		archiveTasks = convertStringListTaskList(stringList);
+		tasks = new SimpleTaskList(storage.read());
+		archiveTasks = new SimpleTaskList(storage.readArchive());
 	}
 
 	/**
@@ -90,55 +108,38 @@ public class ControllerClass implements Controller {
 	 * @return StoragePlus Object
 	 * @author G. Vishnu Priya
 	 */
-	private StoragePlus createStorageObject() {
+	private Storage createStorageObject() {
 		return new StoragePlus();
-	}
-
-	private ArrayList<Task> convertStringListTaskList(
-			ArrayList<String> taskStrings) {
-		ArrayList<Task> result = new ArrayList<Task>();
-
-		for (String str : taskStrings) {
-			result.add(convertStringToTask(str));
-		}
-
-		return result;
-	}
-
-	private Task convertStringToTask(String taskString) {
-		return new TaskClass(taskString);
-	}
-
-	// This method converts tasks from tasks list to taskStrings list.
-	private ArrayList<String> convertTaskListStringList(ArrayList<Task> taskList) {
-		ArrayList<String> taskStrings = new ArrayList<String>();
-		for (Task task : taskList) {
-			taskStrings.add(convertTaskToString(task));
-		}
-
-		return taskStrings;
-	}
-
-	// This method converts tasks to strings to be stored in taskStrings list.
-	private String convertTaskToString(Task task) {
-		return task.toString();
 	}
 
 	/**
 	 * @author Luo Shaohuai
 	 * @param taskList
 	 */
-	private void setDisplayList(ArrayList<Task> taskList) {
-		displayList = convertTaskListStringList(taskList);
+	private void setDisplayList(DisplayList listType) {
+		this.displayListType = listType;
+		resetRecentChange();
+	}
+
+	private void setResultList(List<String> list) {
+		this.resultTasks = list;
+		setDisplayList(DisplayList.SEARCH);
+	}
+
+	private void resetRecentChange() {
+		currentPageNum = 1;
 		recentChange = 0;
 	}
 
-	private void setRecentChange(Task task, ArrayList<Task> taskList) {
-		recentChange = taskList.indexOf(task);
+	private void setRecentChange(Task task, TaskList taskList) {
+		taskList.sort();
+		Integer index = taskList.indexOf(task);
+		setRecentChange(index, taskList);
 	}
 
-	private void setRecentChange(Integer recent) {
-		recentChange = recent;
+	private void setRecentChange(Integer recent, TaskList taskList) {
+		currentPageNum = taskList.getIndexPageContainTask(recent);
+		recentChange = taskList.getIndexTaskOnPage(recent);
 	}
 
 	// This method gets the command type of user input and further processes the
@@ -153,12 +154,11 @@ public class ControllerClass implements Controller {
 			processInput(commandType, content);
 		}
 		updateStorage();
-
 	}
 
 	// This method returns the type of operation to be carried out, either add,
 	// delete, edit or display.
-	public String getOperation(String command) {
+	private String getOperation(String command) {
 		String[] splitCommandIntoWords = command.split(" ");
 		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
 		return operation;
@@ -198,6 +198,9 @@ public class ControllerClass implements Controller {
 		case ARCHIVE:
 			moveToArchive();
 			break;
+		case OVERDUE:
+			overDue();
+			break;
 		case POSTPONE:
 			updateForUndo();
 			postpone(content);
@@ -206,14 +209,16 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
+		case CHANGEPAGE:
+			changePage(content);
+			break;
 		default:
 			throw new Exception("Invalid command.");
 		}
 	}
 
 	private void moveToArchive() {
-		setDisplayList(archiveTasks);
-
+		setDisplayList(DisplayList.ARCHIVE);
 	}
 
 	// the format will be "done <number>"
@@ -225,7 +230,7 @@ public class ControllerClass implements Controller {
 			archiveTasks.add(task);
 			tasks.remove(taskID);
 			displayMainList();
-			setRecentChange(taskID);
+			setRecentChange(taskID, tasks);
 		} else {
 			throw new Exception("Invalid arguments");
 		}
@@ -248,40 +253,86 @@ public class ControllerClass implements Controller {
 		} else {
 			return null;
 		}
+	}
 
+	private void search(String content) {
+		TaskList resultList = processSearch(content);
+
+		setResultList(resultList.getStringList());
+	}
+
+	private TaskList processSearch(String content) {
+
+		String desc = "";
+		Integer singlePos = 0;
+		Integer doublePos = 0;
+		singlePos = content.indexOf('\'', 0);
+		doublePos = content.indexOf('\"', 0);
+		if (singlePos == -1 && doublePos == -1) {
+			// return normal case, just single search(content);
+			desc = content;
+			return simpleSearch(content, tasks);
+		} else {
+
+			String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+			Matcher matcher = Pattern.compile(regex).matcher(content);
+			while (matcher.find()) {
+				desc += content.substring(matcher.start() + 1,
+						matcher.end() - 1) + " ";
+			}
+			if (desc.length() > 0) {
+				desc = desc.substring(0, desc.length() - 1);
+				content = content.replaceAll(regex, "");
+			}
+			// now content is time
+
+			return complexSearch(desc, content, tasks);
+		}
 	}
 
 	// search for date and description
 	// if the user types in one date only,
 	// the software will understand as search for date
-	private void search(String content) {
-		ArrayList<Task> listToDisplay = null;
-		String[] para=content.split("\\s+");
-		
-		Date date = timeParser(content);
-		if (date == null) {
-			listToDisplay = searchDesc(content);
-		} else if (para[0].equalsIgnoreCase("by")) {
-			listToDisplay = searchByDate(date);
-		} else {
-			listToDisplay = searchOnDate(date);
-			
-		}
+	private TaskList complexSearch(String desc, String content,
+			TaskList listToSearch) {
 
-		setDisplayList(listToDisplay);
+		TaskList resultForTime = simpleSearch(content, listToSearch);
+		// search for time first
+
+		return simpleSearch(desc, resultForTime);
+
 	}
 
+	private TaskList simpleSearch(String content, TaskList listToSearch) {
+
+		TaskList listToDisplay = null;
+
+		Date date = timeParser(content);
+		if (date == null) {
+			listToDisplay = searchDesc(content, listToSearch);
+		} else {
+			String[] para = content.trim().split("\\s+");
+			if (para[0].equalsIgnoreCase("by")) {
+
+				listToDisplay = searchByDate(date, listToSearch);
+			} else {
+				listToDisplay = searchOnDate(date, listToSearch);
+			}
+		}
+
+		return listToDisplay;
+	}
 
 	// search on the exact date
-	private ArrayList<Task> searchOnDate(Date deadline) {
-		int numOfTask = tasks.size();
-		ArrayList<Task> resultList = new ArrayList<Task>();
+	private TaskList searchOnDate(Date deadline, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
 
 		for (int i = 0; i < numOfTask; i++) {
-			Task task = tasks.get(i);
+			Task task = listToSearch.get(i);
 			if (task.getDeadline() != null) {
 
-				if (compare(task.getDeadline(), deadline)==0) {
+				if (compare(task.getDeadline(), deadline) == 0) {
 					resultList.add(task);
 				}
 			}
@@ -290,45 +341,44 @@ public class ControllerClass implements Controller {
 		return resultList;
 	}
 
-	private ArrayList<Task> searchByDate(Date deadline) {
-		int numOfTask = tasks.size();
-		ArrayList<Task> resultList = new ArrayList<Task>();
+	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
 
 		for (int i = 0; i < numOfTask; i++) {
-			Task task = tasks.get(i);
-			if (task.getDeadline()!=null){
-				
-			if (compare(task.getDeadline(),deadline) <= 0) {
-				resultList.add(task);
+			Task task = listToSearch.get(i);
+			if (task.getDeadline() != null) {
+
+				if (compare(task.getDeadline(), deadline) <= 0) {
+					resultList.add(task);
+				}
 			}
-		}
 		}
 
 		return resultList;
 	}
-	
-	
-	//return negative if  date1 is before date2
-	//positive if date1 is after date2
-	//0 if they are the same
-	
-	private int compare(Date date1, Date date2){
-		
+
+	// return negative if date1 is before date2
+	// positive if date1 is after date2
+	// 0 if they are the same
+
+	private int compare(Date date1, Date date2) {
+
 		Calendar cal1 = Calendar.getInstance();
 		cal1.setTime(date1);
 
 		Calendar cal2 = Calendar.getInstance();
 		cal2.setTime(date2);
-		
-		if (cal1.get(Calendar.YEAR) !=cal2.get(Calendar.YEAR)){
-			return cal1.get(Calendar.YEAR)-cal2.get(Calendar.YEAR);
-		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)){
+
+		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
+			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
 			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
 		} else {
-			return cal1.get(Calendar.DAY_OF_MONTH)- cal2.get(Calendar.DAY_OF_MONTH);
+			return cal1.get(Calendar.DAY_OF_MONTH)
+					- cal2.get(Calendar.DAY_OF_MONTH);
 		}
-		
-		
+
 	}
 
 	/**
@@ -339,26 +389,26 @@ public class ControllerClass implements Controller {
 	 * @author: Tran Cong Thien
 	 */
 
-	private ArrayList<Task> searchDesc(String keyWord) {
-		ArrayList<Task> resultList = exactSearch(keyWord);
+	private TaskList searchDesc(String keyWord, TaskList listToSearch) {
+		TaskList resultList = exactSearch(keyWord, listToSearch);
 
 		if (resultList.size() == 0) {
 			// exactSearch list is empty
-			return nearMatchSearch(keyWord);
+			return nearMatchSearch(keyWord, listToSearch);
 		} else {
 			return resultList;
 		}
 
 	}
 
-	private ArrayList<Task> exactSearch(String keyWord) {
-		ArrayList<Task> resultList = new ArrayList<Task>();
+	private TaskList exactSearch(String keyWord, TaskList listToSearch) {
+		TaskList resultList = new SimpleTaskList();
 
-		int numOfTask = tasks.size();
+		int numOfTask = listToSearch.size();
 		for (int i = 0; i < numOfTask; i++) {
-			if (isExact(keyWord.toLowerCase(), tasks.get(i).getDesc()
+			if (isExact(keyWord.toLowerCase(), listToSearch.get(i).getDesc()
 					.toLowerCase())) {
-				resultList.add(tasks.get(i));
+				resultList.add(listToSearch.get(i));
 			}
 		}
 
@@ -384,16 +434,16 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	private ArrayList<Task> nearMatchSearch(String key) {
-		ArrayList<Task> resultList = new ArrayList<Task>();
-		int numOfTask = tasks.size();
+	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
+		TaskList resultList = new SimpleTaskList();
+		int numOfTask = listToSearch.size();
 		String[] str = key.trim().split("\\s+");
 		int keyLen = str.length;
 
 		ArrayList<Triple> list = new ArrayList<Triple>();
 
 		for (int i = 0; i < numOfTask; i++) {
-			Task task = tasks.get(i);
+			Task task = listToSearch.get(i);
 			Pair result = searchScore(key.toLowerCase(), task.getDesc().trim()
 					.toLowerCase());
 			if (result.getFirst() > keyLen / 2) {
@@ -413,7 +463,6 @@ public class ControllerClass implements Controller {
 		}
 
 		return resultList;
-		// setDisplayList(resultList);
 	}
 
 	private Pair searchScore(String keyword, String strToSearch) {
@@ -498,6 +547,30 @@ public class ControllerClass implements Controller {
 		return editDistance[sourceStrLen][destStrLen];
 	}
 
+	// return the list of tasks that are overdue at current time
+	// Author: Tran Cong Thien
+	private void overDue() {
+		int numOfTask = tasks.size();
+		Date current = new Date();
+		ArrayList<Task> resultList = new ArrayList<Task>();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = tasks.get(i);
+			if (task.getDeadline() != null) {
+
+				if (task.getDeadline().compareTo(current) <= 0) {
+					resultList.add(task);
+				}
+			}
+		}
+
+		List<String> listToDisplay = new ArrayList<String>();
+		for (Task task : resultList) {
+			listToDisplay.add(task.toString());
+		}
+		setResultList(listToDisplay);
+	}
+
 	private void updateForUndo() {
 		updateUndoList();
 		updateUndoArchiveList();
@@ -509,27 +582,13 @@ public class ControllerClass implements Controller {
 	}
 
 	private void updateUndoArchiveList() {
-		ArrayList<Task> item = new ArrayList<Task>();
-
-		for (int i = 0; i < archiveTasks.size(); i++)
-			item.add(cloneTask(archiveTasks.get(i)));
-
-		undoArchiveList.push(item);
+		undoArchiveList.push(archiveTasks.clone());
 	}
 
 	// push the current state to the undoList
 	// Tran Cong Thien
 	private void updateUndoList() {
-		ArrayList<Task> item = new ArrayList<Task>();
-		// copy content of tasks to item
-		for (int i = 0; i < tasks.size(); i++)
-			item.add(cloneTask(tasks.get(i)));
-
-		undoList.push(item);
-	}
-
-	private Task cloneTask(Task task) {
-		return new TaskClass(task.toString());
+		undoList.push(tasks.clone());
 	}
 
 	// undo command, the tasks will be replaced by the previous state
@@ -539,7 +598,7 @@ public class ControllerClass implements Controller {
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
-			setDisplayList(tasks);
+			setDisplayList(DisplayList.MAIN);
 		}
 	}
 
@@ -569,38 +628,8 @@ public class ControllerClass implements Controller {
 	 * @author Koh Xian Hui
 	 */
 	private void displayMainList() {
-		sortTasks(tasks);
-		setDisplayList(tasks);
-	}
-
-	/**
-	 * 
-	 */
-	private void sortTasks(ArrayList<Task> taskList) {
-		Collections.sort(taskList, (task1, task2) -> {
-			if (task1.isPrioritized() && !task2.isPrioritized()) {
-				return -1;
-			} else if (!task1.isPrioritized() && task2.isPrioritized()) {
-				return 1;
-			}
-
-			if (task1.getStartTime() == null && task2.getStartTime() != null) {
-				return 1;
-			} else if (task1.getStartTime() != null
-					&& task2.getStartTime() == null) {
-				return -1;
-			}
-
-			if (task1.getStartTime() == null && task2.getStartTime() == null) {
-				return task1.getDesc().compareTo(task2.getDesc());
-			} else {
-				Long thisDate = task1.getStartTime().getTime();
-				Long taskDate = task2.getStartTime().getTime();
-
-				return thisDate.compareTo(taskDate);
-			}
-
-		});
+		tasks.sort();
+		setDisplayList(DisplayList.MAIN);
 	}
 
 	/**
@@ -750,9 +779,9 @@ public class ControllerClass implements Controller {
 
 			taskNum -= 1;
 			if (taskNum >= tasks.size()) {
-				setRecentChange(tasks.size() - 1);
+				setRecentChange(tasks.size() - 1, tasks);
 			} else {
-				setRecentChange(taskNum);
+				setRecentChange(taskNum, tasks);
 			}
 
 		} catch (NumberFormatException e) {
@@ -780,6 +809,88 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
+	 * This method changes the attributes related to the changing of a page.
+	 * 
+	 * @return void
+	 * @author G. Vishnu Priya
+	 * @throws Exception
+	 */
+	private void changePage(String content) throws Exception {
+		String direction = content.trim();
+		changeCurrentPageNum(direction);
+	}
+
+	/**
+	 * This method checks if it is valid to change the current page number and
+	 * if so, changes the current page number.
+	 * 
+	 * @throws Exception
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void changeCurrentPageNum(String direction) throws Exception {
+		if (direction.equalsIgnoreCase("up")) {
+			if (checkValidPageUp()) {
+				currentPageNum--;
+				recentChange = 0;
+			} else {
+				throw new Exception("On first page.");
+			}
+		} else {
+			if (checkValidPageDown()) {
+				currentPageNum++;
+				recentChange = 0;
+			} else {
+				throw new Exception("On last page.");
+			}
+		}
+	}
+
+	/**
+	 * This method checks if it is possible to go to the next page by checking
+	 * if there are more tasks in the list which are pushed to the next page.
+	 * 
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageDown() {
+		Integer totalNumPages;
+		// quick fix
+		// TODO: getCurDisplayList() after fix search
+		switch (displayListType) {
+		case MAIN:
+			totalNumPages = tasks.getTotalPageNum();
+			break;
+		case ARCHIVE:
+			totalNumPages = archiveTasks.getTotalPageNum();
+			break;
+		default:
+			totalNumPages = 0;
+			break;
+		}
+		if (currentPageNum < totalNumPages) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * This method checks if it is possible to go to the previous page. If
+	 * currently on first page, it will return false. Otherwise, it will return
+	 * true.
+	 * 
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
+	private boolean checkValidPageUp() {
+		if (currentPageNum <= 1) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * This method updates the content stored.
 	 * 
 	 * @return void
@@ -787,8 +898,8 @@ public class ControllerClass implements Controller {
 	 */
 	private void updateStorage() {
 
-		storage.write(convertTaskListStringList(tasks));
-		storage.writeArchive(convertTaskListStringList(archiveTasks));
+		storage.write(tasks.getStringList());
+		storage.writeArchive(archiveTasks.getStringList());
 	}
 
 	/**
@@ -952,6 +1063,10 @@ public class ControllerClass implements Controller {
 			return CommandType.POSTPONE;
 		} else if (operation.equalsIgnoreCase("archive")) {
 			return CommandType.ARCHIVE;
+		} else if (operation.equalsIgnoreCase("overdue")) {
+			return CommandType.OVERDUE;
+		} else if (operation.equalsIgnoreCase("page")) {
+			return CommandType.CHANGEPAGE;
 		} else {
 			return CommandType.SEARCH;
 		}

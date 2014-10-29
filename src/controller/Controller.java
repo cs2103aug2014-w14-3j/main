@@ -3,7 +3,7 @@
  */
 package controller;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -31,12 +31,6 @@ public interface Controller {
 	 */
 	public Integer execCmd(String cmd) throws Exception;
 	
-	public ArrayList<String> getCurrentList();
-	
-	/**
-	 * List of commands
-	 */
-	static final String CMD_ADD= "add";
-	static final String CMD_LIST= "list";
-	//TO-DO
+	public List<String> getCurrentList();
+
 }

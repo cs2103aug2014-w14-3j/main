@@ -1,6 +1,6 @@
 package storage;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This interface represent the storage
@@ -18,8 +18,8 @@ public interface Storage {
 	 * 
 	 * @return ArrayList<String>
 	 */
-	ArrayList<String> read();
-	ArrayList<String> readArchive();
+	List<String> read();
+	List<String> readArchive();
 
 	/**
 	 * This method store the list of string into the storage
@@ -27,7 +27,7 @@ public interface Storage {
 	 * @param list
 	 *            : list of string representation of Tasks
 	 */
-	void write(ArrayList<String> list);
-	void writeArchive(ArrayList<String> archiveList);
+	void write(List<String> list);
+	void writeArchive(List<String> archiveList);
 }
 
