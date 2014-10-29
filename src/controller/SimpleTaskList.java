@@ -44,12 +44,12 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	@Override
-	public void update(Integer pos, Task task) {
+	public void set(int pos, Task task) {
 		tasks.set(pos, task);
 	}
 
 	@Override
-	public void remove(Integer pos) {
+	public void remove(int pos) {
 		tasks.remove(pos);
 	}
 
@@ -70,7 +70,9 @@ public class SimpleTaskList implements TaskList {
 	
 	@Override
 	public TaskList clone() {
-		return new SimpleTaskList(getStringList());
+		TaskList clone = new SimpleTaskList(getStringList());
+		clone.setNumTaskOnPage(numTaskOnPage);
+		return clone;
 	}
 
 
