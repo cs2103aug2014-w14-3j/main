@@ -63,7 +63,7 @@ public class UIControl extends BorderPane {
 		
 		list.scrollTo(recentChange);
 		list.getSelectionModel().select(recentChange);
-		list.getSelectionModel().clearSelection();
+		//list.getSelectionModel().clearSelection();
 		input.requestFocus();
 	}
 	
