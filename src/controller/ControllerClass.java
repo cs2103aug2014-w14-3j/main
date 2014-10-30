@@ -3,11 +3,14 @@ package controller;
 import controller.Task.TaskType;
 import storage.Storage;
 import storage.StoragePlus;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +28,19 @@ import com.joestelmach.natty.*;
  */
 
 public class ControllerClass implements Controller {
-
+	
+	public static final String CMD_ADD = "add";
+	public static final String CMD_DELETE = "delete";
+	public static final String CMD_EDIT = "edit";
+	public static final String CMD_LIST1 = "list";
+	public static final String CMD_LIST2 = "display";
+	public static final String CMD_UNDO = "undo";
+	public static final String CMD_DONE = "done";
+	public static final String CMD_POSTPONE = "pp";
+	public static final String CMD_ARCHIVE = "archive";
+	public static final String CMD_OVERDUE = "overdue";
+	public static final String CMD_PAGE = "page";
+	
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE
 	};
@@ -33,6 +48,24 @@ public class ControllerClass implements Controller {
 	enum DisplayList {
 		MAIN, ARCHIVE, SEARCH
 	};
+	
+	public static final Map<String, CommandType> commandMap;
+	
+	static {
+		Map<String, CommandType> aMap = new HashMap<>();
+		aMap.put(CMD_ADD, CommandType.ADD);
+		aMap.put(CMD_DELETE, CommandType.DELETE);
+		aMap.put(CMD_EDIT, CommandType.EDIT);
+		aMap.put(CMD_POSTPONE, CommandType.POSTPONE);
+		aMap.put(CMD_LIST1, CommandType.DISPLAY);
+		aMap.put(CMD_LIST2, CommandType.DISPLAY);
+		aMap.put(CMD_UNDO, CommandType.UNDO);
+		aMap.put(CMD_ARCHIVE, CommandType.ARCHIVE);
+		aMap.put(CMD_DONE, CommandType.DONE);
+		aMap.put(CMD_PAGE, CommandType.CHANGEPAGE);
+		aMap.put(CMD_OVERDUE, CommandType.OVERDUE);
+		commandMap = Collections.unmodifiableMap(aMap);
+	}
 
 	private static final int POSITION_OF_OPERATION = 0;
 	private static final int maxNumOfUndo = 40;
@@ -50,14 +83,11 @@ public class ControllerClass implements Controller {
 	private Storage storage;
 	private FixedSizeStack<TaskList> undoList;
 	private FixedSizeStack<TaskList> undoArchiveList;
-	//TODO: find a way to track recent changes
-	private FixedSizeStack<Integer> undoRecentChanges;
 
 	public ControllerClass() {
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);
-		undoRecentChanges = new FixedSizeStack<Integer>(maxNumOfUndo);
 
 		getFileContent();
 		setNumTaskOnPage(numTasksInSinglePage);
@@ -84,6 +114,24 @@ public class ControllerClass implements Controller {
 		case SEARCH:
 			return resultTasks.getPage(currentPageNum);
 		}
+		return null;
+	}
+	
+	public List<String> suggest(String content) {
+		//TODO;
+		List<String> suggestList = new ArrayList<String>();
+		
+		//suggest commands
+		for (String str : commandMap.keySet()) {
+			if (str.indexOf(content) == 0) {
+				suggestList.add(str);
+			}
+		}
+		
+		//suggest search
+		TaskList resultList = processSearch(content);
+		suggestList.addAll(resultList.getStringList());
+		
 		return null;
 	}
 
@@ -560,11 +608,6 @@ public class ControllerClass implements Controller {
 	private void updateForUndo() {
 		updateUndoList();
 		updateUndoArchiveList();
-		updateUndoRecentChanges();
-	}
-
-	private void updateUndoRecentChanges() {
-		undoRecentChanges.push(recentChange);
 	}
 
 	private void updateUndoArchiveList() {
@@ -585,6 +628,7 @@ public class ControllerClass implements Controller {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
 			setDisplayList(DisplayList.MAIN);
+			resetRecentChange();
 		}
 	}
 
@@ -1034,26 +1078,26 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private CommandType matchCommandType(String operation) {
-		if (operation.equalsIgnoreCase("add")) {
+		if (operation.equalsIgnoreCase(CMD_ADD)) {
 			return CommandType.ADD;
-		} else if (operation.equalsIgnoreCase("delete")) {
+		} else if (operation.equalsIgnoreCase(CMD_DELETE)) {
 			return CommandType.DELETE;
-		} else if (operation.equalsIgnoreCase("edit")) {
+		} else if (operation.equalsIgnoreCase(CMD_EDIT)) {
 			return CommandType.EDIT;
-		} else if ((operation.equalsIgnoreCase("display"))
-				|| (operation.equalsIgnoreCase("list"))) {
+		} else if ((operation.equalsIgnoreCase(CMD_LIST1))
+				|| (operation.equalsIgnoreCase(CMD_LIST2))) {
 			return CommandType.DISPLAY;
-		} else if (operation.equalsIgnoreCase("undo")) {
+		} else if (operation.equalsIgnoreCase(CMD_UNDO)) {
 			return CommandType.UNDO;
-		} else if (operation.equalsIgnoreCase("done")) {
+		} else if (operation.equalsIgnoreCase(CMD_DONE)) {
 			return CommandType.DONE;
-		} else if (operation.equalsIgnoreCase("pp")) {
+		} else if (operation.equalsIgnoreCase(CMD_POSTPONE)) {
 			return CommandType.POSTPONE;
-		} else if (operation.equalsIgnoreCase("archive")) {
+		} else if (operation.equalsIgnoreCase(CMD_ARCHIVE)) {
 			return CommandType.ARCHIVE;
-		} else if (operation.equalsIgnoreCase("overdue")) {
+		} else if (operation.equalsIgnoreCase(CMD_OVERDUE)) {
 			return CommandType.OVERDUE;
-		} else if (operation.equalsIgnoreCase("page")) {
+		} else if (operation.equalsIgnoreCase(CMD_PAGE)) {
 			return CommandType.CHANGEPAGE;
 		} else {
 			return CommandType.SEARCH;

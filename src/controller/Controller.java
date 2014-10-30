@@ -18,8 +18,6 @@ import java.util.List;
  */
 public interface Controller {
 	
-	public static final Integer taskPerPage = 10;
-	
 	/**
 	 * This method translate and execute a command
 	 * The command may or may not be a valid command
@@ -32,5 +30,6 @@ public interface Controller {
 	public Integer execCmd(String cmd) throws Exception;
 	
 	public List<String> getCurrentList();
-
+	
+	public List<String> suggest(String content);
 }
