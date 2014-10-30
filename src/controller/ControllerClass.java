@@ -1,20 +1,24 @@
 package controller;
 
-import controller.Task.TaskType;
-import storage.Storage;
-import storage.StoragePlus;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.joestelmach.natty.*;
+import storage.Storage;
+import storage.StoragePlus;
+
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
+
+import controller.Task.TaskType;
 
 /*
  * This is the class for the Controller, which serves as the component for logic in the software.
@@ -274,17 +278,30 @@ public class ControllerClass implements Controller {
 
 	// the format will be "done <number>"
 	private void markAsDone(String content) throws Exception {
-		int taskID = Integer.parseInt(content.trim()) - 1;
-		// move task from task List to archive
-		if (taskID >= 0 && taskID < tasks.size()) {
-			Task task = tasks.get(taskID);
-			archiveTasks.add(task);
-			tasks.remove(taskID);
-			displayMainList();
-			setRecentChange(taskID, tasks);
-		} else {
-			throw new Exception("Invalid arguments");
+		String[] taskNumbers = content.split(" ");
+		Arrays.sort(taskNumbers, new Comparator<String>() {
+			public int compare(String first, String second) {
+				return Integer.valueOf(second).compareTo(Integer.valueOf(first));
+			}
+		});
+		
+		for(int i = 0; i < taskNumbers.length; i++) {
+			int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
+			// move task from task List to archive
+			if (taskID >= 0 && taskID < tasks.size()) {
+				Task task = tasks.get(taskID);
+				archiveTasks.add(task);
+				tasks.remove(taskID);
+				
+				if(i == taskNumbers.length - 1) {
+					setRecentChange(taskID, tasks);
+				}
+			} else {
+				throw new Exception("Invalid arguments");
+			}
 		}
+		
+		displayMainList();
 	}
 
 	// used for searching date
@@ -639,12 +656,19 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String content) {
 		try {
-			Integer taskNum = Integer.parseInt(content) - 1;
-			Task postponedTask = tasks.get(taskNum);
-			postponedTask.clearTimes();
-			postponedTask.setType(TaskType.FLOATING);
+			String[] taskNumbers = content.split(" ");
+		
+			for(int i = 0; i < taskNumbers.length; i++) {
+				Integer taskNum  = Integer.parseInt(taskNumbers[i]) - 1;
+				Task postponedTask = tasks.get(taskNum);
+				postponedTask.clearTimes();
+				postponedTask.setType(TaskType.FLOATING);
+				
+				if(i == taskNumbers.length - 1) {
+					setRecentChange(postponedTask, tasks);
+				}
+			}
 			displayMainList();
-			setRecentChange(postponedTask, tasks);
 		} catch (NumberFormatException e) {
 			System.out.println("invalid number");
 		}
@@ -1079,26 +1103,26 @@ public class ControllerClass implements Controller {
 	 */
 	private CommandType matchCommandType(String operation) {
 		if (operation.equalsIgnoreCase(CMD_ADD)) {
-			return CommandType.ADD;
+			return commandMap.get(CMD_ADD);
 		} else if (operation.equalsIgnoreCase(CMD_DELETE)) {
-			return CommandType.DELETE;
+			return commandMap.get(CMD_DELETE);
 		} else if (operation.equalsIgnoreCase(CMD_EDIT)) {
-			return CommandType.EDIT;
+			return commandMap.get(CMD_EDIT);
 		} else if ((operation.equalsIgnoreCase(CMD_LIST1))
 				|| (operation.equalsIgnoreCase(CMD_LIST2))) {
-			return CommandType.DISPLAY;
+			return commandMap.get(CMD_LIST1);
 		} else if (operation.equalsIgnoreCase(CMD_UNDO)) {
-			return CommandType.UNDO;
+			return commandMap.get(CMD_UNDO);
 		} else if (operation.equalsIgnoreCase(CMD_DONE)) {
-			return CommandType.DONE;
+			return commandMap.get(CMD_DONE);
 		} else if (operation.equalsIgnoreCase(CMD_POSTPONE)) {
-			return CommandType.POSTPONE;
+			return commandMap.get(CMD_POSTPONE);
 		} else if (operation.equalsIgnoreCase(CMD_ARCHIVE)) {
-			return CommandType.ARCHIVE;
+			return commandMap.get(CMD_ARCHIVE);
 		} else if (operation.equalsIgnoreCase(CMD_OVERDUE)) {
-			return CommandType.OVERDUE;
+			return commandMap.get(CMD_OVERDUE);
 		} else if (operation.equalsIgnoreCase(CMD_PAGE)) {
-			return CommandType.CHANGEPAGE;
+			return commandMap.get(CMD_PAGE);
 		} else {
 			return CommandType.SEARCH;
 		}
