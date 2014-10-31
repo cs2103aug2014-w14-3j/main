@@ -87,7 +87,6 @@ public class Main extends Application{
 			if (displayBuf == null) {
 				return;
 			}
-			assert displayBuf.size() <= Controller.taskPerPage;
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
 				e.printStackTrace();

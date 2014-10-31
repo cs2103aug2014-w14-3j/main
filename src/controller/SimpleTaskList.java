@@ -193,7 +193,7 @@ public class SimpleTaskList implements TaskList {
 	@Override
 	public Integer getIndexPageContainTask(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
-			throw new IndexOutOfBoundsException("Invalid Index");
+			return 1;
 		}
 		
 		return taskIndex / numTaskOnPage + 1;
@@ -202,7 +202,7 @@ public class SimpleTaskList implements TaskList {
 	@Override
 	public Integer getIndexTaskOnPage(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
-			throw new IndexOutOfBoundsException("Invalid Index");
+			return 0;
 		}
 		
 		return taskIndex % numTaskOnPage;
