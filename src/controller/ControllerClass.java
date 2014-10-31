@@ -722,6 +722,18 @@ public class ControllerClass implements Controller {
 		}
 
 		String attributeToChange = words[1];
+		Task taskToEdit = tasks.get(positionOfTask);
+		
+		if(isMultipleEditPriority(attributeToChange)) {
+			for (int i=0; i<words.length-1;i++) {
+				Task task = tasks.get(Integer.parseInt(words[i])-1);
+				editPriority(task);
+				if(i== words.length-2) {
+					setRecentChange(task, tasks);
+				}
+			}
+		} else {
+		
 		String editDetails = "";
 		for (int i = 2; i < words.length; i++) {
 			editDetails += words[i] + " ";
@@ -730,11 +742,20 @@ public class ControllerClass implements Controller {
 			editDetails = editDetails.substring(0, editDetails.length() - 1);
 		}
 
-		Task taskToEdit = tasks.get(positionOfTask);
 		editAttribute(taskToEdit, attributeToChange, editDetails);
-
-		displayMainList();
 		setRecentChange(taskToEdit, tasks);
+		}
+		displayMainList();
+		
+	}
+
+	private boolean isMultipleEditPriority(String attributeToChange) {
+		try {
+			Integer.parseInt(attributeToChange);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
