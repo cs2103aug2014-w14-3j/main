@@ -122,7 +122,6 @@ public class ControllerClass implements Controller {
 	}
 	
 	public List<String> suggest(String content) {
-		//TODO;
 		List<String> suggestList = new ArrayList<String>();
 		
 		//suggest commands
@@ -136,7 +135,7 @@ public class ControllerClass implements Controller {
 		TaskList resultList = processSearch(content);
 		suggestList.addAll(resultList.getStringList());
 		
-		return null;
+		return suggestList;
 	}
 
 	private void setNumTaskOnPage(Integer number) {
@@ -229,46 +228,46 @@ public class ControllerClass implements Controller {
 	private void processInput(CommandType commandType, String content)
 			throws Exception {
 		switch (commandType) {
-		case ADD:
-			updateForUndo();
-			addTask(content);
-			break;
-		case DELETE:
-			updateForUndo();
-			deleteTask(content);
-			break;
-		case EDIT:
-			updateForUndo();
-			editTask(content);
-			break;
-		case UNDO:
-			undo();
-			break;
-		case SEARCH:
-			search(content);
-			break;
-		case DISPLAY:
-			displayMainList();
-			break;
-		case ARCHIVE:
-			moveToArchive();
-			break;
-		case OVERDUE:
-			overDue();
-			break;
-		case POSTPONE:
-			updateForUndo();
-			postpone(content);
-			break;
-		case DONE:
-			updateForUndo();
-			markAsDone(content);
-			break;
-		case CHANGEPAGE:
-			changePage(content);
-			break;
-		default:
-			throw new Exception("Invalid command.");
+			case ADD:
+				updateForUndo();
+				addTask(content);
+				break;
+			case DELETE:
+				updateForUndo();
+				deleteTask(content);
+				break;
+			case EDIT:
+				updateForUndo();
+				editTask(content);
+				break;
+			case UNDO:
+				undo();
+				break;
+			case SEARCH:
+				search(content);
+				break;
+			case DISPLAY:
+				displayMainList();
+				break;
+			case ARCHIVE:
+				moveToArchive();
+				break;
+			case OVERDUE:
+				overDue();
+				break;
+			case POSTPONE:
+				updateForUndo();
+				postpone(content);
+				break;
+			case DONE:
+				updateForUndo();
+				markAsDone(content);
+				break;
+			case CHANGEPAGE:
+				changePage(content);
+				break;
+			default:
+				throw new Exception("Invalid command.");
 		}
 	}
 
@@ -1102,30 +1101,12 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private CommandType matchCommandType(String operation) {
-		if (operation.equalsIgnoreCase(CMD_ADD)) {
-			return commandMap.get(CMD_ADD);
-		} else if (operation.equalsIgnoreCase(CMD_DELETE)) {
-			return commandMap.get(CMD_DELETE);
-		} else if (operation.equalsIgnoreCase(CMD_EDIT)) {
-			return commandMap.get(CMD_EDIT);
-		} else if ((operation.equalsIgnoreCase(CMD_LIST1))
-				|| (operation.equalsIgnoreCase(CMD_LIST2))) {
-			return commandMap.get(CMD_LIST1);
-		} else if (operation.equalsIgnoreCase(CMD_UNDO)) {
-			return commandMap.get(CMD_UNDO);
-		} else if (operation.equalsIgnoreCase(CMD_DONE)) {
-			return commandMap.get(CMD_DONE);
-		} else if (operation.equalsIgnoreCase(CMD_POSTPONE)) {
-			return commandMap.get(CMD_POSTPONE);
-		} else if (operation.equalsIgnoreCase(CMD_ARCHIVE)) {
-			return commandMap.get(CMD_ARCHIVE);
-		} else if (operation.equalsIgnoreCase(CMD_OVERDUE)) {
-			return commandMap.get(CMD_OVERDUE);
-		} else if (operation.equalsIgnoreCase(CMD_PAGE)) {
-			return commandMap.get(CMD_PAGE);
-		} else {
-			return CommandType.SEARCH;
-		}
+		CommandType command = commandMap.get(operation.toLowerCase());
+		if (command == null) {
+			command = CommandType.SEARCH;
+		} 
+		
+		return command;
 	}
 
 	public static Controller getInstance() {
