@@ -18,6 +18,9 @@ import storage.StoragePlus;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+
 import controller.Task.TaskType;
 
 /*
@@ -44,9 +47,9 @@ public class ControllerClass implements Controller {
 	public static final String CMD_ARCHIVE = "archive";
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
-
+	public static final String CMD_FREE="find";
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME
 	};
 
 	enum DisplayList {
@@ -68,6 +71,7 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_DONE, CommandType.DONE);
 		aMap.put(CMD_PAGE, CommandType.CHANGEPAGE);
 		aMap.put(CMD_OVERDUE, CommandType.OVERDUE);
+		aMap.put(CMD_FREE, CommandType.FREETIME);
 		commandMap = Collections.unmodifiableMap(aMap);
 	}
 
@@ -79,7 +83,8 @@ public class ControllerClass implements Controller {
 	private TaskList tasks;
 	private TaskList archiveTasks;
 	private TaskList resultTasks;
-
+	private boolean[][] timeSlots;
+	
 	private DisplayList displayListType;
 	private Integer recentChange;
 	private Integer currentPageNum;
@@ -98,6 +103,7 @@ public class ControllerClass implements Controller {
 		displayListType = DisplayList.MAIN;
 		resetRecentChange();
 	}
+	
 
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
@@ -163,6 +169,7 @@ public class ControllerClass implements Controller {
 	private Storage createStorageObject() {
 		return new StoragePlus();
 	}
+	
 
 	/**
 	 * @author Luo Shaohuai
@@ -263,6 +270,10 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
+			
+		case FREETIME:
+			freeTime(content);
+			break;
 		case CHANGEPAGE:
 			changePage(content);
 			break;
@@ -303,11 +314,229 @@ public class ControllerClass implements Controller {
 
 		displayMainList();
 	}
-
-	// used for searching date
-	// if this method returns null, it means that user is typing in a
-	// description
-
+	
+	
+	
+	private void freeTime(String content) throws Exception{
+		
+			Pair pair=parserForFind(content);
+			int hh=pair.getFirst();
+			int mm=pair.getSecond();
+			
+			ArrayList<Date> resultList=findFreeTime(hh,mm);
+			
+			for (int i=0;i<resultList.size();i++){
+				System.out.println(resultList.get(i));
+			}
+			
+			System.out.println("End of search");
+	
+	}
+	
+	// xx hours, xx hours yy mins/minute
+	//yy minutes
+	
+	private Pair parserForFind(String content) throws Exception{
+		
+		String[] para=content.trim().split("\\s+");
+		
+		int len=para.length;
+		
+		if (len==4){
+			return new Pair(Integer.parseInt(para[0]),Integer.parseInt(para[2]));
+		} else if (len==2){
+			if (para[1].equalsIgnoreCase("hours") ||para[1].equalsIgnoreCase("hour")){
+				return new Pair(Integer.parseInt(para[0]),0);
+			} else if (para[1].equalsIgnoreCase("minutes") ||para[1].equalsIgnoreCase("minutes")
+					||para[1].equalsIgnoreCase("mins") ||para[1].equalsIgnoreCase("min")){
+				return new Pair(0,Integer.parseInt(para[0]));
+			} else {
+				throw new Exception("Please specify time");
+			}
+	
+		}else {
+			throw new Exception("Please specify time");
+		}
+	}
+		
+	
+	private ArrayList<Date> findFreeTime(int hours, int mins){
+		int numOfSlots=numOfSlotsNeed(hours,mins);
+		
+		initTimeSlots();
+		processDate();
+		ArrayList<Integer> indexList=findEmptySlots(numOfSlots);
+		return dateList(indexList);
+		
+	}
+	
+	
+	
+	private ArrayList<Date> dateList(ArrayList<Integer> number){
+		
+		ArrayList<Date> resultList=new ArrayList<Date>();
+		
+		for (int i=0;i<number.size();i++){
+			
+			int num=number.get(i);
+			
+			Calendar cal=Calendar.getInstance();
+			cal.add(Calendar.DATE,num);
+			
+			resultList.add(cal.getTime());
+		}
+		
+		return resultList;
+	}
+	private void initTimeSlots(){
+		timeSlots=new boolean[30][144];
+		
+		
+		//avoid time from 0.00am to 7.00am
+		for (int i=0;i<30;i++){
+			for (int j=0;j<144;j++){
+				if (j>=0 && j<42){
+					timeSlots[i][j]=false;
+				}else{
+					timeSlots[i][j]=true;
+				}
+			}
+		}
+		
+	
+	}
+	
+	
+	private int numOfSlotsNeed(int hour, int min){
+		int totalMin=hour*60+min;
+		return (int) Math.ceil(totalMin/10);
+		
+	}
+	
+	private ArrayList<Integer> findEmptySlots(int numOfSlot){
+		ArrayList<Integer> list=new ArrayList<Integer>();
+		
+		for (int i=0;i<30;i++){
+			if (hasEmpty(numOfSlot,i)){
+				list.add(i);
+			}
+		}
+			
+		return list;
+	}
+	
+	private boolean hasEmpty(int numOfSlot,int dateIndex){
+		
+		int count;
+		for (int i=0;i<144;i++){
+			if (timeSlots[dateIndex][i]==true){
+				count=1;
+				boolean exit=false;
+				for (int j=i+1;j<144 && !exit;j++){
+					if (timeSlots[dateIndex][j]==true)
+					{
+						count++;
+						if (count>=numOfSlot)
+							return true;
+					}
+					else 
+						exit=true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	private void processDate(){
+		int numOfTask=tasks.size();
+		Date now=new Date();
+		
+		Calendar lastDay=Calendar.getInstance();
+		lastDay.add(Calendar.DATE, 29);
+		
+		Date lastday=lastDay.getTime();
+		
+		
+		for (int i=0;i<numOfTask;i++){
+			Task task=tasks.get(i);
+			if (task.getType()==TaskType.TIMED){
+				Date startTime=task.getStartTime();
+				Date endTime=task.getEndTime();
+				
+				if (compare(now,startTime) <=0 && compare(endTime,lastday) <=0){
+					occupySlot(startTime,endTime);
+				}
+			}
+		}
+	}
+	
+	
+	private void occupySlot(Date start,Date end){
+		int dateIndex=getDateIndex(start);
+		int timeIndex=getTimeIndex(start);
+	
+		int dateEndIndex=getDateIndex(end);
+		int timeEndIndex=getTimeIndex(end);
+		int numOfSlots=numSlots(start,end);
+		
+		if (dateIndex!=dateEndIndex){
+			for (int i=dateIndex;i<144;i++){
+				timeSlots[dateIndex][i]=false;
+			}
+			
+			for (int i=dateIndex+1;i<dateEndIndex-1;i++){
+				for (int j=0;j<144;j++){
+					timeSlots[i][j]=false;
+				}
+			}
+			
+			for (int i=0;i<=timeEndIndex;i++){
+				timeSlots[dateEndIndex][i]=false;
+			}
+			
+		} else {
+			for (int i=timeIndex;i<timeIndex+numOfSlots;i++)
+				timeSlots[dateIndex][i]=false;
+		}
+		
+		
+	}
+	private int getTimeIndex(Date date){
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		
+		int hours = cal.get(Calendar.HOUR_OF_DAY);
+		int minutes = cal.get(Calendar.MINUTE);
+		
+		return hours*6+minutes/10;
+		
+	}
+	//return i if date is the i-th date from now
+	//-1 if date is before now
+	private int getDateIndex(Date date){
+		Date now=new Date();
+		
+		long diff=date.getTime()-now.getTime();
+		if (diff >=0){
+			return (int) Math.floor(diff/(1000*60*60*24));
+		}else{
+			return -1;
+		}
+	}
+	
+	private int numSlots(Date start, Date end){
+		
+		long diff=end.getTime()-start.getTime();
+		
+		int numOfSlots=(int) Math.ceil(diff/(1000*60*10));
+		
+		return numOfSlots;
+		
+	}
+	
 	private Date timeParser(String input) {
 		Parser parser = new Parser();
 		List<DateGroup> groups = parser.parse(input);
@@ -325,8 +554,6 @@ public class ControllerClass implements Controller {
 
 	private void search(String content) {
 		TaskList resultList = processSearch(content);
-		// TODO: move search to tasklist class
-		// TODO: add num in desc
 		setResultList(resultList);
 	}
 
@@ -459,49 +686,11 @@ public class ControllerClass implements Controller {
 	 */
 
 	private TaskList searchDesc(String keyWord, TaskList listToSearch) {
-		TaskList resultList = exactSearch(keyWord, listToSearch);
-
-		if (resultList.size() == 0) {
-			// exactSearch list is empty
+		
 			return nearMatchSearch(keyWord, listToSearch);
-		} else {
-			return resultList;
-		}
 
 	}
 
-	private TaskList exactSearch(String keyWord, TaskList listToSearch) {
-		TaskList resultList = new SimpleTaskList();
-
-		int numOfTask = listToSearch.size();
-		for (int i = 0; i < numOfTask; i++) {
-			if (isExact(keyWord.toLowerCase(), listToSearch.get(i).getDesc()
-					.toLowerCase())) {
-				resultList.add(listToSearch.get(i));
-			}
-		}
-
-		return resultList;
-	}
-
-	private boolean isExact(String keyword, String strToSearch) {
-		String[] str = keyword.trim().split("\\s+");
-		int lenOfKey = str.length;
-		int numOfMatch = 0;
-
-		for (int i = 0; i < lenOfKey; i++) {
-			// match exactly in the string
-			if (strToSearch.indexOf(str[i]) != -1) {
-				numOfMatch++;
-			}
-		}
-
-		if (numOfMatch == lenOfKey) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
 		TaskList resultList = new SimpleTaskList();
@@ -539,14 +728,40 @@ public class ControllerClass implements Controller {
 		int strLen = key.length;
 		int searchScore = 0;
 		int numOfMatch = 0;
-
+		
+		boolean[] isMatched=new boolean[strLen];
+		int[] matchScore=new int[strLen]; 
+		
+		for (int i=0;i<strLen;i++){
+			isMatched[i]=false;
+			matchScore[i]=0;
+		}
+		
+		
 		for (int i = 0; i < strLen; i++) {
-			if (matchScore(key[i], strToSearch) != 0) {
-				numOfMatch++;
-			}
-			searchScore += matchScore(key[i], strToSearch);
+			if (strToSearch.indexOf(keyword)!=-1){
+				if (isMatched[i]==false){
+					isMatched[i]=true;
+					matchScore[i]=1000;
+				}
+			} else if (matchScore(key[i], strToSearch) != 0) {
+				if (isMatched[i]==false){
+					isMatched[i]=true;
+					matchScore[i]=matchScore(key[i], strToSearch);
+				} else {
+					if (matchScore(key[i],strToSearch)> matchScore[i]){
+						matchScore[i]=matchScore(key[i],strToSearch);
+					}
+				}
+			}	
 		}
 
+		for (int i=0;i<strLen;i++){
+			if (isMatched[i]==true){
+				numOfMatch++;
+			}
+			searchScore+=matchScore[i];
+		}
 		return new Pair(numOfMatch, searchScore);
 	}
 

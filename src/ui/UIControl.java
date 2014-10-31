@@ -63,7 +63,6 @@ public class UIControl extends BorderPane {
 		
 		list.scrollTo(recentChange);
 		list.getSelectionModel().select(recentChange);
-		//list.getSelectionModel().clearSelection();
 		input.requestFocus();
 	}
 	
@@ -92,7 +91,7 @@ public class UIControl extends BorderPane {
 	}
 	
 	private void displayCurTime() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss a");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm a");
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
 			time.setText(format.format(LocalDateTime.now()));
 		}));
