@@ -32,7 +32,7 @@ import controller.Task.TaskType;
  */
 
 public class ControllerClass implements Controller {
-	
+
 	public static final String CMD_ADD = "add";
 	public static final String CMD_DELETE = "delete";
 	public static final String CMD_EDIT = "edit";
@@ -44,7 +44,7 @@ public class ControllerClass implements Controller {
 	public static final String CMD_ARCHIVE = "archive";
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
-	
+
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE
 	};
@@ -52,9 +52,9 @@ public class ControllerClass implements Controller {
 	enum DisplayList {
 		MAIN, ARCHIVE, SEARCH
 	};
-	
+
 	public static final Map<String, CommandType> commandMap;
-	
+
 	static {
 		Map<String, CommandType> aMap = new HashMap<>();
 		aMap.put(CMD_ADD, CommandType.ADD);
@@ -120,21 +120,21 @@ public class ControllerClass implements Controller {
 		}
 		return null;
 	}
-	
+
 	public List<String> suggest(String content) {
 		List<String> suggestList = new ArrayList<String>();
-		
-		//suggest commands
+
+		// suggest commands
 		for (String str : commandMap.keySet()) {
 			if (str.indexOf(content) == 0) {
 				suggestList.add(str);
 			}
 		}
-		
-		//suggest search
+
+		// suggest search
 		TaskList resultList = processSearch(content);
 		suggestList.addAll(resultList.getStringList());
-		
+
 		return suggestList;
 	}
 
@@ -228,46 +228,46 @@ public class ControllerClass implements Controller {
 	private void processInput(CommandType commandType, String content)
 			throws Exception {
 		switch (commandType) {
-			case ADD:
-				updateForUndo();
-				addTask(content);
-				break;
-			case DELETE:
-				updateForUndo();
-				deleteTask(content);
-				break;
-			case EDIT:
-				updateForUndo();
-				editTask(content);
-				break;
-			case UNDO:
-				undo();
-				break;
-			case SEARCH:
-				search(content);
-				break;
-			case DISPLAY:
-				displayMainList();
-				break;
-			case ARCHIVE:
-				moveToArchive();
-				break;
-			case OVERDUE:
-				overDue();
-				break;
-			case POSTPONE:
-				updateForUndo();
-				postpone(content);
-				break;
-			case DONE:
-				updateForUndo();
-				markAsDone(content);
-				break;
-			case CHANGEPAGE:
-				changePage(content);
-				break;
-			default:
-				throw new Exception("Invalid command.");
+		case ADD:
+			updateForUndo();
+			addTask(content);
+			break;
+		case DELETE:
+			updateForUndo();
+			deleteTask(content);
+			break;
+		case EDIT:
+			updateForUndo();
+			editTask(content);
+			break;
+		case UNDO:
+			undo();
+			break;
+		case SEARCH:
+			search(content);
+			break;
+		case DISPLAY:
+			displayMainList();
+			break;
+		case ARCHIVE:
+			moveToArchive();
+			break;
+		case OVERDUE:
+			overDue();
+			break;
+		case POSTPONE:
+			updateForUndo();
+			postpone(content);
+			break;
+		case DONE:
+			updateForUndo();
+			markAsDone(content);
+			break;
+		case CHANGEPAGE:
+			changePage(content);
+			break;
+		default:
+			throw new Exception("Invalid command.");
 		}
 	}
 
@@ -280,26 +280,27 @@ public class ControllerClass implements Controller {
 		String[] taskNumbers = content.split(" ");
 		Arrays.sort(taskNumbers, new Comparator<String>() {
 			public int compare(String first, String second) {
-				return Integer.valueOf(second).compareTo(Integer.valueOf(first));
+				return Integer.valueOf(second)
+						.compareTo(Integer.valueOf(first));
 			}
 		});
-		
-		for(int i = 0; i < taskNumbers.length; i++) {
+
+		for (int i = 0; i < taskNumbers.length; i++) {
 			int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
 			// move task from task List to archive
 			if (taskID >= 0 && taskID < tasks.size()) {
 				Task task = tasks.get(taskID);
 				archiveTasks.add(task);
 				tasks.remove(taskID);
-				
-				if(i == taskNumbers.length - 1) {
+
+				if (i == taskNumbers.length - 1) {
 					setRecentChange(taskID, tasks);
 				}
 			} else {
 				throw new Exception("Invalid arguments");
 			}
 		}
-		
+
 		displayMainList();
 	}
 
@@ -324,8 +325,8 @@ public class ControllerClass implements Controller {
 
 	private void search(String content) {
 		TaskList resultList = processSearch(content);
-		//TODO: move search to tasklist class
-		//TODO: add num in desc
+		// TODO: move search to tasklist class
+		// TODO: add num in desc
 		setResultList(resultList);
 	}
 
@@ -656,14 +657,14 @@ public class ControllerClass implements Controller {
 	private void postpone(String content) {
 		try {
 			String[] taskNumbers = content.split(" ");
-		
-			for(int i = 0; i < taskNumbers.length; i++) {
-				Integer taskNum  = Integer.parseInt(taskNumbers[i]) - 1;
+
+			for (int i = 0; i < taskNumbers.length; i++) {
+				Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
 				Task postponedTask = tasks.get(taskNum);
 				postponedTask.clearTimes();
 				postponedTask.setType(TaskType.FLOATING);
-				
-				if(i == taskNumbers.length - 1) {
+
+				if (i == taskNumbers.length - 1) {
 					setRecentChange(postponedTask, tasks);
 				}
 			}
@@ -826,16 +827,26 @@ public class ControllerClass implements Controller {
 	 */
 	private void proceedWithDelete(String content) throws Exception {
 		try {
-			int taskNum = Integer.parseInt(content);
-			executeDelete(taskNum);
-			displayMainList();
 
-			taskNum -= 1;
-			if (taskNum >= tasks.size()) {
-				setRecentChange(tasks.size() - 1, tasks);
-			} else {
-				setRecentChange(taskNum, tasks);
+			String[] taskNumbers = content.split(" ");
+			List<Integer> taskNumDescending = new ArrayList<Integer>();
+			for (int i=0; i< taskNumbers.length; i++) {
+				int taskNum = Integer.parseInt(taskNumbers[i]);
+				taskNumDescending.add(taskNum);
 			}
+			Collections.sort(taskNumDescending, Collections.reverseOrder());
+			
+			for (int i = 0; i < taskNumDescending.size(); i++) {
+				int taskNum = taskNumDescending.get(i);
+				executeDelete(taskNum);
+				taskNum -= 1;
+				if (taskNum >= tasks.size()) {
+					setRecentChange(tasks.size() - 1, tasks);
+				} else {
+					setRecentChange(taskNum, tasks);
+				}
+			}
+			displayMainList();
 
 		} catch (NumberFormatException e) {
 			throw new Exception(
@@ -857,7 +868,7 @@ public class ControllerClass implements Controller {
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
 			throw new Exception(
-					"Task does not exist. Please enter task number within the range.");
+					"Task does not exist. Please enter task numbers within the range.");
 		}
 	}
 
@@ -1104,8 +1115,8 @@ public class ControllerClass implements Controller {
 		CommandType command = commandMap.get(operation.toLowerCase());
 		if (command == null) {
 			command = CommandType.SEARCH;
-		} 
-		
+		}
+
 		return command;
 	}
 
