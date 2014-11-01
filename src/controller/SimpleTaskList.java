@@ -263,8 +263,7 @@ public class SimpleTaskList implements TaskList {
 				content = content.replaceAll(regex, "");
 			}
 			// now content is time
-
-			return complexSearch(desc, content, this);
+				return complexSearch(desc, content, this);
 		}
 	}
 	
@@ -325,8 +324,10 @@ public class SimpleTaskList implements TaskList {
 			Task task = listToSearch.get(i);
 			if (task.getDeadline() != null) {
 				Task newTask=task.clone();
-				String newDesc=(i+1)+". "+task.getDesc();
-				newTask.setDesc(newDesc);
+				if (newTask.getDesc().indexOf(". ")==-1){
+					String newDesc=(i+1)+". "+newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
 				
 				if (compare(task.getDeadline(), deadline) == 0) {
 					resultList.add(newTask);
@@ -336,7 +337,8 @@ public class SimpleTaskList implements TaskList {
 
 		return resultList;
 	}
-
+	
+	
 	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
@@ -346,8 +348,10 @@ public class SimpleTaskList implements TaskList {
 			if (task.getDeadline() != null) {
 				
 				Task newTask=task.clone();
-				String newDesc=(i+1)+". "+task.getDesc();
-				newTask.setDesc(newDesc);
+				if (newTask.getDesc().indexOf(". ")==-1){
+					String newDesc=(i+1)+". "+newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
 				
 				if (compare(task.getDeadline(), deadline) <= 0) {
 					resultList.add(newTask);
@@ -411,8 +415,10 @@ public class SimpleTaskList implements TaskList {
 			if (result.getFirst() > keyLen / 2) {
 				if (result.getSecond() >= 500 * keyLen) {
 					Task newTask=task.clone();
-					String newDesc=(i+1)+". "+newTask.getDesc();
-					newTask.setDesc(newDesc);
+					if (newTask.getDesc().indexOf(". ")==-1){
+						String newDesc=(i+1)+". "+newTask.getDesc();
+						newTask.setDesc(newDesc);
+					}
 					list.add(new Triple(result.getFirst(), result.getSecond(),
 							newTask));
 				}
