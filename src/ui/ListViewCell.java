@@ -21,6 +21,8 @@ class ListViewCell extends ListCell<String> {
 		String[] split = str.split("%");
 		if (split.length < 4) {
 			item.setDesc(str);
+			item.setPriority(false);
+			item.clearTime();
 			setGraphic(item.getHBox());
 			return;
 		}

@@ -111,17 +111,31 @@ public class ControllerClass implements Controller {
 	}
 
 	public List<String> getCurrentList() {
+		List<String> list = null;
 		switch (displayListType) {
-		case MAIN:
-			return tasks.getNumberedPage(currentPageNum);
-
-		case ARCHIVE:
-			return archiveTasks.getNumberedPage(currentPageNum);
-
-		case SEARCH:
-			return resultTasks.getPage(currentPageNum);
+			case MAIN:
+				list = tasks.getNumberedPage(currentPageNum);
+				if(list.isEmpty()) {
+					list.add("**No task in the main list**");
+				}
+				break;
+	
+			case ARCHIVE:
+				list = archiveTasks.getNumberedPage(currentPageNum);
+				if(list.isEmpty()) {
+					list.add("**No task in the archive list**");
+				}
+				break;
+	
+			case SEARCH:
+				list = resultTasks.getPage(currentPageNum);
+				if(list.isEmpty()) {
+					list.add("**No search result**");
+				}
+				break;
 		}
-		return null;
+		
+		return list;
 	}
 
 	public List<String> suggest(String content) {
