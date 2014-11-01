@@ -34,7 +34,7 @@ public class UIControl extends BorderPane {
 	
 	@FXML
 	private TextField input;
-		
+	
 	public UIControl() {
 		displayCurTime();
 	}
@@ -75,6 +75,7 @@ public class UIControl extends BorderPane {
 			if (event.getCode() == KeyCode.ENTER) {
 				value.onEventExec(input.getText());
 				input.clear();
+				event.consume();
 			}
 		});
 	}
@@ -102,6 +103,26 @@ public class UIControl extends BorderPane {
 				event.consume();
 			}
 		});
+	}
+	
+	public void setInputOnChange(OnEvent value) {
+		input.textProperty().addListener((observable, oldString, newString)->{
+			value.onEventExec(newString);
+		});
+	}
+	
+	public void setInputText(String str) {
+		input.setText(str);
+		input.requestFocus();
+		try {
+			input.positionCaret(input.getText().length());
+		} catch (Exception e) {
+			//do nothing
+		}
+	}
+	
+	public void setInputOnFocus() {
+		input.requestFocus();
 	}
 	
 	private void displayCurTime() {

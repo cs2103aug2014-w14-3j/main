@@ -14,7 +14,7 @@ public class TestControllerClassSortAndPostpone {
 	
 	@Before
 	public void setup() {
-		controller = new ControllerClass();
+		controller = ControllerClass.getInstance();
 	}
 
 	public String getDescFromTaskStrings(String stringedTask) {

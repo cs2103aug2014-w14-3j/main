@@ -90,7 +90,7 @@ public class ControllerClass implements Controller {
 	private FixedSizeStack<TaskList> undoList;
 	private FixedSizeStack<TaskList> undoArchiveList;
 
-	public ControllerClass() {
+	private ControllerClass() {
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);

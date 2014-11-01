@@ -19,7 +19,7 @@ public class TestSearch {
 	//Test exactSearch: the keyword will appear exactly in one of the description of the tasks
 	//return the task list
 	public void tesExactSearch() throws Exception{
-		Controller controller=new ControllerClass();
+		Controller controller=ControllerClass.getInstance();
 		List<String> list;
 		controller.execCmd("add go home");
 		controller.execCmd("add go to school and eat lunch");
@@ -36,10 +36,10 @@ public class TestSearch {
 	//Test exactSearch
 	//the keyword is typed wrongly and the software will give the list of the tasks which are nearly matched
 	public void testNearMatchSearch() throws Exception{
-		Controller controller=new ControllerClass();
+		Controller controller=ControllerClass.getInstance();
 		List<String> list;
-		controller.execCmd("add go home");
-		controller.execCmd("add go to school and eat lunch");
+		//controller.execCmd("add go home");
+		//controller.execCmd("add go to school and eat lunch");
 		//search for "eat lunch" but user types it as "ate lunchh";
 		controller.execCmd("ate lunchh");
 		
