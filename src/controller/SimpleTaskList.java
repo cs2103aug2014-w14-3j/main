@@ -282,41 +282,49 @@ public class SimpleTaskList implements TaskList {
 	
 	private Date timeParser(String input) {
 		Parser parser = new Parser();
-		
-		
-		
+
 		List<DateGroup> groups = parser.parse(input);
 		List<Date> dates = new ArrayList<Date>();
 		for (DateGroup group : groups) {
 			dates.addAll(group.getDates());
 		}
 
-
 		if (dates.size() == 1) {
-			//avoid ambiguous cases for natty
+			// avoid ambiguous cases for natty
+
+			if (input.length() == 1 || input.length() == 2) {
+				// can not get a date form these length
+				return null;
+			}
+			
 			String newStr="";
 			for (int i=0;i<input.length();i++){
 				if (input.charAt(i)=='/' || Character.isDigit(input.charAt(i))){
 					newStr=newStr+input.charAt(i);
 				}
-				
-				if (newStr.length()!=5){
+			}
+			
+			if (newStr.length()>=4){
+				if (newStr.indexOf("/")==-1)
 					return null;
-				} else {
-					if (newStr.charAt(2)=='/'){
-						try {
-							int mon=Integer.parseInt(newStr.substring(0,2));
-							int date=Integer.parseInt(newStr.substring(3));
-							
-							if (mon>12 || date >31)
-								return null;
-						} catch ( NumberFormatException nfe){
-							return null;
-						}
+			}
+			
+			if (newStr.length()==5){
+				if (newStr.charAt(2)=='/'){
+					try {
+						int mon=Integer.parseInt(newStr.substring(0,2));
+						int date=Integer.parseInt(newStr.substring(3));
 						
+						if (mon>12 || date >31)
+							return null;
+					} catch ( NumberFormatException nfe){
+						return null;
 					}
+					
 				}
 			}
+			
+			
 			return dates.get(0);
 		} else {
 			return null;
