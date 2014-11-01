@@ -317,15 +317,15 @@ public class ControllerClass implements Controller {
 				archiveTasks.add(0,task);
 				tasks.remove(taskID);
 
-				if (i == taskNumbers.length - 1) {
+				/*if (i == taskNumbers.length - 1) {
 					setRecentChange(taskID, tasks);
-				}
+				}*/
 			} else {
 				throw new Exception("Invalid arguments");
 			}
 		}
-
-		displayMainList();
+		tasks.sort();
+		//displayMainList();
 	}
 	
 	
@@ -827,13 +827,8 @@ public class ControllerClass implements Controller {
 				int taskNum = taskNumDescending.get(i);
 				executeDelete(taskNum);
 				taskNum -= 1;
-				if (taskNum >= tasks.size()) {
-					setRecentChange(tasks.size() - 1, tasks);
-				} else {
-					setRecentChange(taskNum, tasks);
-				}
 			}
-			displayMainList();
+			tasks.sort();
 
 		} catch (NumberFormatException e) {
 			throw new Exception(
