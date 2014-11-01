@@ -133,6 +133,7 @@ public class Main extends Application{
 		suggest.setX(stage.getX() + mainControl.getInputPosition().getX());
 		suggest.setY(stage.getY() + stage.getHeight() - 5);
 		list.setOnEnter((str) -> onPopupListEnter(str));
+		list.setOnEsc((str)->onPopupListEsc(str));
 		
 		if (list.loadList(controller.suggest(newValue))) {
 			suggest.show(stage);
@@ -149,6 +150,12 @@ public class Main extends Application{
 		} else {
 			mainControl.setInputText(str);
 		}
+		return str;
+	}
+	
+	private String onPopupListEsc(String str) {
+		suggest.hide();
+		mainControl.setInputOnFocus();
 		return str;
 	}
 	

@@ -71,4 +71,13 @@ public class PopupListControl {
 			}
 		});
 	}
+	
+	public void setOnEsc(OnEvent value) {
+		list.setOnKeyReleased((event) -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				value.onEventExec(list.getSelectionModel().getSelectedItem());
+				event.consume();
+			}
+		});
+	}
 }
