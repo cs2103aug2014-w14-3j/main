@@ -617,23 +617,27 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @author Koh Xian Hui
 	 */
-	private void postpone(String content) {
+	private void postpone(String content) throws Exception {
 		try {
-			String[] taskNumbers = content.split(" ");
+			if(displayListType != DisplayList.MAIN) {
+				throw new Exception("Postpone can only be done in main list.");
+			} else {
+				String[] taskNumbers = content.split(" ");
 
-			for (int i = 0; i < taskNumbers.length; i++) {
-				Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
-				Task postponedTask = tasks.get(taskNum);
-				postponedTask.clearTimes();
-				postponedTask.setType(TaskType.FLOATING);
+				for (int i = 0; i < taskNumbers.length; i++) {
+					Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
+					Task postponedTask = tasks.get(taskNum);
+					postponedTask.clearTimes();
+					postponedTask.setType(TaskType.FLOATING);
 
-				if (i == taskNumbers.length - 1) {
-					setRecentChange(postponedTask, tasks);
+					if (i == taskNumbers.length - 1) {
+						setRecentChange(postponedTask, tasks);
+					}
 				}
 			}
 			displayMainList();
 		} catch (NumberFormatException e) {
-			System.out.println("invalid number");
+			throw new Exception("Invalid postpone format. Please enter task number.");
 		}
 	}
 
