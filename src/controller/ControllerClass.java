@@ -632,6 +632,8 @@ public class ControllerClass implements Controller {
 					postponedTask.clearTimes();
 					postponedTask.setType(TaskType.FLOATING);
 				}
+				
+				tasks.sort();
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid postpone format. Please enter task number.");
