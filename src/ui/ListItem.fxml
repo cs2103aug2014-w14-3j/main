@@ -14,7 +14,7 @@
          <children>
              <HBox prefHeight="20.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
                <children>
-                  <Circle fx:id="priority" fill="YELLOW" radius="7.0" stroke="BLACK" strokeType="INSIDE">
+                  <Circle fx:id="priority" fill="YELLOW" radius="7.0" stroke="BLACK" strokeType="INSIDE" style="-fx-fill: #FF0000;">
                      <HBox.margin>
                         <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                      </HBox.margin>

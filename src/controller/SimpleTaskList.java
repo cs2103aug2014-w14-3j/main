@@ -324,9 +324,12 @@ public class SimpleTaskList implements TaskList {
 		for (int i = 0; i < numOfTask; i++) {
 			Task task = listToSearch.get(i);
 			if (task.getDeadline() != null) {
-
+				Task newTask=task.clone();
+				String newDesc=(i+1)+". "+task.getDesc();
+				newTask.setDesc(newDesc);
+				
 				if (compare(task.getDeadline(), deadline) == 0) {
-					resultList.add(task);
+					resultList.add(newTask);
 				}
 			}
 		}
@@ -341,9 +344,13 @@ public class SimpleTaskList implements TaskList {
 		for (int i = 0; i < numOfTask; i++) {
 			Task task = listToSearch.get(i);
 			if (task.getDeadline() != null) {
-
+				
+				Task newTask=task.clone();
+				String newDesc=(i+1)+". "+task.getDesc();
+				newTask.setDesc(newDesc);
+				
 				if (compare(task.getDeadline(), deadline) <= 0) {
-					resultList.add(task);
+					resultList.add(newTask);
 				}
 			}
 		}
@@ -403,9 +410,11 @@ public class SimpleTaskList implements TaskList {
 					.toLowerCase());
 			if (result.getFirst() > keyLen / 2) {
 				if (result.getSecond() >= 500 * keyLen) {
-
+					Task newTask=task.clone();
+					String newDesc=(i+1)+". "+newTask.getDesc();
+					newTask.setDesc(newDesc);
 					list.add(new Triple(result.getFirst(), result.getSecond(),
-							task));
+							newTask));
 				}
 			}
 		}
