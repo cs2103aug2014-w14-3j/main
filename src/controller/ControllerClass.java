@@ -599,8 +599,6 @@ public class ControllerClass implements Controller {
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
-			setDisplayList(DisplayList.MAIN);
-			resetRecentChange();
 		}
 	}
 
