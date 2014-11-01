@@ -44,9 +44,9 @@ public class ControllerClass implements Controller {
 	public static final String CMD_ARCHIVE = "archive";
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
-	public static final String CMD_FREE="find";
+	public static final String CMD_FREE = "find";
 	public static final String CMD_CLEARARCHIVE = "clear archive";
-	
+
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME
 	};
@@ -83,7 +83,7 @@ public class ControllerClass implements Controller {
 	private TaskList archiveTasks;
 	private TaskList resultTasks;
 	private boolean[][] timeSlots;
-	
+
 	private DisplayList displayListType;
 	private Integer recentChange;
 	private Integer currentPageNum;
@@ -102,7 +102,6 @@ public class ControllerClass implements Controller {
 		displayListType = DisplayList.MAIN;
 		resetRecentChange();
 	}
-	
 
 	// This method starts execution of each user command by first retrieving
 	// all existing tasks stored and goes on to parse user command, to determine
@@ -115,28 +114,28 @@ public class ControllerClass implements Controller {
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
-			case MAIN:
-				list = tasks.getNumberedPage(currentPageNum);
-				if(list.isEmpty()) {
-					list.add("**No task in the main list**");
-				}
-				break;
-	
-			case ARCHIVE:
-				list = archiveTasks.getNumberedPage(currentPageNum);
-				if(list.isEmpty()) {
-					list.add("**No task in the archive list**");
-				}
-				break;
-	
-			case SEARCH:
-				list = resultTasks.getPage(currentPageNum);
-				if(list.isEmpty()) {
-					list.add("**No search result**");
-				}
-				break;
+		case MAIN:
+			list = tasks.getNumberedPage(currentPageNum);
+			if (list.isEmpty()) {
+				list.add("**No task in the main list**");
+			}
+			break;
+
+		case ARCHIVE:
+			list = archiveTasks.getNumberedPage(currentPageNum);
+			if (list.isEmpty()) {
+				list.add("**No task in the archive list**");
+			}
+			break;
+
+		case SEARCH:
+			list = resultTasks.getPage(currentPageNum);
+			if (list.isEmpty()) {
+				list.add("**No search result**");
+			}
+			break;
 		}
-		
+
 		return list;
 	}
 
@@ -182,7 +181,6 @@ public class ControllerClass implements Controller {
 	private Storage createStorageObject() {
 		return new StoragePlus();
 	}
-	
 
 	/**
 	 * @author Luo Shaohuai
@@ -283,7 +281,7 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
-			
+
 		case FREETIME:
 			freeTime(content);
 			break;
@@ -301,285 +299,277 @@ public class ControllerClass implements Controller {
 
 	// the format will be "done <number>"
 	private void markAsDone(String content) throws Exception {
-		String[] taskNumbers = content.split(" ");
-		Arrays.sort(taskNumbers, new Comparator<String>() {
-			public int compare(String first, String second) {
-				return Integer.valueOf(second)
-						.compareTo(Integer.valueOf(first));
-			}
-		});
+		
+			String[] taskNumbers = content.trim().split("\\s+");
+			Arrays.sort(taskNumbers, new Comparator<String>() {
+				public int compare(String first, String second) {
+					return Integer.valueOf(second).compareTo(
+							Integer.valueOf(first));
+				}
+			});
 
-		for (int i = 0; i < taskNumbers.length; i++) {
-			int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
-			// move task from task List to archive
-			if (taskID >= 0 && taskID < tasks.size()) {
-				Task task = tasks.get(taskID);
-				archiveTasks.add(0,task);
-				tasks.remove(taskID);
-
-				/*if (i == taskNumbers.length - 1) {
-					setRecentChange(taskID, tasks);
-				}*/
-			} else {
-				throw new Exception("Invalid arguments");
+			try{
+			for (int i = 0; i < taskNumbers.length; i++) {
+				int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
+				// move task from task List to archive
+				if (taskID >= 0 && taskID < tasks.size()) {
+					Task task = tasks.get(taskID);
+					archiveTasks.add(0, task);
+					tasks.remove(taskID);
+				} else {
+					throw new Exception("Invalid arguments");
+				}
 			}
+			}catch (NumberFormatException e){
+				throw new Exception("Invalid format. Please enter the task number!");
+			}
+			tasks.sort();
 		}
-		tasks.sort();
-		//displayMainList();
+
+
+	private void freeTime(String content) throws Exception {
+
+		Pair pair = parserForFind(content);
+		int hh = pair.getFirst();
+		int mm = pair.getSecond();
+
+		ArrayList<Date> resultList = findFreeTime(hh, mm);
+
+		for (int i = 0; i < resultList.size(); i++) {
+			System.out.println(resultList.get(i));
+		}
+
+		System.out.println("End of search");
+
 	}
-	
-	
-	
-	private void freeTime(String content) throws Exception{
-		
-			Pair pair=parserForFind(content);
-			int hh=pair.getFirst();
-			int mm=pair.getSecond();
-			
-			ArrayList<Date> resultList=findFreeTime(hh,mm);
-			
-			for (int i=0;i<resultList.size();i++){
-				System.out.println(resultList.get(i));
-			}
-			
-			System.out.println("End of search");
-	
-	}
-	
+
 	// xx hours, xx hours yy mins/minute
-	//yy minutes
-	
-	private Pair parserForFind(String content) throws Exception{
-		
-		String[] para=content.trim().split("\\s+");
-		
-		int len=para.length;
-		
-		if (len==4){
-			return new Pair(Integer.parseInt(para[0]),Integer.parseInt(para[2]));
-		} else if (len==2){
-			if (para[1].equalsIgnoreCase("hours") ||para[1].equalsIgnoreCase("hour")){
-				return new Pair(Integer.parseInt(para[0]),0);
-			} else if (para[1].equalsIgnoreCase("minutes") ||para[1].equalsIgnoreCase("minutes")
-					||para[1].equalsIgnoreCase("mins") ||para[1].equalsIgnoreCase("min")){
-				return new Pair(0,Integer.parseInt(para[0]));
+	// yy minutes
+
+	private Pair parserForFind(String content) throws Exception {
+
+		String[] para = content.trim().split("\\s+");
+
+		int len = para.length;
+
+		if (len == 4) {
+			return new Pair(Integer.parseInt(para[0]),
+					Integer.parseInt(para[2]));
+		} else if (len == 2) {
+			if (para[1].equalsIgnoreCase("hours")
+					|| para[1].equalsIgnoreCase("hour")) {
+				return new Pair(Integer.parseInt(para[0]), 0);
+			} else if (para[1].equalsIgnoreCase("minutes")
+					|| para[1].equalsIgnoreCase("minutes")
+					|| para[1].equalsIgnoreCase("mins")
+					|| para[1].equalsIgnoreCase("min")) {
+				return new Pair(0, Integer.parseInt(para[0]));
 			} else {
 				throw new Exception("Please specify time");
 			}
-	
-		}else {
+
+		} else {
 			throw new Exception("Please specify time");
 		}
 	}
-		
-	
-	private ArrayList<Date> findFreeTime(int hours, int mins){
-		int numOfSlots=numOfSlotsNeed(hours,mins);
-		
+
+	private ArrayList<Date> findFreeTime(int hours, int mins) {
+		int numOfSlots = numOfSlotsNeed(hours, mins);
+
 		initTimeSlots();
 		processDate();
-		ArrayList<Integer> indexList=findEmptySlots(numOfSlots);
+		ArrayList<Integer> indexList = findEmptySlots(numOfSlots);
 		return dateList(indexList);
-		
+
 	}
-	
-	
-	
-	private ArrayList<Date> dateList(ArrayList<Integer> number){
-		
-		ArrayList<Date> resultList=new ArrayList<Date>();
-		
-		for (int i=0;i<number.size();i++){
-			
-			int num=number.get(i);
-			
-			Calendar cal=Calendar.getInstance();
-			cal.add(Calendar.DATE,num);
-			
+
+	private ArrayList<Date> dateList(ArrayList<Integer> number) {
+
+		ArrayList<Date> resultList = new ArrayList<Date>();
+
+		for (int i = 0; i < number.size(); i++) {
+
+			int num = number.get(i);
+
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.DATE, num);
+
 			resultList.add(cal.getTime());
 		}
-		
+
 		return resultList;
 	}
-	private void initTimeSlots(){
-		timeSlots=new boolean[30][144];
-		
-		
-		//avoid time from 0.00am to 7.00am
-		for (int i=0;i<30;i++){
-			for (int j=0;j<144;j++){
-				if (j>=0 && j<42){
-					timeSlots[i][j]=false;
-				}else{
-					timeSlots[i][j]=true;
+
+	private void initTimeSlots() {
+		timeSlots = new boolean[30][144];
+
+		// avoid time from 0.00am to 7.00am
+		for (int i = 0; i < 30; i++) {
+			for (int j = 0; j < 144; j++) {
+				if (j >= 0 && j < 42) {
+					timeSlots[i][j] = false;
+				} else {
+					timeSlots[i][j] = true;
 				}
 			}
 		}
-		
-	
+
 	}
-	
-	
-	private int numOfSlotsNeed(int hour, int min){
-		int totalMin=hour*60+min;
-		return (int) Math.ceil(totalMin/10);
-		
+
+	private int numOfSlotsNeed(int hour, int min) {
+		int totalMin = hour * 60 + min;
+		return (int) Math.ceil(totalMin / 10);
+
 	}
-	
-	private ArrayList<Integer> findEmptySlots(int numOfSlot){
-		ArrayList<Integer> list=new ArrayList<Integer>();
-		
-		for (int i=0;i<30;i++){
-			if (hasEmpty(numOfSlot,i)){
+
+	private ArrayList<Integer> findEmptySlots(int numOfSlot) {
+		ArrayList<Integer> list = new ArrayList<Integer>();
+
+		for (int i = 0; i < 30; i++) {
+			if (hasEmpty(numOfSlot, i)) {
 				list.add(i);
 			}
 		}
-			
+
 		return list;
 	}
-	
-	private boolean hasEmpty(int numOfSlot,int dateIndex){
-		
+
+	private boolean hasEmpty(int numOfSlot, int dateIndex) {
+
 		int count;
-		for (int i=0;i<144;i++){
-			if (timeSlots[dateIndex][i]==true){
-				count=1;
-				boolean exit=false;
-				for (int j=i+1;j<144 && !exit;j++){
-					if (timeSlots[dateIndex][j]==true)
-					{
+		for (int i = 0; i < 144; i++) {
+			if (timeSlots[dateIndex][i] == true) {
+				count = 1;
+				boolean exit = false;
+				for (int j = i + 1; j < 144 && !exit; j++) {
+					if (timeSlots[dateIndex][j] == true) {
 						count++;
-						if (count>=numOfSlot)
+						if (count >= numOfSlot)
 							return true;
-					}
-					else 
-						exit=true;
+					} else
+						exit = true;
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
-	private void processDate(){
-		int numOfTask=tasks.size();
-		Date now=new Date();
-		
-		Calendar lastDay=Calendar.getInstance();
+
+	private void processDate() {
+		int numOfTask = tasks.size();
+		Date now = new Date();
+
+		Calendar lastDay = Calendar.getInstance();
 		lastDay.add(Calendar.DATE, 29);
-		
-		Date lastday=lastDay.getTime();
-		
-		
-		for (int i=0;i<numOfTask;i++){
-			Task task=tasks.get(i);
-			if (task.getType()==TaskType.TIMED){
-				Date startTime=task.getStartTime();
-				Date endTime=task.getEndTime();
-				
-				if (compare(now,startTime) <=0 && compare(endTime,lastday) <=0){
-					occupySlot(startTime,endTime);
+
+		Date lastday = lastDay.getTime();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = tasks.get(i);
+			if (task.getType() == TaskType.TIMED) {
+				Date startTime = task.getStartTime();
+				Date endTime = task.getEndTime();
+
+				if (compare(now, startTime) <= 0
+						&& compare(endTime, lastday) <= 0) {
+					occupySlot(startTime, endTime);
 				}
 			}
 		}
 	}
-	
+
 	// return negative if date1 is before date2
-		// positive if date1 is after date2
-		// 0 if they are the same
+	// positive if date1 is after date2
+	// 0 if they are the same
 
-		private int compare(Date date1, Date date2) {
+	private int compare(Date date1, Date date2) {
 
-			Calendar cal1 = Calendar.getInstance();
-			cal1.setTime(date1);
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date1);
 
-			Calendar cal2 = Calendar.getInstance();
-			cal2.setTime(date2);
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
 
-			if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
-				return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
-			} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
-				return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
-			} else {
-				return cal1.get(Calendar.DAY_OF_MONTH)
-						- cal2.get(Calendar.DAY_OF_MONTH);
-			}
-
+		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
+			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
+			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		} else {
+			return cal1.get(Calendar.DAY_OF_MONTH)
+					- cal2.get(Calendar.DAY_OF_MONTH);
 		}
-	
-	private void occupySlot(Date start,Date end){
-		int dateIndex=getDateIndex(start);
-		int timeIndex=getTimeIndex(start);
-	
-		int dateEndIndex=getDateIndex(end);
-		int timeEndIndex=getTimeIndex(end);
-		int numOfSlots=numSlots(start,end);
-		
-		if (dateIndex!=dateEndIndex){
-			for (int i=dateIndex;i<144;i++){
-				timeSlots[dateIndex][i]=false;
+
+	}
+
+	private void occupySlot(Date start, Date end) {
+		int dateIndex = getDateIndex(start);
+		int timeIndex = getTimeIndex(start);
+
+		int dateEndIndex = getDateIndex(end);
+		int timeEndIndex = getTimeIndex(end);
+		int numOfSlots = numSlots(start, end);
+
+		if (dateIndex != dateEndIndex) {
+			for (int i = dateIndex; i < 144; i++) {
+				timeSlots[dateIndex][i] = false;
 			}
-			
-			for (int i=dateIndex+1;i<dateEndIndex-1;i++){
-				for (int j=0;j<144;j++){
-					timeSlots[i][j]=false;
+
+			for (int i = dateIndex + 1; i < dateEndIndex - 1; i++) {
+				for (int j = 0; j < 144; j++) {
+					timeSlots[i][j] = false;
 				}
 			}
-			
-			for (int i=0;i<=timeEndIndex;i++){
-				timeSlots[dateEndIndex][i]=false;
+
+			for (int i = 0; i <= timeEndIndex; i++) {
+				timeSlots[dateEndIndex][i] = false;
 			}
-			
+
 		} else {
-			for (int i=timeIndex;i<timeIndex+numOfSlots;i++)
-				timeSlots[dateIndex][i]=false;
+			for (int i = timeIndex; i < timeIndex + numOfSlots; i++)
+				timeSlots[dateIndex][i] = false;
 		}
-		
-		
+
 	}
-	private int getTimeIndex(Date date){
-		
+
+	private int getTimeIndex(Date date) {
+
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
-		
+
 		int hours = cal.get(Calendar.HOUR_OF_DAY);
 		int minutes = cal.get(Calendar.MINUTE);
-		
-		return hours*6+minutes/10;
-		
+
+		return hours * 6 + minutes / 10;
+
 	}
-	//return i if date is the i-th date from now
-	//-1 if date is before now
-	private int getDateIndex(Date date){
-		Date now=new Date();
-		
-		long diff=date.getTime()-now.getTime();
-		if (diff >=0){
-			return (int) Math.floor(diff/(1000*60*60*24));
-		}else{
+
+	// return i if date is the i-th date from now
+	// -1 if date is before now
+	private int getDateIndex(Date date) {
+		Date now = new Date();
+
+		long diff = date.getTime() - now.getTime();
+		if (diff >= 0) {
+			return (int) Math.floor(diff / (1000 * 60 * 60 * 24));
+		} else {
 			return -1;
 		}
 	}
-	
-	private int numSlots(Date start, Date end){
-		
-		long diff=end.getTime()-start.getTime();
-		
-		int numOfSlots=(int) Math.ceil(diff/(1000*60*10));
-		
-		return numOfSlots;
-		
-	}
-	
 
+	private int numSlots(Date start, Date end) {
+
+		long diff = end.getTime() - start.getTime();
+
+		int numOfSlots = (int) Math.ceil(diff / (1000 * 60 * 10));
+
+		return numOfSlots;
+
+	}
 
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
 	}
-
-	
 
 	// return the list of tasks that are overdue at current time
 	// Author: Tran Cong Thien
@@ -621,7 +611,7 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String content) throws Exception {
 		try {
-			if(displayListType != DisplayList.MAIN) {
+			if (displayListType != DisplayList.MAIN) {
 				throw new Exception("Postpone can only be done in main list.");
 			} else {
 				String[] taskNumbers = content.split(" ");
@@ -632,11 +622,12 @@ public class ControllerClass implements Controller {
 					postponedTask.clearTimes();
 					postponedTask.setType(TaskType.FLOATING);
 				}
-				
+
 				tasks.sort();
 			}
 		} catch (NumberFormatException e) {
-			throw new Exception("Invalid postpone format. Please enter task number.");
+			throw new Exception(
+					"Invalid postpone format. Please enter task number.");
 		}
 	}
 
@@ -689,30 +680,31 @@ public class ControllerClass implements Controller {
 
 		String attributeToChange = words[1];
 		Task taskToEdit = tasks.get(positionOfTask);
-		
-		if(isMultipleEditPriority(attributeToChange)) {
-			for (int i=0; i<words.length-1;i++) {
-				Task task = tasks.get(Integer.parseInt(words[i])-1);
+
+		if (isMultipleEditPriority(attributeToChange)) {
+			for (int i = 0; i < words.length - 1; i++) {
+				Task task = tasks.get(Integer.parseInt(words[i]) - 1);
 				editPriority(task);
-				if(i== words.length-2) {
+				if (i == words.length - 2) {
 					setRecentChange(task, tasks);
 				}
 			}
 		} else {
-		
-		String editDetails = "";
-		for (int i = 2; i < words.length; i++) {
-			editDetails += words[i] + " ";
-		}
-		if (!editDetails.isEmpty()) {
-			editDetails = editDetails.substring(0, editDetails.length() - 1);
-		}
 
-		editAttribute(taskToEdit, attributeToChange, editDetails);
-		setRecentChange(taskToEdit, tasks);
+			String editDetails = "";
+			for (int i = 2; i < words.length; i++) {
+				editDetails += words[i] + " ";
+			}
+			if (!editDetails.isEmpty()) {
+				editDetails = editDetails
+						.substring(0, editDetails.length() - 1);
+			}
+
+			editAttribute(taskToEdit, attributeToChange, editDetails);
+			setRecentChange(taskToEdit, tasks);
 		}
 		displayMainList();
-		
+
 	}
 
 	private boolean isMultipleEditPriority(String attributeToChange) {
@@ -817,12 +809,12 @@ public class ControllerClass implements Controller {
 
 			String[] taskNumbers = content.split(" ");
 			List<Integer> taskNumDescending = new ArrayList<Integer>();
-			for (int i=0; i< taskNumbers.length; i++) {
+			for (int i = 0; i < taskNumbers.length; i++) {
 				int taskNum = Integer.parseInt(taskNumbers[i]);
 				taskNumDescending.add(taskNum);
 			}
 			Collections.sort(taskNumDescending, Collections.reverseOrder());
-			
+
 			for (int i = 0; i < taskNumDescending.size(); i++) {
 				int taskNum = taskNumDescending.get(i);
 				executeDelete(taskNum);
