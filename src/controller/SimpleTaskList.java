@@ -4,9 +4,15 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 
 /**
  * @author 
@@ -226,6 +232,300 @@ public class SimpleTaskList implements TaskList {
 		}
 
 		return resultList;
+	}
+
+	@Override
+	public TaskList search(String content) {
+		return processSearch(content);
+	}
+	
+	private TaskList processSearch(String content) {
+
+		String desc = "";
+		Integer singlePos = 0;
+		Integer doublePos = 0;
+		singlePos = content.indexOf('\'', 0);
+		doublePos = content.indexOf('\"', 0);
+		if (singlePos == -1 && doublePos == -1) {
+			// return normal case, just single search(content);
+			desc = content;
+			return simpleSearch(content, this);
+		} else {
+
+			String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+			Matcher matcher = Pattern.compile(regex).matcher(content);
+			while (matcher.find()) {
+				desc += content.substring(matcher.start() + 1,
+						matcher.end() - 1) + " ";
+			}
+			if (desc.length() > 0) {
+				desc = desc.substring(0, desc.length() - 1);
+				content = content.replaceAll(regex, "");
+			}
+			// now content is time
+
+			return complexSearch(desc, content, this);
+		}
+	}
+	
+	private Date timeParser(String input) {
+		Parser parser = new Parser();
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		if (dates.size() == 1) {
+			return dates.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	// search for date and description
+	// if the user types in one date only,
+	// the software will understand as search for date
+	private TaskList complexSearch(String desc, String content,
+			TaskList listToSearch) {
+
+		TaskList resultForTime = simpleSearch(content, listToSearch);
+		// search for time first
+
+		return simpleSearch(desc, resultForTime);
+
+	}
+
+	private TaskList simpleSearch(String content, TaskList listToSearch) {
+
+		TaskList listToDisplay = null;
+
+		Date date = timeParser(content);
+		if (date == null) {
+			listToDisplay = searchDesc(content, listToSearch);
+		} else {
+			String[] para = content.trim().split("\\s+");
+			if (para[0].equalsIgnoreCase("by")) {
+
+				listToDisplay = searchByDate(date, listToSearch);
+			} else {
+				listToDisplay = searchOnDate(date, listToSearch);
+			}
+		}
+
+		return listToDisplay;
+	}
+
+	// search on the exact date
+	private TaskList searchOnDate(Date deadline, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			if (task.getDeadline() != null) {
+
+				if (compare(task.getDeadline(), deadline) == 0) {
+					resultList.add(task);
+				}
+			}
+		}
+
+		return resultList;
+	}
+
+	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			if (task.getDeadline() != null) {
+
+				if (compare(task.getDeadline(), deadline) <= 0) {
+					resultList.add(task);
+				}
+			}
+		}
+
+		return resultList;
+	}
+
+	// return negative if date1 is before date2
+	// positive if date1 is after date2
+	// 0 if they are the same
+
+	private int compare(Date date1, Date date2) {
+
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date1);
+
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+
+		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
+			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
+			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		} else {
+			return cal1.get(Calendar.DAY_OF_MONTH)
+					- cal2.get(Calendar.DAY_OF_MONTH);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @return: the result list of task if the key appears in the list of task,
+	 *          return the list of exact search else return the list of
+	 *          nearMatch search
+	 * @author: Tran Cong Thien
+	 */
+
+	private TaskList searchDesc(String keyWord, TaskList listToSearch) {
+		
+			return nearMatchSearch(keyWord, listToSearch);
+
+	}
+
+
+	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
+		TaskList resultList = new SimpleTaskList();
+		int numOfTask = listToSearch.size();
+		String[] str = key.trim().split("\\s+");
+		int keyLen = str.length;
+
+		ArrayList<Triple> list = new ArrayList<Triple>();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			Pair result = searchScore(key.toLowerCase(), task.getDesc().trim()
+					.toLowerCase());
+			if (result.getFirst() > keyLen / 2) {
+				if (result.getSecond() >= 500 * keyLen) {
+
+					list.add(new Triple(result.getFirst(), result.getSecond(),
+							task));
+				}
+			}
+		}
+
+		Collections.sort(list);
+
+		for (int i = list.size() - 1; i >= 0; i--) {
+			Task task = list.get(i).getThird();
+			resultList.add(task);
+		}
+
+		return resultList;
+	}
+
+	private Pair searchScore(String keyword, String strToSearch) {
+		String[] key = keyword.trim().split("\\s+");
+		int strLen = key.length;
+		int searchScore = 0;
+		int numOfMatch = 0;
+		
+		boolean[] isMatched=new boolean[strLen];
+		int[] matchScore=new int[strLen]; 
+		
+		for (int i=0;i<strLen;i++){
+			isMatched[i]=false;
+			matchScore[i]=0;
+		}
+		
+		
+		for (int i = 0; i < strLen; i++) {
+			if (strToSearch.indexOf(keyword)!=-1){
+				if (isMatched[i]==false){
+					isMatched[i]=true;
+					matchScore[i]=1000;
+				}
+			} else if (matchScore(key[i], strToSearch) != 0) {
+				if (isMatched[i]==false){
+					isMatched[i]=true;
+					matchScore[i]=matchScore(key[i], strToSearch);
+				} else {
+					if (matchScore(key[i],strToSearch)> matchScore[i]){
+						matchScore[i]=matchScore(key[i],strToSearch);
+					}
+				}
+			}	
+		}
+
+		for (int i=0;i<strLen;i++){
+			if (isMatched[i]==true){
+				numOfMatch++;
+			}
+			searchScore+=matchScore[i];
+		}
+		return new Pair(numOfMatch, searchScore);
+	}
+
+	// keyword is one word only
+	// return maxScore of matching of this keyword in the string
+	private int matchScore(String key, String strToSearch) {
+
+		String[] string = strToSearch.trim().split("\\s+");
+		int strLen = string.length;
+		int maxScore = 0;
+
+		for (int i = 0; i < strLen; i++) {
+			int score = approximateMatchScore(key, string[i]);
+			if (maxScore < score) {
+				maxScore = score;
+			}
+		}
+
+		return maxScore;
+	}
+
+	// Criteria to be matched between 2 words, if the
+	// editDistance/lenghOfKeyWord is <0.5
+	// the 2 strings are considered approximately matched
+	private int approximateMatchScore(String keyword, String string) {
+		int editDist = editDistance(string, keyword);
+		int lenOfKey = keyword.length();
+		if (editDist / lenOfKey < 0.5)
+			return 1000 - 1000 * editDist / lenOfKey;
+		else
+			return 0;
+
+	}
+
+	// the edit Distance score between 2 strings, used for nearMatch Search
+	// the lower, the better
+	// Tran Cong Thien
+	private int editDistance(String sourceString, String destString) {
+		int sourceStrLen = sourceString.length();
+		int destStrLen = destString.length();
+
+		// sourceString in for vertical axis
+		// destString in the horizontal axis
+		int[][] editDistance = new int[sourceStrLen + 1][destStrLen + 1];
+
+		for (int i = 1; i <= sourceStrLen; i++) {
+			editDistance[i][0] = i;
+		}
+
+		for (int j = 1; j <= destStrLen; j++) {
+			editDistance[0][j] = j;
+		}
+
+		for (int j = 1; j <= destStrLen; j++) {
+			for (int i = 1; i <= sourceStrLen; i++) {
+
+				if (sourceString.charAt(i - 1) == destString.charAt(j - 1)) {
+					editDistance[i][j] = editDistance[i - 1][j - 1];
+				} else {
+					editDistance[i][j] = Math.min(editDistance[i - 1][j] + 1,
+							Math.min(editDistance[i][j - 1] + 1,
+									editDistance[i - 1][j - 1] + 1));
+				}
+			}
+		}
+
+		return editDistance[sourceStrLen][destStrLen];
 	}
 
 }

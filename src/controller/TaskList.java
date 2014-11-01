@@ -43,4 +43,6 @@ public interface TaskList {
 	Integer getIndexTaskOnPage(Integer taskIndex);
 	
 	TaskList getOverdueTasks();
+	
+	TaskList search(String content);
 }
