@@ -314,7 +314,7 @@ public class ControllerClass implements Controller {
 			// move task from task List to archive
 			if (taskID >= 0 && taskID < tasks.size()) {
 				Task task = tasks.get(taskID);
-				archiveTasks.add(task);
+				archiveTasks.add(0,task);
 				tasks.remove(taskID);
 
 				if (i == taskNumbers.length - 1) {

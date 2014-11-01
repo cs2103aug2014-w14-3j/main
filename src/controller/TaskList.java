@@ -6,6 +6,8 @@ public interface TaskList {
 
 	boolean add(Task task);
 	
+	void add(int index,Task task);
+	
 	void addAll(List<String> strList);
 		
 	void set(int pos, Task task);

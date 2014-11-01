@@ -49,6 +49,12 @@ public class SimpleTaskList implements TaskList {
 	public boolean add(Task task) {
 		return tasks.add(task);
 	}
+	
+	@Override
+	public void add(int index,Task task) {
+		tasks.add(index,task);
+	}
+	
 
 	@Override
 	public void set(int pos, Task task) {
