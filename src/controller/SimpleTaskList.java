@@ -240,7 +240,7 @@ public class SimpleTaskList implements TaskList {
 				if (task.getDeadline().compareTo(current) <= 0) {
 					Task withNum = task.clone();
 					withNum.setDesc((i + 1) + ". " + withNum.getDesc());
-					resultList.add(task);
+					resultList.add(withNum);
 				}
 			}
 		}
