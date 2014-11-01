@@ -75,7 +75,6 @@ public class UIControl extends BorderPane {
 			if (event.getCode() == KeyCode.ENTER) {
 				value.onEventExec(input.getText());
 				input.clear();
-				event.consume();
 			}
 		});
 	}

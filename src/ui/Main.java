@@ -107,6 +107,11 @@ public class Main extends Application{
 		if (command.isEmpty()) {
 			return command;
 		}
+		
+		if (suggest.isFocused()) {
+			return command;
+		}
+		
 		execCmd(command);
 		pushHistory(command);
 		mainControl.loadList(displayBuf, recentChange);
@@ -131,7 +136,7 @@ public class Main extends Application{
 		suggest.getContent().clear();
 		suggest.getContent().add(list.getPane());
 		suggest.setX(stage.getX() + mainControl.getInputPosition().getX());
-		suggest.setY(stage.getY() + stage.getHeight() - 5);
+		suggest.setY(stage.getY() + stage.getHeight() + 5);
 		list.setOnEnter((str) -> onPopupListEnter(str));
 		list.setOnEsc((str)->onPopupListEsc(str));
 		
@@ -150,6 +155,7 @@ public class Main extends Application{
 		} else {
 			mainControl.setInputText(str);
 		}
+		suggest.hide();
 		return str;
 	}
 	
