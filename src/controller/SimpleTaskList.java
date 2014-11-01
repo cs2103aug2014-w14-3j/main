@@ -249,41 +249,74 @@ public class SimpleTaskList implements TaskList {
 	
 	private TaskList processSearch(String content) {
 
-		String desc = "";
-		Integer singlePos = 0;
-		Integer doublePos = 0;
-		singlePos = content.indexOf('\'', 0);
-		doublePos = content.indexOf('\"', 0);
-		if (singlePos == -1 && doublePos == -1) {
-			// return normal case, just single search(content);
-			desc = content;
-			return simpleSearch(content, this);
-		} else {
+		
+		int first=content.indexOf('\"');
+		int second=content.lastIndexOf('\"');
+		
 
-			String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
-			Matcher matcher = Pattern.compile(regex).matcher(content);
-			while (matcher.find()) {
-				desc += content.substring(matcher.start() + 1,
-						matcher.end() - 1) + " ";
+		if (first!=-1 || second==-1){
+			return simpleSearch(content,this,false);
+		} else {
+			if (second==content.length()-1 && first==0){
+				String desc=content.replaceAll("\"","");
+				return simpleSearch(desc,this,true);
+			} else {
+				String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+				Matcher matcher = Pattern.compile(regex).matcher(content);
+				String desc="";
+				String time="";
+				
+				while (matcher.find()) {
+					desc += content.substring(matcher.start() + 1,
+							matcher.end() - 1) + " ";
+				}
+				if (desc.length() > 0) {
+					desc = desc.substring(0, desc.length() - 1);
+					time = content.replaceAll(regex, "");
+				}
+				// now content is time
+					return complexSearch(desc, time, this);
 			}
-			if (desc.length() > 0) {
-				desc = desc.substring(0, desc.length() - 1);
-				content = content.replaceAll(regex, "");
-			}
-			// now content is time
-				return complexSearch(desc, content, this);
 		}
 	}
 	
 	private Date timeParser(String input) {
 		Parser parser = new Parser();
+		
+		
+		
 		List<DateGroup> groups = parser.parse(input);
 		List<Date> dates = new ArrayList<Date>();
 		for (DateGroup group : groups) {
 			dates.addAll(group.getDates());
 		}
 
+
 		if (dates.size() == 1) {
+			//avoid ambiguous cases for natty
+			String newStr="";
+			for (int i=0;i<input.length();i++){
+				if (input.charAt(i)=='/' || Character.isDigit(input.charAt(i))){
+					newStr=newStr+input.charAt(i);
+				}
+				
+				if (newStr.length()!=5){
+					return null;
+				} else {
+					if (newStr.charAt(2)=='/'){
+						try {
+							int mon=Integer.parseInt(newStr.substring(0,2));
+							int date=Integer.parseInt(newStr.substring(3));
+							
+							if (mon>12 || date >31)
+								return null;
+						} catch ( NumberFormatException nfe){
+							return null;
+						}
+						
+					}
+				}
+			}
 			return dates.get(0);
 		} else {
 			return null;
@@ -295,31 +328,32 @@ public class SimpleTaskList implements TaskList {
 	// the software will understand as search for date
 	private TaskList complexSearch(String desc, String content,
 			TaskList listToSearch) {
-
-		TaskList resultForTime = simpleSearch(content, listToSearch);
+		TaskList resultForTime = simpleSearch(content, listToSearch,false);
 		// search for time first
 
-		return simpleSearch(desc, resultForTime);
+		return simpleSearch(desc, resultForTime,true);
 
 	}
 
-	private TaskList simpleSearch(String content, TaskList listToSearch) {
+	private TaskList simpleSearch(String content, TaskList listToSearch, boolean isDesc) {
 
 		TaskList listToDisplay = null;
-
+		
+		if (isDesc==true){
+			listToDisplay = searchDesc(content, listToSearch);	
+		} else {
 		Date date = timeParser(content);
 		if (date == null) {
 			listToDisplay = searchDesc(content, listToSearch);
-		} else {
+		} else  {
 			String[] para = content.trim().split("\\s+");
 			if (para[0].equalsIgnoreCase("by")) {
-
 				listToDisplay = searchByDate(date, listToSearch);
 			} else {
 				listToDisplay = searchOnDate(date, listToSearch);
 			}
 		}
-
+		}
 		return listToDisplay;
 	}
 
