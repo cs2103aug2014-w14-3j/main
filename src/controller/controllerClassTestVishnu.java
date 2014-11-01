@@ -21,7 +21,7 @@ public class controllerClassTestVishnu {
 	
 	@Before
 	public void initialize() {
-		controller = new ControllerClass();
+		controller = ControllerClass.getInstance();
 	}
 	
 	@Rule

@@ -25,6 +25,7 @@ import controller.ControllerClass;
  */
 public class Main extends Application{
 	private Popup noti;
+	private Popup suggest;
 	private Stage stage;
 	private UIControl mainControl;
 	public Main() {
@@ -32,6 +33,7 @@ public class Main extends Application{
 		log = new Log();
 		commandHistory = new ArrayList<String>();
 		noti = new Popup();	
+		suggest = new Popup();
 		historyPos = 0;
 	}
 	
@@ -61,6 +63,7 @@ public class Main extends Application{
 		
 		mainControl.setInputOnEnter((command) -> onEnter(command));
 		mainControl.setInputOnKeyUPDown((direction) -> onUpDown(direction));
+		mainControl.setInputOnChange((str) -> onInputChange(str));
 		
 		execCmd("list");
 		mainControl.loadList(displayBuf);
@@ -71,7 +74,7 @@ public class Main extends Application{
 	
 	private void execCmd(String cmd) {
 		if(cmd.trim().compareToIgnoreCase(Config.cmdExit) == 0) {
-			log.log("exit");
+			log.log("on exit");
 			Platform.exit();
 			System.exit(0);
 		}
@@ -121,6 +124,39 @@ public class Main extends Application{
 			return commandHistory.get(historyPos);
 		}
 		return null;
+	}
+	
+	private String onInputChange(String newValue) {
+		PopupListControl list = new PopupListControl();
+		suggest.getContent().clear();
+		suggest.getContent().add(list.getPane());
+		suggest.setX(stage.getX() + mainControl.getInputPosition().getX());
+		suggest.setY(stage.getY() + stage.getHeight() - 5);
+		list.setOnEnter((str) -> onPopupListEnter(str));
+		list.setOnEsc((str)->onPopupListEsc(str));
+		
+		if (list.loadList(controller.suggest(newValue))) {
+			suggest.show(stage);
+		} else {
+			suggest.hide();
+		}
+		
+		return newValue;
+	}
+	
+	private String onPopupListEnter(String str) {
+		if (str == null || str.isEmpty()) {
+			mainControl.setInputOnFocus();
+		} else {
+			mainControl.setInputText(str);
+		}
+		return str;
+	}
+	
+	private String onPopupListEsc(String str) {
+		suggest.hide();
+		mainControl.setInputOnFocus();
+		return str;
 	}
 	
 	private void pushHistory(String command) {
