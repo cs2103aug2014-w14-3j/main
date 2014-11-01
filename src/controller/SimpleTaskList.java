@@ -151,9 +151,13 @@ public class SimpleTaskList implements TaskList {
 			return new ArrayList<String>();
 		}
 		
-		if (pageNum < 0 || pageNum > getTotalPageNum()) {
-			throw new IndexOutOfBoundsException("Invalid Page Number");
+		if(pageNum < 0) {
+			pageNum = 0;
 		}
+		
+		if(pageNum > getTotalPageNum()) {
+			pageNum = getTotalPageNum();
+		} 
 		
 		ArrayList<String> taskStrings = new ArrayList<String>();
 		Integer from = (pageNum - 1) * numTaskOnPage;
@@ -181,9 +185,13 @@ public class SimpleTaskList implements TaskList {
 		if (getTotalPageNum() == 0) {
 			return new ArrayList<String>();
 		}
+
+		if(pageNum < 0) {
+			pageNum = 0;
+		}
 		
-		if (pageNum < 0 || pageNum > getTotalPageNum()) {
-			throw new IndexOutOfBoundsException("Invalid Page Number");
+		if(pageNum > getTotalPageNum()) {
+			pageNum = getTotalPageNum();
 		}
 		
 		ArrayList<String> taskStrings = new ArrayList<String>();

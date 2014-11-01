@@ -45,6 +45,8 @@ public class ControllerClass implements Controller {
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE="find";
+	public static final String CMD_CLEARARCHIVE = "clear archive";
+	
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME
 	};
@@ -629,13 +631,8 @@ public class ControllerClass implements Controller {
 					Task postponedTask = tasks.get(taskNum);
 					postponedTask.clearTimes();
 					postponedTask.setType(TaskType.FLOATING);
-
-					if (i == taskNumbers.length - 1) {
-						setRecentChange(postponedTask, tasks);
-					}
 				}
 			}
-			displayMainList();
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid postpone format. Please enter task number.");
 		}
