@@ -49,6 +49,12 @@ public class SimpleTaskList implements TaskList {
 	public boolean add(Task task) {
 		return tasks.add(task);
 	}
+	
+	@Override
+	public void add(int index,Task task) {
+		tasks.add(index,task);
+	}
+	
 
 	@Override
 	public void set(int pos, Task task) {
@@ -151,9 +157,13 @@ public class SimpleTaskList implements TaskList {
 			return new ArrayList<String>();
 		}
 		
-		if (pageNum < 0 || pageNum > getTotalPageNum()) {
-			throw new IndexOutOfBoundsException("Invalid Page Number");
+		if(pageNum < 0) {
+			pageNum = 0;
 		}
+		
+		if(pageNum > getTotalPageNum()) {
+			pageNum = getTotalPageNum();
+		} 
 		
 		ArrayList<String> taskStrings = new ArrayList<String>();
 		Integer from = (pageNum - 1) * numTaskOnPage;
@@ -181,9 +191,13 @@ public class SimpleTaskList implements TaskList {
 		if (getTotalPageNum() == 0) {
 			return new ArrayList<String>();
 		}
+
+		if(pageNum < 0) {
+			pageNum = 0;
+		}
 		
-		if (pageNum < 0 || pageNum > getTotalPageNum()) {
-			throw new IndexOutOfBoundsException("Invalid Page Number");
+		if(pageNum > getTotalPageNum()) {
+			pageNum = getTotalPageNum();
 		}
 		
 		ArrayList<String> taskStrings = new ArrayList<String>();
@@ -241,35 +255,40 @@ public class SimpleTaskList implements TaskList {
 	
 	private TaskList processSearch(String content) {
 
-		String desc = "";
-		Integer singlePos = 0;
-		Integer doublePos = 0;
-		singlePos = content.indexOf('\'', 0);
-		doublePos = content.indexOf('\"', 0);
-		if (singlePos == -1 && doublePos == -1) {
-			// return normal case, just single search(content);
-			desc = content;
-			return simpleSearch(content, this);
+		
+		int first=content.indexOf('\"');
+		int second=content.lastIndexOf('\"');
+		
+
+		if (first!=-1 || second==-1){
+			return simpleSearch(content,this,false);
 		} else {
-
-			String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
-			Matcher matcher = Pattern.compile(regex).matcher(content);
-			while (matcher.find()) {
-				desc += content.substring(matcher.start() + 1,
-						matcher.end() - 1) + " ";
+			if (second==content.length()-1 && first==0){
+				String desc=content.replaceAll("\"","");
+				return simpleSearch(desc,this,true);
+			} else {
+				String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+				Matcher matcher = Pattern.compile(regex).matcher(content);
+				String desc="";
+				String time="";
+				
+				while (matcher.find()) {
+					desc += content.substring(matcher.start() + 1,
+							matcher.end() - 1) + " ";
+				}
+				if (desc.length() > 0) {
+					desc = desc.substring(0, desc.length() - 1);
+					time = content.replaceAll(regex, "");
+				}
+				// now content is time
+					return complexSearch(desc, time, this);
 			}
-			if (desc.length() > 0) {
-				desc = desc.substring(0, desc.length() - 1);
-				content = content.replaceAll(regex, "");
-			}
-			// now content is time
-
-			return complexSearch(desc, content, this);
 		}
 	}
 	
 	private Date timeParser(String input) {
 		Parser parser = new Parser();
+
 		List<DateGroup> groups = parser.parse(input);
 		List<Date> dates = new ArrayList<Date>();
 		for (DateGroup group : groups) {
@@ -277,6 +296,41 @@ public class SimpleTaskList implements TaskList {
 		}
 
 		if (dates.size() == 1) {
+			// avoid ambiguous cases for natty
+
+			if (input.length() == 1 || input.length() == 2) {
+				// can not get a date form these length
+				return null;
+			}
+			
+			String newStr="";
+			for (int i=0;i<input.length();i++){
+				if (input.charAt(i)=='/' || Character.isDigit(input.charAt(i))){
+					newStr=newStr+input.charAt(i);
+				}
+			}
+			
+			if (newStr.length()>=4){
+				if (newStr.indexOf("/")==-1)
+					return null;
+			}
+			
+			if (newStr.length()==5){
+				if (newStr.charAt(2)=='/'){
+					try {
+						int mon=Integer.parseInt(newStr.substring(0,2));
+						int date=Integer.parseInt(newStr.substring(3));
+						
+						if (mon>12 || date >31)
+							return null;
+					} catch ( NumberFormatException nfe){
+						return null;
+					}
+					
+				}
+			}
+			
+			
 			return dates.get(0);
 		} else {
 			return null;
@@ -288,31 +342,32 @@ public class SimpleTaskList implements TaskList {
 	// the software will understand as search for date
 	private TaskList complexSearch(String desc, String content,
 			TaskList listToSearch) {
-
-		TaskList resultForTime = simpleSearch(content, listToSearch);
+		TaskList resultForTime = simpleSearch(content, listToSearch,false);
 		// search for time first
 
-		return simpleSearch(desc, resultForTime);
+		return simpleSearch(desc, resultForTime,true);
 
 	}
 
-	private TaskList simpleSearch(String content, TaskList listToSearch) {
+	private TaskList simpleSearch(String content, TaskList listToSearch, boolean isDesc) {
 
 		TaskList listToDisplay = null;
-
+		
+		if (isDesc==true){
+			listToDisplay = searchDesc(content, listToSearch);	
+		} else {
 		Date date = timeParser(content);
 		if (date == null) {
 			listToDisplay = searchDesc(content, listToSearch);
-		} else {
+		} else  {
 			String[] para = content.trim().split("\\s+");
 			if (para[0].equalsIgnoreCase("by")) {
-
 				listToDisplay = searchByDate(date, listToSearch);
 			} else {
 				listToDisplay = searchOnDate(date, listToSearch);
 			}
 		}
-
+		}
 		return listToDisplay;
 	}
 
@@ -325,8 +380,10 @@ public class SimpleTaskList implements TaskList {
 			Task task = listToSearch.get(i);
 			if (task.getDeadline() != null) {
 				Task newTask=task.clone();
-				String newDesc=(i+1)+". "+task.getDesc();
-				newTask.setDesc(newDesc);
+				if (newTask.getDesc().indexOf(". ")==-1){
+					String newDesc=(i+1)+". "+newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
 				
 				if (compare(task.getDeadline(), deadline) == 0) {
 					resultList.add(newTask);
@@ -336,7 +393,8 @@ public class SimpleTaskList implements TaskList {
 
 		return resultList;
 	}
-
+	
+	
 	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
@@ -346,8 +404,10 @@ public class SimpleTaskList implements TaskList {
 			if (task.getDeadline() != null) {
 				
 				Task newTask=task.clone();
-				String newDesc=(i+1)+". "+task.getDesc();
-				newTask.setDesc(newDesc);
+				if (newTask.getDesc().indexOf(". ")==-1){
+					String newDesc=(i+1)+". "+newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
 				
 				if (compare(task.getDeadline(), deadline) <= 0) {
 					resultList.add(newTask);
@@ -411,8 +471,10 @@ public class SimpleTaskList implements TaskList {
 			if (result.getFirst() > keyLen / 2) {
 				if (result.getSecond() >= 500 * keyLen) {
 					Task newTask=task.clone();
-					String newDesc=(i+1)+". "+newTask.getDesc();
-					newTask.setDesc(newDesc);
+					if (newTask.getDesc().indexOf(". ")==-1){
+						String newDesc=(i+1)+". "+newTask.getDesc();
+						newTask.setDesc(newDesc);
+					}
 					list.add(new Triple(result.getFirst(), result.getSecond(),
 							newTask));
 				}

@@ -45,6 +45,8 @@ public class ControllerClass implements Controller {
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE="find";
+	public static final String CMD_CLEARARCHIVE = "clear archive";
+	
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME
 	};
@@ -312,7 +314,7 @@ public class ControllerClass implements Controller {
 			// move task from task List to archive
 			if (taskID >= 0 && taskID < tasks.size()) {
 				Task task = tasks.get(taskID);
-				archiveTasks.add(task);
+				archiveTasks.add(0,task);
 				tasks.remove(taskID);
 
 				if (i == taskNumbers.length - 1) {
@@ -617,23 +619,24 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @author Koh Xian Hui
 	 */
-	private void postpone(String content) {
+	private void postpone(String content) throws Exception {
 		try {
-			String[] taskNumbers = content.split(" ");
+			if(displayListType != DisplayList.MAIN) {
+				throw new Exception("Postpone can only be done in main list.");
+			} else {
+				String[] taskNumbers = content.split(" ");
 
-			for (int i = 0; i < taskNumbers.length; i++) {
-				Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
-				Task postponedTask = tasks.get(taskNum);
-				postponedTask.clearTimes();
-				postponedTask.setType(TaskType.FLOATING);
-
-				if (i == taskNumbers.length - 1) {
-					setRecentChange(postponedTask, tasks);
+				for (int i = 0; i < taskNumbers.length; i++) {
+					Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
+					Task postponedTask = tasks.get(taskNum);
+					postponedTask.clearTimes();
+					postponedTask.setType(TaskType.FLOATING);
 				}
+				
+				tasks.sort();
 			}
-			displayMainList();
 		} catch (NumberFormatException e) {
-			System.out.println("invalid number");
+			throw new Exception("Invalid postpone format. Please enter task number.");
 		}
 	}
 
@@ -1087,7 +1090,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private String removeCommandType(String command, String operation) {
-		return command.replace(operation, "").trim();
+		return command.replaceFirst(operation, "").trim();
 	}
 
 	/**
