@@ -1091,7 +1091,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private String removeCommandType(String command, String operation) {
-		return command.replace(operation, "").trim();
+		return command.replaceFirst(operation, "").trim();
 	}
 
 	/**
