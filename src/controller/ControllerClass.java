@@ -18,9 +18,6 @@ import storage.StoragePlus;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-
 import controller.Task.TaskType;
 
 /*

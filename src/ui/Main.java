@@ -32,6 +32,7 @@ public class Main extends Application{
 		log = new Log();
 		commandHistory = new ArrayList<String>();
 		noti = new Popup();	
+		historyPos = 0;
 	}
 	
 	@Override
@@ -57,9 +58,6 @@ public class Main extends Application{
 		mainControl = loader.getController();
 		
 		Scene scene = new Scene(mainPane);
-		scene.getStylesheets().setAll(
-	            getClass().getResource("main.css").toExternalForm()
-	        );
 		
 		mainControl.setInputOnEnter((command) -> onEnter(command));
 		mainControl.setInputOnKeyUPDown((direction) -> onUpDown(direction));

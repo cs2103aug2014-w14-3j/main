@@ -13,7 +13,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ListView?>
 
-<BorderPane prefHeight="420.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIControl">
+<BorderPane prefHeight="620.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIControl">
 	<top>
 		<HBox prefHeight="57.0" prefWidth="611.0" style="-fx-background-color: #22A7F0;">
    			<children>
@@ -47,9 +47,9 @@
 	<bottom>
 		<HBox style="-fx-background-color: #22A7F0;">
 		   <children>
-		   		<TextField fx:id="input" prefHeight="40.0" prefWidth="609.0" promptText="    I want to" style="-fx-background-radius: 25px,25px;">
+		   		<TextField fx:id="input" prefHeight="40.0" prefWidth="609.0" promptText="I want to" style="-fx-background-radius: 25px,25px;">
                <padding>
-                  <Insets left="2.0" />
+                  <Insets left="15.0" right="15.0" />
                </padding>
                <font>
                   <Font name="Tahoma Bold" size="16.0" />
@@ -68,7 +68,7 @@
 		</HBox>
 	</bottom>
 	<center>
-		<ListView fx:id="list" prefHeight="314.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
+		<ListView fx:id="list" prefHeight="500.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin></ListView>

@@ -12,6 +12,7 @@ import java.util.Date;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -21,13 +22,16 @@ import javafx.scene.text.TextFlow;
  */
 class ListItem{
 	@FXML
-	private HBox hbox;
+	private HBox box;
 	
 	@FXML
 	private Text desc; 
 	
 	@FXML
 	private TextFlow time;
+	
+	@FXML
+	private Circle priority;
 	
 	ListItem() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ListItem.fxml"));
@@ -44,7 +48,7 @@ class ListItem{
 	}
 	
 	public HBox getHBox() {
-		return hbox;
+		return box;
 	}
 	
 	public void setDesc(String text) {
@@ -52,11 +56,7 @@ class ListItem{
 	}
 	
 	public void setPriority(boolean priority) {
-		if (priority) {
-			hbox.setStyle("-fx-background-color: #F89406");
-		} else {
-			hbox.setStyle("-fx-background-color: #EEEEEE");
-		}
+		this.priority.setVisible(priority);
 	}
 	
 	public void clearTime() {
@@ -65,12 +65,13 @@ class ListItem{
 	
 	public void setTimes() {
 		clearTime();
-		time.getChildren().add(new Text("Floating"));
+		Text floating = new Text("Floating");
+		floating.setStyle("-fx-fill: #777777;");
+		time.getChildren().add(floating);
 	}
 	
 	public void setTimes(Long timeInMilli) {
 		clearTime();
-		
 		time.getChildren().add(timeToText(timeInMilli));
 	}
 	
@@ -79,7 +80,8 @@ class ListItem{
 		time.getChildren().add(timeToText(timeStart));
 		
 		Text to = new Text();
-		to.setText("\n");
+		to.setText(" to ");
+		to.setStyle("-fx-fill: #777777");
 		time.getChildren().add(to);
 		time.getChildren().add(timeToText(timeEnd));	
 	}
@@ -88,8 +90,9 @@ class ListItem{
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
 		Text timeText = new Text();
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm a");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
 		timeText.setText(format.format(timeobj));
+		timeText.setStyle("-fx-fill: #222222;");
 		return timeText;
 	}
 	

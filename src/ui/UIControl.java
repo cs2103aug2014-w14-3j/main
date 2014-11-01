@@ -83,15 +83,29 @@ public class UIControl extends BorderPane {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
 				input.setText(value.onEventExec("UP"));
+				try {
+					input.positionCaret(input.getText().length());
+				} catch (Exception e) {
+					//do nothing
+					//if input has no text, exception will be thrown
+				}
+				event.consume();
 			}
 			if (event.getCode() == KeyCode.DOWN) {
 				input.setText(value.onEventExec("DOWN"));
+				try {
+					input.positionCaret(input.getText().length());
+				} catch (Exception e) {
+					//do nothing
+					//if input has no text, exception will be thrown
+				}
+				event.consume();
 			}
 		});
 	}
 	
 	private void displayCurTime() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm a");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
 			time.setText(format.format(LocalDateTime.now()));
 		}));
