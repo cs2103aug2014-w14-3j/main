@@ -142,6 +142,9 @@ public class ControllerClass implements Controller {
 	public List<String> suggest(String content) {
 		List<String> suggestList = new ArrayList<String>();
 
+		if (content == null || content.isEmpty()) {
+			return suggestList;
+		}
 		// suggest commands
 		for (String str : commandMap.keySet()) {
 			if (str.indexOf(content) == 0) {

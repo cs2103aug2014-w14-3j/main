@@ -11,6 +11,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -37,7 +39,9 @@ public class Main extends Application{
 			stage.setScene(loadScene());
 			mainControl.init();
 		} catch (IOException e) {
-			e.printStackTrace();
+			if (Config.onDevelopment) {
+				e.printStackTrace();
+			}
 			Platform.exit();
 			System.exit(0);
 		}
@@ -59,8 +63,8 @@ public class Main extends Application{
 		mainControl.setInputOnChange((str) -> onInputChange(str));
 		
 		execCmd("list");
-		mainControl.loadList(displayBuf);
 		
+		setHotKeys(scene);
 		return scene;
 	}
 	
@@ -81,6 +85,7 @@ public class Main extends Application{
 			if (displayBuf == null) {
 				return;
 			}
+			mainControl.loadList(displayBuf, recentChange);
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
 				e.printStackTrace();
@@ -99,7 +104,6 @@ public class Main extends Application{
 		
 		execCmd(command);
 		pushHistory(command);
-		mainControl.loadList(displayBuf, recentChange);
 		return command;
 	}
 	
@@ -123,6 +127,20 @@ public class Main extends Application{
 	private void pushHistory(String command) {
 		commandHistory.add(command);
 		historyPos = commandHistory.size();
+	}
+	
+	private void setHotKeys(Scene scene) {
+		scene.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
+			if (event.getCode() == KeyCode.PAGE_DOWN || 
+					(event.getCode() == KeyCode.RIGHT && event.isAltDown())) {
+				execCmd("page down");
+				event.consume();
+			} else if (event.getCode() == KeyCode.PAGE_UP
+					|| (event.getCode() == KeyCode.LEFT && event.isAltDown())) {
+				execCmd("page up");
+				event.consume();
+			}
+		});
 	}
 	
 	/**
