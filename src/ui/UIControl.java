@@ -145,7 +145,8 @@ public class UIControl extends BorderPane {
 			double posX = input.localToScene(0.0, 0.0).getX() 
 					+ input.getScene().getWindow().getX();
 			double posY = input.getScene().getWindow().getY()
-					+ input.getScene().getWindow().getHeight();
+					+ input.localToScene(0.0, 0.0).getY()
+					+ input.getHeight();
 			
 			if (popupList.loadList(value.getList(newString))) {
 				suggest.show(input, posX, posY);
