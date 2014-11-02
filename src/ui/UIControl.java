@@ -12,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
+import javafx.stage.Popup;
 import javafx.util.Duration;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -19,7 +20,6 @@ import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Point2D;
 
 /**
  * @author Luo Shaohuai
@@ -35,8 +35,13 @@ public class UIControl extends BorderPane {
 	@FXML
 	private TextField input;
 	
+	private Popup noti;
+	private Popup suggest;
+	
 	public UIControl() {
 		displayCurTime();
+		noti = new Popup();	
+		suggest = new Popup();
 	}
 	
 	public void loadList(List<String> displayBuf) {
@@ -66,8 +71,22 @@ public class UIControl extends BorderPane {
 		input.requestFocus();
 	}
 	
-	public Point2D getInputPosition() {
-		return input.localToScene(0.0, 0.0);
+	public void hideNoti() {
+		noti.hide();
+	}
+	
+	public void showNoti(String message) {
+		noti.getContent().clear();
+		noti.getContent().add(new Text(message));
+		noti.setHeight(20.0);
+		
+		double posX = input.localToScene(0.0, 0.0).getX() 
+				+ input.getScene().getWindow().getX();
+		double posY = input.localToScene(0.0, 0.0).getY() 
+				+ input.getScene().getWindow().getY()
+				- noti.getHeight();
+		
+		noti.show(input, posX, posY);
 	}
 	
 	public void setInputOnEnter(OnEvent value) {
@@ -104,9 +123,19 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
-	public void setInputOnChange(OnEvent value) {
+	public void setInputOnChange(ListGetter value) {
 		input.textProperty().addListener((observable, oldString, newString)->{
-			value.onEventExec(newString);
+			PopupListControl list = new PopupListControl();
+			suggest.getContent().clear();
+			suggest.getContent().add(list.getPane());
+			
+			double posX = input.localToScene(0.0, 0.0).getX() 
+					+ input.getScene().getWindow().getX();
+			double posY = input.getScene().getWindow().getY()
+					+ input.getScene().getWindow().getHeight();
+			
+			list.loadList(value.getList(newString));
+			suggest.show(input, posX, posY);
 		});
 	}
 	

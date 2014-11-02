@@ -12,8 +12,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import controller.Controller;
@@ -24,23 +22,17 @@ import controller.ControllerClass;
  *
  */
 public class Main extends Application{
-	private Popup noti;
-	private Popup suggest;
-	private Stage stage;
 	private UIControl mainControl;
 	public Main() {
 		controller = ControllerClass.getInstance();
 		log = new Log();
 		commandHistory = new ArrayList<String>();
-		noti = new Popup();	
-		suggest = new Popup();
 		historyPos = 0;
 	}
 	
 	@Override
 	public void start(Stage stage) { 
 		try {
-			this.stage = stage;
 			stage.initStyle(StageStyle.UNDECORATED);
 			stage.setScene(loadScene());
 		} catch (IOException e) {
@@ -81,7 +73,7 @@ public class Main extends Application{
 		
 		try {
 			log.log("Command: " + cmd);
-			noti.hide();
+			mainControl.hideNoti();
 			
 			recentChange = controller.execCmd(cmd);
 			displayBuf = controller.getCurrentList();
@@ -92,12 +84,8 @@ public class Main extends Application{
 			if (Config.onDevelopment) {
 				e.printStackTrace();
 			}
-			Text text = new Text(e.getMessage());
-			noti.getContent().clear();
-			noti.getContent().add(text);
-			noti.setX(stage.getX() + mainControl.getInputPosition().getX());
-			noti.setY(stage.getY() + mainControl.getInputPosition().getY());
-			noti.show(stage);
+			mainControl.showNoti(e.getMessage());
+			
 			log.log(e.getMessage());
 		}
 
@@ -105,10 +93,6 @@ public class Main extends Application{
 	
 	private String onEnter(String command) {
 		if (command.isEmpty()) {
-			return command;
-		}
-		
-		if (suggest.isFocused()) {
 			return command;
 		}
 		
@@ -131,38 +115,8 @@ public class Main extends Application{
 		return null;
 	}
 	
-	private String onInputChange(String newValue) {
-		PopupListControl list = new PopupListControl();
-		suggest.getContent().clear();
-		suggest.getContent().add(list.getPane());
-		suggest.setX(stage.getX() + mainControl.getInputPosition().getX());
-		suggest.setY(stage.getY() + stage.getHeight() + 5);
-		list.setOnEnter((str) -> onPopupListEnter(str));
-		list.setOnEsc((str)->onPopupListEsc(str));
-		
-		if (list.loadList(controller.suggest(newValue))) {
-			suggest.show(stage);
-		} else {
-			suggest.hide();
-		}
-		
-		return newValue;
-	}
-	
-	private String onPopupListEnter(String str) {
-		if (str == null || str.isEmpty()) {
-			mainControl.setInputOnFocus();
-		} else {
-			mainControl.setInputText(str);
-		}
-		suggest.hide();
-		return str;
-	}
-	
-	private String onPopupListEsc(String str) {
-		suggest.hide();
-		mainControl.setInputOnFocus();
-		return str;
+	private List<String> onInputChange(String newValue) {
+		return controller.suggest(newValue);
 	}
 	
 	private void pushHistory(String command) {
