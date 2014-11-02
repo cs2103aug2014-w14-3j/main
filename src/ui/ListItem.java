@@ -90,7 +90,7 @@ class ListItem{
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
 		Text timeText = new Text();
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.taskDateFormat);
 		timeText.setText(format.format(timeobj));
 		timeText.setStyle("-fx-fill: #222222;");
 		return timeText;
