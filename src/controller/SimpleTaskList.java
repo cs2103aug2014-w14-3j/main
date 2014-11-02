@@ -552,12 +552,12 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	// Criteria to be matched between 2 words, if the
-	// editDistance/lenghOfKeyWord is <0.5
+	// editDistance/lenghOfKeyWord is <0.3
 	// the 2 strings are considered approximately matched
 	private int approximateMatchScore(String keyword, String string) {
 		int editDist = editDistance(string, keyword);
 		int lenOfKey = keyword.length();
-		if (editDist / lenOfKey < 0.5)
+		if (editDist / lenOfKey < 0.3)
 			return 1000 - 1000 * editDist / lenOfKey;
 		else
 			return 0;
