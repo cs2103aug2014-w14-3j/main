@@ -22,18 +22,8 @@ public interface Config {
 	
 	//sytle
 	public static String title = "Forget-Me-Not";
-	
-	public static String titleStyle = "-fx-fill: #FFEEDD;";
-	public static String rootStyle = "-fx-background-color: #CCBBAA;";
-	public static String topStyle = "-fx-background-color: #AABBCC;";
-	public static String bottomStyle = "-fx-background-color: #AABBCC;";
-	public static String centerStyle = "-fx-background-color: #CCBBAA;";
-	public static String inputFieldStyle = "-fx-font-size: 16pt;";
-	public static String inputFieldPlaceholder = "Enter command here";
-	
-	//window
-	public static Integer width = 600;
-	public static Integer height = 400;
+	public static String curTimeDateFormat = "MMM dd, yyyy hh:mm:ss a";
+	public static String taskDateFormat = "MMM dd, yyyy hh:mm a";
 	
 	//command handle by UI
 	public static String cmdExit = "exit";

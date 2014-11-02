@@ -42,7 +42,8 @@ public class UIControl extends BorderPane {
 	
 	private Popup noti;
 	private Popup suggest;
-	PopupListControl popupList;
+	PopupList popupList;
+	Noti notiBox;
 	
 	private double mouseX;
 	private double mouseY;
@@ -50,9 +51,11 @@ public class UIControl extends BorderPane {
 	public UIControl() {
 		displayCurTime();
 		noti = new Popup();	
+		notiBox = new Noti();
 		suggest = new Popup();
-		popupList = new PopupListControl();
+		popupList = new PopupList();
 		suggest.getContent().add(popupList.getPane());
+		noti.getContent().add(notiBox.getBox());
 	}
 	
 	public void init() {
@@ -91,8 +94,7 @@ public class UIControl extends BorderPane {
 	}
 	
 	public void showNoti(String message) {
-		noti.getContent().clear();
-		noti.getContent().add(new Text(message));
+		notiBox.setText(message);
 		noti.setHeight(20.0);
 		
 		double posX = input.localToScene(0.0, 0.0).getX() 
@@ -165,7 +167,7 @@ public class UIControl extends BorderPane {
 	}
 	
 	private void displayCurTime() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.curTimeDateFormat);
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
 			time.setText(format.format(LocalDateTime.now()));
 		}));

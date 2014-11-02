@@ -16,11 +16,11 @@ import javafx.scene.layout.Pane;
  * @author Luo Shaohuai
  *
  */
-public class PopupListControl {
+public class PopupList {
 	private ListView<String> list;
 	private Pane pane;
 	
-	public PopupListControl() {
+	public PopupList() {
 		list = new ListView<String>();
 		pane = new Pane();
 		pane.getChildren().add(list);
