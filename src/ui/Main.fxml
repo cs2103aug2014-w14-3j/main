@@ -15,7 +15,7 @@
 
 <BorderPane prefHeight="620.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIControl">
 	<top>
-		<HBox prefHeight="57.0" prefWidth="611.0" style="-fx-background-color: #22A7F0;">
+		<HBox fx:id="title" prefHeight="57.0" prefWidth="611.0" style="-fx-background-color: #22A7F0;">
    			<children>
 	   			<Text style="-fx-fill: #FFFFFF;" text="Forget-Me-Not" wrappingWidth="200">
 	               <font>
