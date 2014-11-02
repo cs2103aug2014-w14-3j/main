@@ -70,7 +70,7 @@
 	<center>
 		<ListView fx:id="list" prefHeight="500.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
          <BorderPane.margin>
-            <Insets bottom="5.0" />
+            <Insets />
          </BorderPane.margin></ListView>
 	</center>
 </BorderPane>
