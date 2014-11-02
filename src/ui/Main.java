@@ -41,7 +41,7 @@ public class Main extends Application{
 	public void start(Stage stage) { 
 		try {
 			this.stage = stage;
-			//stage.initStyle(StageStyle.UNDECORATED);
+			stage.initStyle(StageStyle.UNDECORATED);
 			stage.setScene(loadScene());
 		} catch (IOException e) {
 			e.printStackTrace();
