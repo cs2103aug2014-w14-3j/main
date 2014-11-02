@@ -26,7 +26,7 @@ public class PopupList {
 		pane.getChildren().add(list);
 		
 		list.setPrefHeight(100.0);
-		list.setPrefWidth(578.0);
+		list.setPrefWidth(587.0);
 	}
 	
 	public Pane getPane() {

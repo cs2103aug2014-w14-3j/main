@@ -13,7 +13,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ListView?>
 
-<BorderPane prefHeight="620.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIControl">
+<BorderPane prefHeight="620.0" prefWidth="600.0" style="-fx-background-radius: 10px,10px,10px,10px;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIControl">
 	<top>
 		<HBox fx:id="title" prefHeight="57.0" prefWidth="611.0" style="-fx-background-color: #22A7F0;">
    			<children>
@@ -70,7 +70,7 @@
 	<center>
 		<ListView fx:id="list" prefHeight="500.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
          <BorderPane.margin>
-            <Insets />
+            <Insets bottom="5.0" />
          </BorderPane.margin></ListView>
 	</center>
 </BorderPane>
