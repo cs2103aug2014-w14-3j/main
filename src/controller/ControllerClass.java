@@ -283,7 +283,7 @@ public class ControllerClass implements Controller {
 			break;
 
 		case FREETIME:
-			freeTime(content);
+			findFreeTime(content);
 			break;
 		case CHANGEPAGE:
 			changePage(content);
@@ -328,21 +328,37 @@ public class ControllerClass implements Controller {
 
 	//get the first 5 in the date list only
 	
-	private ArrayList<String> findFreeTime(String content) throws Exception{
+	private ArrayList<ArrayList<String>> findFreeTime(String content) throws Exception{
 		
-	
 		ArrayList<Date> resultList=freeTime(content);
 		ArrayList<ArrayList<String>> listToShow=new ArrayList<ArrayList<String>>();
+	
+		
 		for (int i=0;i<resultList.size() && i<5;i++){
 			
 			ArrayList<String> arr=new ArrayList<String>();
 			
+			Date date=resultList.get(i);
+			TaskList taskOnDate=tasks.searchOnDate(date,tasks);
 			
-		
+			arr.add(date.toString());
+			for (int j=0;j<taskOnDate.size();j++){
+				arr.add(taskOnDate.get(j).toString());
+			}
 			
+			listToShow.add(arr);
 		}	
-		return null;
 		
+		for (int i=0;i<listToShow.size();i++)
+		{
+			ArrayList<String> arr=listToShow.get(i);
+			for (int j=0;j<arr.size();j++){
+				System.out.println(arr.get(j));
+			}
+		}
+		
+		
+		return listToShow;
 		
 	}
 	
@@ -358,24 +374,12 @@ public class ControllerClass implements Controller {
 		processDate();
 		if (first == -1) {
 			ArrayList<Date> resultList = findFreeTime(second);
-			
-			/*for (int i = 0; i < resultList.size(); i++) {
-				System.out.println(resultList.get(i));
-			}*/
 			return resultList;
 		} else {
 				
-			
-			
 			ArrayList<Date> resultList = dateList(checkDate(first, second));
-		/*	for (int i = 0; i < resultList.size(); i++) {
-				System.out.println(resultList.get(i));
-			}
-			for (int j=0;j<103;j++){
-				
-				System.out.println((j)+"="+timeSlots[2][j]);
-			}
-			*/
+		/*	for (int i=0;i<resultList.size();i++)
+				System.out.println(resultList.get(i));*/
 			return resultList;
 
 		}
@@ -431,8 +435,7 @@ public class ControllerClass implements Controller {
 					throw new Exception("Please specify the period of time!");
 				}
 
-				System.out.println(date1);
-				System.out.println(date2);
+		
 				Calendar cal1 = Calendar.getInstance();
 				cal1.setTime(date1);
 
@@ -485,15 +488,14 @@ public class ControllerClass implements Controller {
 
 		for (int i = 0; i < 30; i++) {
 			boolean take = true;
-			System.out.println("start="+start+";end="+end);
+		
 			for (int j = start;j <end &&take==true; j++) {
-				System.out.println("inside loop is taken");
+			
 				if (timeSlots[i][j] == false) {
 					take = false;
 				}
 			}
 			if (take) {
-				System.out.println("Day of index"+i + " is chosen");
 				resultList.add(i);
 			}
 		}
@@ -628,15 +630,9 @@ public class ControllerClass implements Controller {
 		int dateEndIndex = getDateIndex(end);
 		int timeEndIndex = getUpperTimeIndex(end);
 
-		System.out.println("Hello world");
-		System.out.println("DateIndex Start="+dateIndex);
-		System.out.println("TimeIndex Start="+timeIndex);
-		System.out.println("DateIndex End="+dateEndIndex);
-		System.out.println("TimeIndex End="+timeEndIndex);
-		
+	
 		int numOfSlots = numSlots(start, end);
-		
-		System.out.println("numOfSlots="+numOfSlots);
+
 		if (dateIndex != -1 && dateEndIndex != -1) {
 			if (dateIndex != dateEndIndex) {
 				for (int i = dateIndex; i < 144; i++) {

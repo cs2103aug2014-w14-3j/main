@@ -372,7 +372,7 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	// search on the exact date
-	private TaskList searchOnDate(Date deadline, TaskList listToSearch) {
+	public TaskList searchOnDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
 

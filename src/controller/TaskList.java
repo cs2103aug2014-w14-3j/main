@@ -1,7 +1,7 @@
 package controller;
 
 import java.util.List;
-
+import java.util.Date;
 public interface TaskList {
 
 	boolean add(Task task);
@@ -47,4 +47,6 @@ public interface TaskList {
 	TaskList getOverdueTasks();
 	
 	TaskList search(String content);
+	
+	TaskList searchOnDate(Date date, TaskList list);
 }
