@@ -35,6 +35,7 @@ public class Main extends Application{
 		try {
 			stage.initStyle(StageStyle.UNDECORATED);
 			stage.setScene(loadScene());
+			mainControl.init();
 		} catch (IOException e) {
 			e.printStackTrace();
 			Platform.exit();

@@ -7,10 +7,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
 import javafx.util.Duration;
@@ -35,13 +37,26 @@ public class UIControl extends BorderPane {
 	@FXML
 	private TextField input;
 	
+	@FXML
+	private HBox title;
+	
 	private Popup noti;
 	private Popup suggest;
+	PopupListControl popupList;
+	
+	private double mouseX;
+	private double mouseY;
 	
 	public UIControl() {
 		displayCurTime();
 		noti = new Popup();	
 		suggest = new Popup();
+		popupList = new PopupListControl();
+		suggest.getContent().add(popupList.getPane());
+	}
+	
+	public void init() {
+		setDraggable(title);
 	}
 	
 	public void loadList(List<String> displayBuf) {
@@ -125,16 +140,12 @@ public class UIControl extends BorderPane {
 	
 	public void setInputOnChange(ListGetter value) {
 		input.textProperty().addListener((observable, oldString, newString)->{
-			PopupListControl list = new PopupListControl();
-			suggest.getContent().clear();
-			suggest.getContent().add(list.getPane());
-			
 			double posX = input.localToScene(0.0, 0.0).getX() 
 					+ input.getScene().getWindow().getX();
 			double posY = input.getScene().getWindow().getY()
 					+ input.getScene().getWindow().getHeight();
 			
-			list.loadList(value.getList(newString));
+			popupList.loadList(value.getList(newString));
 			suggest.show(input, posX, posY);
 		});
 	}
@@ -160,5 +171,17 @@ public class UIControl extends BorderPane {
 		}));
 		timeline.setCycleCount(Animation.INDEFINITE);
 		timeline.play();
+	}
+	
+	private void setDraggable(Node node) {
+	    node.setOnMousePressed((event) -> {
+	    	mouseX = event.getSceneX();
+	    	mouseY = event.getSceneY();
+	    });
+
+	    node.setOnMouseDragged((event) -> {
+	    	node.getScene().getWindow().setX(event.getScreenX() - mouseX);
+	    	node.getScene().getWindow().setY(event.getScreenY() - mouseY);
+	    });
 	}
 }
