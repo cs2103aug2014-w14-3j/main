@@ -332,8 +332,12 @@ public class ControllerClass implements Controller {
 		
 	
 		ArrayList<Date> resultList=freeTime(content);
-		
+		ArrayList<ArrayList<String>> listToShow=new ArrayList<ArrayList<String>>();
 		for (int i=0;i<resultList.size() && i<5;i++){
+			
+			ArrayList<String> arr=new ArrayList<String>();
+			
+			
 		
 			
 		}	
