@@ -299,16 +299,16 @@ public class ControllerClass implements Controller {
 
 	// the format will be "done <number>"
 	private void markAsDone(String content) throws Exception {
-		
-			String[] taskNumbers = content.trim().split("\\s+");
-			Arrays.sort(taskNumbers, new Comparator<String>() {
-				public int compare(String first, String second) {
-					return Integer.valueOf(second).compareTo(
-							Integer.valueOf(first));
-				}
-			});
 
-			try{
+		String[] taskNumbers = content.trim().split("\\s+");
+		Arrays.sort(taskNumbers, new Comparator<String>() {
+			public int compare(String first, String second) {
+				return Integer.valueOf(second)
+						.compareTo(Integer.valueOf(first));
+			}
+		});
+
+		try {
 			for (int i = 0; i < taskNumbers.length; i++) {
 				int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
 				// move task from task List to archive
@@ -320,26 +320,61 @@ public class ControllerClass implements Controller {
 					throw new Exception("Invalid arguments");
 				}
 			}
-			}catch (NumberFormatException e){
-				throw new Exception("Invalid format. Please enter the task number!");
-			}
-			tasks.sort();
+		} catch (NumberFormatException e) {
+			throw new Exception("Invalid format. Please enter the task number!");
 		}
+		tasks.sort();
+	}
 
-
-	private void freeTime(String content) throws Exception {
-
+	//get the first 5 in the date list only
+	
+	private ArrayList<String> findFreeTime(String content) throws Exception{
+		
+	
+		ArrayList<Date> resultList=freeTime(content);
+		
+		for (int i=0;i<resultList.size() && i<5;i++){
+		
+			
+		}	
+		return null;
+		
+		
+	}
+	
+	
+	
+	private ArrayList<Date> freeTime(String content) throws Exception {
+		
 		Pair pair = parserForFind(content);
-		int hh = pair.getFirst();
-		int mm = pair.getSecond();
+		int first = pair.getFirst();
+		int second = pair.getSecond();
 
-		ArrayList<Date> resultList = findFreeTime(hh, mm);
+		initTimeSlots();
+		processDate();
+		if (first == -1) {
+			ArrayList<Date> resultList = findFreeTime(second);
+			
+			/*for (int i = 0; i < resultList.size(); i++) {
+				System.out.println(resultList.get(i));
+			}*/
+			return resultList;
+		} else {
+				
+			
+			
+			ArrayList<Date> resultList = dateList(checkDate(first, second));
+		/*	for (int i = 0; i < resultList.size(); i++) {
+				System.out.println(resultList.get(i));
+			}
+			for (int j=0;j<103;j++){
+				
+				System.out.println((j)+"="+timeSlots[2][j]);
+			}
+			*/
+			return resultList;
 
-		for (int i = 0; i < resultList.size(); i++) {
-			System.out.println(resultList.get(i));
 		}
-
-		System.out.println("End of search");
 
 	}
 
@@ -348,38 +383,118 @@ public class ControllerClass implements Controller {
 
 	private Pair parserForFind(String content) throws Exception {
 
-		String[] para = content.trim().split("\\s+");
+		if (content.indexOf("to") == -1) {
+			String[] para = content.trim().split("\\s+");
+			int len = para.length;
+			if (len == 4) {
+				int hh = Integer.parseInt(para[0]);
+				int mm = Integer.parseInt(para[2]);
+				int num = hh * 6 + (int) Math.ceil(mm / 10);
 
-		int len = para.length;
+				return new Pair(-1, num);
+			} else if (len == 2) {
+				try {
+					if (para[1].equalsIgnoreCase("hours")
+							|| para[1].equalsIgnoreCase("hour")) {
+						int hh = Integer.parseInt(para[0]);
+						return new Pair(-1, hh * 6);
+					} else if (para[1].equalsIgnoreCase("minutes")
+							|| para[1].equalsIgnoreCase("minutes")
+							|| para[1].equalsIgnoreCase("mins")
+							|| para[1].equalsIgnoreCase("min")) {
 
-		if (len == 4) {
-			return new Pair(Integer.parseInt(para[0]),
-					Integer.parseInt(para[2]));
-		} else if (len == 2) {
-			if (para[1].equalsIgnoreCase("hours")
-					|| para[1].equalsIgnoreCase("hour")) {
-				return new Pair(Integer.parseInt(para[0]), 0);
-			} else if (para[1].equalsIgnoreCase("minutes")
-					|| para[1].equalsIgnoreCase("minutes")
-					|| para[1].equalsIgnoreCase("mins")
-					|| para[1].equalsIgnoreCase("min")) {
-				return new Pair(0, Integer.parseInt(para[0]));
+						int mm = Integer.parseInt(para[0]);
+						return new Pair(-1, (int) Math.ceil(mm / 10));
+					}
+				} catch (NumberFormatException e) {
+					throw new Exception("Please specify time!");
+				}
 			} else {
 				throw new Exception("Please specify time");
 			}
 
 		} else {
-			throw new Exception("Please specify time");
+
+			String[] para = content.trim().split("to");
+
+			if (para.length != 2) {
+				throw new Exception("Please specify the period of time!");
+			} else {
+				Date date1 = parserForFindTime(para[0]);
+				Date date2 = parserForFindTime(para[1]);
+
+				if (date1 == null || date2 == null || date1.after(date2)) {
+					throw new Exception("Please specify the period of time!");
+				}
+
+				System.out.println(date1);
+				System.out.println(date2);
+				Calendar cal1 = Calendar.getInstance();
+				cal1.setTime(date1);
+
+				Calendar cal2 = Calendar.getInstance();
+				cal2.setTime(date2);
+
+				int hh1 = cal1.get(Calendar.HOUR_OF_DAY);
+				int mm1 = cal1.get(Calendar.MINUTE);
+
+				int hh2 = cal2.get(Calendar.HOUR_OF_DAY);
+				int mm2 = cal2.get(Calendar.MINUTE);
+
+				return new Pair(hh1 * 6 + mm1 / 10, hh2 * 6
+						+ (int) Math.ceil(mm2 / 10));
+			}
+		}
+		return null;
+	}
+
+	// return the date time
+	// return null if no date time is recognized
+	private Date parserForFindTime(String input) {
+
+		Parser parser = new Parser();
+
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		if (dates.size() == 1) {
+			return dates.get(0);
+		} else {
+			return null;
 		}
 	}
 
-	private ArrayList<Date> findFreeTime(int hours, int mins) {
-		int numOfSlots = numOfSlotsNeed(hours, mins);
+	private ArrayList<Date> findFreeTime(int numOfSlots) {
+		
 
-		initTimeSlots();
-		processDate();
 		ArrayList<Integer> indexList = findEmptySlots(numOfSlots);
 		return dateList(indexList);
+
+	}
+
+	private ArrayList<Integer> checkDate(int start, int end) {
+		
+		ArrayList<Integer> resultList = new ArrayList<Integer>();
+
+		for (int i = 0; i < 30; i++) {
+			boolean take = true;
+			System.out.println("start="+start+";end="+end);
+			for (int j = start;j <end &&take==true; j++) {
+				System.out.println("inside loop is taken");
+				if (timeSlots[i][j] == false) {
+					take = false;
+				}
+			}
+			if (take) {
+				System.out.println("Day of index"+i + " is chosen");
+				resultList.add(i);
+			}
+		}
+
+		return resultList;
 
 	}
 
@@ -403,6 +518,7 @@ public class ControllerClass implements Controller {
 	private void initTimeSlots() {
 		timeSlots = new boolean[30][144];
 
+		
 		// avoid time from 0.00am to 7.00am
 		for (int i = 0; i < 30; i++) {
 			for (int j = 0; j < 144; j++) {
@@ -413,12 +529,13 @@ public class ControllerClass implements Controller {
 				}
 			}
 		}
-
-	}
-
-	private int numOfSlotsNeed(int hour, int min) {
-		int totalMin = hour * 60 + min;
-		return (int) Math.ceil(totalMin / 10);
+		
+		Calendar now=Calendar.getInstance();
+		
+		int index=getUpperTimeIndex(now.getTime());
+		for (int j=0;j<index;j++){
+			timeSlots[0][j]=false;
+		}
 
 	}
 
@@ -430,7 +547,6 @@ public class ControllerClass implements Controller {
 				list.add(i);
 			}
 		}
-
 		return list;
 	}
 
@@ -506,27 +622,61 @@ public class ControllerClass implements Controller {
 		int timeIndex = getTimeIndex(start);
 
 		int dateEndIndex = getDateIndex(end);
-		int timeEndIndex = getTimeIndex(end);
+		int timeEndIndex = getUpperTimeIndex(end);
+
+		System.out.println("Hello world");
+		System.out.println("DateIndex Start="+dateIndex);
+		System.out.println("TimeIndex Start="+timeIndex);
+		System.out.println("DateIndex End="+dateEndIndex);
+		System.out.println("TimeIndex End="+timeEndIndex);
+		
 		int numOfSlots = numSlots(start, end);
-
-		if (dateIndex != dateEndIndex) {
-			for (int i = dateIndex; i < 144; i++) {
-				timeSlots[dateIndex][i] = false;
-			}
-
-			for (int i = dateIndex + 1; i < dateEndIndex - 1; i++) {
-				for (int j = 0; j < 144; j++) {
-					timeSlots[i][j] = false;
+		
+		System.out.println("numOfSlots="+numOfSlots);
+		if (dateIndex != -1 && dateEndIndex != -1) {
+			if (dateIndex != dateEndIndex) {
+				for (int i = dateIndex; i < 144; i++) {
+					timeSlots[dateIndex][i] = false;
 				}
-			}
 
-			for (int i = 0; i <= timeEndIndex; i++) {
-				timeSlots[dateEndIndex][i] = false;
-			}
+				for (int i = dateIndex + 1; i < dateEndIndex - 1; i++) {
+					for (int j = 0; j < 144; j++) {
+						timeSlots[i][j] = false;
+					}
+				}
 
-		} else {
-			for (int i = timeIndex; i < timeIndex + numOfSlots; i++)
-				timeSlots[dateIndex][i] = false;
+				for (int i = 0; i <= timeEndIndex; i++) {
+					timeSlots[dateEndIndex][i] = false;
+				}
+
+			} else {
+				for (int i = timeIndex; i < timeIndex + numOfSlots; i++)
+					timeSlots[dateIndex][i] = false;
+			}
+		} else if (dateIndex==-1 && dateEndIndex!=-1 &&dateEndIndex <30){
+			
+			int nowTimeIndex=getTimeIndex(new Date());
+			if (dateEndIndex!=0){
+					for (int i = nowTimeIndex; i < 144; i++) {
+						timeSlots[dateIndex][i] = false;
+					}
+
+					for (int i = 1; i < dateEndIndex - 1; i++) {
+						for (int j = 0; j < 144; j++) {
+							timeSlots[i][j] = false;
+						}
+					}
+
+					for (int i = 0; i <= timeEndIndex; i++) {
+						timeSlots[dateEndIndex][i] = false;
+					}
+			
+				
+			} else {
+				for (int i = nowTimeIndex; i < nowTimeIndex + numOfSlots; i++)
+					timeSlots[0][i] = false;
+				
+			}
 		}
 
 	}
@@ -542,26 +692,43 @@ public class ControllerClass implements Controller {
 		return hours * 6 + minutes / 10;
 
 	}
+	
+	private int getUpperTimeIndex(Date date){
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+
+		int hours = cal.get(Calendar.HOUR_OF_DAY);
+		int minutes = cal.get(Calendar.MINUTE);
+
+		return hours * 6 + (int) Math.ceil(minutes / 10);
+		
+	}
 
 	// return i if date is the i-th date from now
 	// -1 if date is before now
+	
 	private int getDateIndex(Date date) {
-		Date now = new Date();
-
-		long diff = date.getTime() - now.getTime();
-		if (diff >= 0) {
-			return (int) Math.floor(diff / (1000 * 60 * 60 * 24));
-		} else {
-			return -1;
-		}
+		
+	Calendar now=Calendar.getInstance();
+	now.set(Calendar.HOUR_OF_DAY,0);
+	now.set(Calendar.MINUTE,0);
+	now.set(Calendar.SECOND,0);
+	
+	Date current=now.getTime();
+	
+	long diff = date.getTime() - current.getTime();
+	if (diff >= 0) {
+		return (int) Math.floor(diff / (1000 * 60 * 60 * 24));
+	} else {
+		return -1;
+	}
 	}
 
+	// number of time intervals
 	private int numSlots(Date start, Date end) {
-
 		long diff = end.getTime() - start.getTime();
-
 		int numOfSlots = (int) Math.ceil(diff / (1000 * 60 * 10));
-
 		return numOfSlots;
 
 	}
@@ -731,16 +898,6 @@ public class ControllerClass implements Controller {
 		} else if (attribute.equalsIgnoreCase("time")) {
 			processTime(taskToEdit, editDetails);
 		}
-		/*
-		 * else if (attribute.equalsIgnoreCase("date")) {
-		 * 
-		 * } else if (attribute.equalsIgnoreCase("time")) {
-		 * 
-		 * } else if (attribute.equalsIgnoreCase("from")) {
-		 * 
-		 * 
-		 * }
-		 */
 		else if (attribute.equalsIgnoreCase("!")) {
 			editPriority(taskToEdit);
 		} else {

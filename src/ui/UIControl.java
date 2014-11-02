@@ -126,7 +126,7 @@ public class UIControl extends BorderPane {
 	}
 	
 	private void displayCurTime() {
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm:ss a");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
 			time.setText(format.format(LocalDateTime.now()));
 		}));
