@@ -92,6 +92,8 @@ public class ControllerClass implements Controller {
 	private FixedSizeStack<TaskList> undoList;
 	private FixedSizeStack<TaskList> undoArchiveList;
 
+	private String feedbackMessage = "";
+	
 	private ControllerClass() {
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
@@ -107,15 +109,23 @@ public class ControllerClass implements Controller {
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
 	public Integer execCmd(String command) throws Exception {
-	//	if(tasks.size() != 0) {
-			getFileContent();
-			setNumTaskOnPage(numTasksInSinglePage);
-	//	}
+		getFileContent();
+		setNumTaskOnPage(numTasksInSinglePage);
 		parseCommand(command);
 		updateStorage();
 		return recentChange;
 	}
 
+	// For UI to get feedback message
+	public String getFeedback() {
+		return feedbackMessage;
+	}
+	
+	// Sets feedback message
+	private void setFeedback(String feedback) {
+		feedbackMessage = feedback;
+	}
+	
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
@@ -775,6 +785,7 @@ public class ControllerClass implements Controller {
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
+			setFeedback("Undo is successful");
 		}
 	}
 
@@ -1152,7 +1163,8 @@ public class ControllerClass implements Controller {
 
 		Task task = processUserInput(content);
 		this.tasks.add(task);
-
+		
+		setFeedback("task is added successfully");
 		displayMainList();
 		setRecentChange(task, tasks);
 	}
