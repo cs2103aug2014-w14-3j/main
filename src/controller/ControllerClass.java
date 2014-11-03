@@ -107,7 +107,9 @@ public class ControllerClass implements Controller {
 	// all existing tasks stored and goes on to parse user command, to determine
 	// which course of action to take.
 	public Integer execCmd(String command) throws Exception {
+		getFileContent();
 		parseCommand(command);
+		updateStorage();
 		return recentChange;
 	}
 
@@ -302,23 +304,19 @@ public class ControllerClass implements Controller {
 
 	// the format will be "done <number>"
 	private void markAsDone(String content) throws Exception {
-
+		
 		String[] taskNumbers = content.trim().split("\\s+");
-		Arrays.sort(taskNumbers, new Comparator<String>() {
-			public int compare(String first, String second) {
-				return Integer.valueOf(second)
-						.compareTo(Integer.valueOf(first));
-			}
-		});
+		Arrays.sort(taskNumbers);
 
 		try {
-			for (int i = 0; i < taskNumbers.length; i++) {
+			for (int i = taskNumbers.length; i >= 0; i--) {
 				int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
 				// move task from task List to archive
 				if (taskID >= 0 && taskID < tasks.size()) {
 					Task task = tasks.get(taskID);
 					archiveTasks.add(0, task);
 					tasks.remove(taskID);
+
 				} else {
 					throw new Exception("Invalid arguments");
 				}
