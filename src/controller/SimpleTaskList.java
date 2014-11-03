@@ -557,7 +557,7 @@ public class SimpleTaskList implements TaskList {
 	private int approximateMatchScore(String keyword, String string) {
 		int editDist = editDistance(string, keyword);
 		int lenOfKey = keyword.length();
-		if (editDist / lenOfKey < 0.3)
+		if (editDist / lenOfKey < 0.25)
 			return 1000 - 1000 * editDist / lenOfKey;
 		else
 			return 0;

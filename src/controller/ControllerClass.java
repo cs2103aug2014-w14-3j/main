@@ -807,6 +807,8 @@ public class ControllerClass implements Controller {
 	 * @author Koh Xian Hui
 	 */
 	private void displayMainList() {
+		//getFileContent();
+		//setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
 		setDisplayList(DisplayList.MAIN);
 	}
