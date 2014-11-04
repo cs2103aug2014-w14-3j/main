@@ -15,6 +15,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
+import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -52,10 +53,16 @@ public class UIControl extends BorderPane {
 		displayCurTime();
 		noti = new Popup();	
 		notiBox = new Noti();
+		noti.getContent().add(notiBox.getBox());
+		
 		suggest = new Popup();
 		popupList = new PopupList();
 		suggest.getContent().add(popupList.getPane());
-		noti.getContent().add(notiBox.getBox());
+		suggest.setAutoFix(false);
+		suggest.setAutoHide(true);
+		suggest.setConsumeAutoHidingEvents(false);
+		suggest.setHideOnEscape(true);
+		suggest.setAnchorLocation(AnchorLocation.CONTENT_TOP_LEFT);
 	}
 	
 	public void init() {

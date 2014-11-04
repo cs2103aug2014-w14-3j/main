@@ -838,10 +838,14 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void editTask(String content) throws Exception {
-		if (isEmptyCommand(content)) {
+		if (displayListType==DisplayList.MAIN) {
+			if (isEmptyCommand(content)) {
 			throw new Exception("Please specify what to edit.");
 		} else {
 			proceedWithEdit(content);
+		} 
+		} else {
+			throw new Exception("Editing can only be done on the main list.");
 		}
 
 	}
@@ -855,12 +859,14 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void proceedWithEdit(String content) throws Exception {
-		String[] words = content.split(" ");
-		int positionOfTask = Integer.parseInt(words[0]) - 1;
+		try {
+			String[] words = content.split(" ");
 
+		int positionOfTask = Integer.parseInt(words[0]) - 1;
+		
 		if (positionOfTask < 0 || positionOfTask >= tasks.size()
 				|| words.length < 2) {
-			throw new Exception("Invalid arguments");
+			throw new Exception("Invalid edit format.");
 		}
 
 		String attributeToChange = words[1];
@@ -877,6 +883,9 @@ public class ControllerClass implements Controller {
 		} else {
 
 			String editDetails = "";
+			if ((!attributeToChange.equals("!")) && (words.length==2)) {
+				throw new Exception("Please specify details to edit.");
+			}
 			for (int i = 2; i < words.length; i++) {
 				editDetails += words[i] + " ";
 			}
@@ -889,6 +898,9 @@ public class ControllerClass implements Controller {
 			setRecentChange(taskToEdit, tasks);
 		}
 		displayMainList();
+		} catch (NumberFormatException e) {
+			throw new Exception("Invalid edit format.");
+		}
 
 	}
 
@@ -964,8 +976,12 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void deleteTask(String content) throws Exception {
+		if (displayListType == DisplayList.MAIN) {
 		if (isValidDelete(content)) {
 			proceedWithDelete(content);
+		}
+		} else {
+			throw new Exception("Deletion can only be done in main list.");
 		}
 	}
 
