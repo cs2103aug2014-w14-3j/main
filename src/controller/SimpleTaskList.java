@@ -351,25 +351,26 @@ public class SimpleTaskList implements TaskList {
 	private TaskList simpleSearch(String content, TaskList listToSearch,
 			boolean isDesc) {
 
-		TaskList listToDisplay = null;
-
-		if (isDesc == true) {
-			listToDisplay = searchDesc(content, listToSearch);
+	
+		Date date = timeParser(content);
+		
+		if (isDesc == true  || date==null) {
+			System.out.println("content is: "+content);
+			
+			return searchDesc(content, listToSearch);
+		
 		} else {
-			Date date = timeParser(content);
-			if (date == null) {
-				listToDisplay = searchDesc(content, listToSearch);
-			} else {
+			
+		
 				String[] para = content.trim().split("\\s+");
 				if (para[0].equalsIgnoreCase("by")) {
-					listToDisplay = searchByDate(date, listToSearch);
+					return searchByDate(date, listToSearch);
 				} else {
-					listToDisplay = searchOnDate(date, listToSearch);
+					return searchOnDate(date, listToSearch);
 				}
 			}
-		}
-		
-		return listToDisplay;
+
+	
 	}
 
 	// search on the exact date
@@ -451,18 +452,21 @@ public class SimpleTaskList implements TaskList {
 
 	public TaskList searchDesc(String keyWord, TaskList listToSearch) {
 
-		TaskList result = searchExact(keyWord, listToSearch);
-
-		if (result.size() == 0) {
+	/*	TaskList result = searchExact(keyWord, listToSearch);
+		if (result.size() == 0) {	
 			return nearMatchSearch(keyWord, listToSearch);
 		} else {
-			return result;
+			System.out.println("Enter exact search");
+			return searchExact(keyWord,listToSearch);
 		}
-
+*/
+		return nearMatchSearch(keyWord, listToSearch);
 	}
 
 	private TaskList searchExact(String keyWord, TaskList listToSearch) {
+	
 		TaskList result = new SimpleTaskList();
+		
 		int numOfTask = listToSearch.size();
 		boolean[] isTaken=new boolean[numOfTask];
 		
@@ -470,6 +474,7 @@ public class SimpleTaskList implements TaskList {
 			isTaken[i]=false;
 		}
 		
+
 		//will not search for 1 character only
 		if (keyWord.length() >= 2) {
 			for (int i = 0; i < numOfTask; i++) {
@@ -500,12 +505,12 @@ public class SimpleTaskList implements TaskList {
 					}
 				}
 			}
-
+		System.out.println("End of exact search");
 		return result;
 	}
 
 	private boolean isTheSame(String keyWord, String strToSearch) {
-
+		System.out.println("has is the same");
 		String[] paraKey = keyWord.trim().split("s++");
 		int lenKey = paraKey.length;
 
@@ -530,7 +535,7 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	private boolean isInside(String keyWord, String strToSearch) {
-
+		System.out.println("inside");
 		String[] paraKey = keyWord.trim().split("s++");
 		int lenKey = paraKey.length;
 
@@ -555,6 +560,8 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
+		
+
 		TaskList resultList = new SimpleTaskList();
 		int numOfTask = listToSearch.size();
 		String[] str = key.trim().split("\\s+");
@@ -578,14 +585,23 @@ public class SimpleTaskList implements TaskList {
 				}
 			}
 		}
-
+		
+		if (list.size()==0){
+			return new SimpleTaskList();
+		}
+		
+		
 		Collections.sort(list);
-
+		
 		for (int i = list.size() - 1; i >= 0; i--) {
 			Task task = list.get(i).getThird();
 			resultList.add(task);
 		}
-
+		
+		
+		for (int i=0;i<resultList.size();i++){
+			System.out.println(resultList.get(i).toString());
+		}
 		return resultList;
 	}
 
@@ -604,7 +620,7 @@ public class SimpleTaskList implements TaskList {
 		}
 
 		for (int i = 0; i < strLen; i++) {
-			 if (matchScore(key[i], strToSearch) != 0) {
+			 if (matchScore(key[i], strToSearch) > 0) {
 				if (isMatched[i] == false) {
 					isMatched[i] = true;
 					matchScore[i] = matchScore(key[i], strToSearch);
@@ -623,6 +639,8 @@ public class SimpleTaskList implements TaskList {
 			}
 			searchScore += matchScore[i];
 		}
+		
+		System.out.println("searchScore="+searchScore);
 		return new Pair(numOfMatch, searchScore);
 	}
 
@@ -636,6 +654,7 @@ public class SimpleTaskList implements TaskList {
 
 		for (int i = 0; i < strLen; i++) {
 			int score = approximateMatchScore(key, string[i]);
+			//System.out.println("Score="+ score);
 			if (maxScore < score) {
 				maxScore = score;
 			}
@@ -648,10 +667,13 @@ public class SimpleTaskList implements TaskList {
 	// editDistance/lenghOfKeyWord is <0.2
 	// the 2 strings are considered approximately matched
 	private int approximateMatchScore(String keyword, String string) {
+	
 		int editDist = editDistance(string, keyword);
 		int lenOfStr = string.length();
-		if (editDist / lenOfStr < 0.25 )
-			return 1000 - 1000 * editDist / lenOfStr;
+//		System.out.println(editDist/(lenOfStr*1.0));
+	//	System.out.println(1000 -  (int) Math.floor(1000 * editDist / (lenOfStr*1.0)));
+		if ( (editDist / (lenOfStr*1.0)) < 0.5)
+			return 1000 -  (int) Math.floor(1000 * editDist / (lenOfStr*1.0));
 		else
 			return 0;
 
