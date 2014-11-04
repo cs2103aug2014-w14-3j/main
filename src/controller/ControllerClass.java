@@ -168,7 +168,7 @@ public class ControllerClass implements Controller {
 		}
 
 		// suggest search
-		TaskList resultList = tasks.search(content);
+		TaskList resultList = tasks.searchDesc(content,tasks);
 		suggestList.addAll(resultList.getStringList());
 
 		return suggestList;
