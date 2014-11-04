@@ -116,12 +116,18 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	// For UI to get feedback message
+	/*
+	 * Accessor for UI to get the feedback message of current action.
+	 * @author Koh Xian Hui
+	 */
 	public String getFeedback() {
 		return feedbackMessage;
 	}
 	
-	// Sets feedback message
+	/*
+	 * Sets feedback messsage.
+	 * @author Koh Xian Hui
+	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
