@@ -855,7 +855,9 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void proceedWithEdit(String content) throws Exception {
-		String[] words = content.split(" ");
+		try {
+			String[] words = content.split(" ");
+
 		int positionOfTask = Integer.parseInt(words[0]) - 1;
 		
 		if (positionOfTask < 0 || positionOfTask >= tasks.size()
@@ -892,6 +894,9 @@ public class ControllerClass implements Controller {
 			setRecentChange(taskToEdit, tasks);
 		}
 		displayMainList();
+		} catch (NumberFormatException e) {
+			throw new Exception("Invalid edit format please enter task number followed by attribute to edit.");
+		}
 
 	}
 
