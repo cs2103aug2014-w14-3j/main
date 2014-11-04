@@ -1092,7 +1092,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageUp()) {
 				currentPageNum--;
 				recentChange = 0;
-				setFeedback("Page " + currentPageNum + " out of " + totalNumPages);
+				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On first page.");
 			}
@@ -1100,7 +1100,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
-				setFeedback("Page " + currentPageNum + " out of " + totalNumPages);
+				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On last page.");
 			}
@@ -1120,25 +1120,25 @@ public class ControllerClass implements Controller {
 		Integer totalNumPages;
 		// quick fix
 		// TODO: getCurDisplayList() after fix search
-		switch (displayListType) {
-		case MAIN:
-			totalNumPages = tasks.getTotalPageNum();
-			break;
-		case ARCHIVE:
-			totalNumPages = archiveTasks.getTotalPageNum();
-			break;
-		case SEARCH:
-			totalNumPages = resultTasks.getTotalPageNum();
-		default:
-			totalNumPages = 0;
-			break;
-		}
+		totalNumPages = getTotalNumOfPages(displayListType);
 		if (currentPageNum < totalNumPages) {
 			return true;
 		}
 		return false;
 	}
-
+	
+	private int getTotalNumOfPages(DisplayList displayListType) {
+		if(displayListType.equals("MAIN")) {
+			return tasks.getTotalPageNum();
+		} else if(displayListType.equals("ARCHIVE")) {
+			return archiveTasks.getTotalPageNum();
+		} else if(displayListType.equals("SEARCH")) {
+			return resultTasks.getTotalPageNum();
+		} else {
+			return 0;
+		}
+	}
+	
 	/**
 	 * This method checks if it is possible to go to the previous page. If
 	 * currently on first page, it will return false. Otherwise, it will return
