@@ -339,6 +339,12 @@ public class ControllerClass implements Controller {
 					throw new Exception("Invalid arguments");
 				}
 			}
+			
+			if(taskNumbers.length == 1) {
+				setFeedback("Task is marked as done successfully.");
+			} else {
+				setFeedback(taskNumbers.length + " tasks are marked as done successfully.");
+			}
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid format. Please enter the task number!");
 		}
@@ -809,6 +815,12 @@ public class ControllerClass implements Controller {
 				}
 
 				tasks.sort();
+				
+				if(taskNumbers.length == 1) {
+					setFeedback("Task is postponed successfully.");
+				} else {
+					setFeedback(taskNumbers.length + " tasks are postponed successfully.");
+				}
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
@@ -880,6 +892,12 @@ public class ControllerClass implements Controller {
 					setRecentChange(task, tasks);
 				}
 			}
+			
+			if(words.length == 1) {
+				setFeedback("Task is edited successfully");
+			} else {
+				setFeedback(words.length + " tasks are edited successfully.");
+			}
 		} else {
 
 			String editDetails = "";
@@ -896,6 +914,7 @@ public class ControllerClass implements Controller {
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
 			setRecentChange(taskToEdit, tasks);
+			setFeedback("Task is edited successfully.");
 		}
 		displayMainList();
 		} catch (NumberFormatException e) {
@@ -1012,7 +1031,12 @@ public class ControllerClass implements Controller {
 				taskNum -= 1;
 			}
 			tasks.sort();
-
+			
+			if(taskNumDescending.size() == 1) {
+				setFeedback("Task is successfully deleted.");
+			} else {
+				setFeedback(taskNumDescending.size() + " tasks are successfully deleted.");
+			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
 					"Invalid delete format. Please enter task number.");
@@ -1180,7 +1204,7 @@ public class ControllerClass implements Controller {
 		Task task = processUserInput(content);
 		this.tasks.add(task);
 		
-		setFeedback("task is added successfully");
+		setFeedback("task is successfully added.");
 		displayMainList();
 		setRecentChange(task, tasks);
 	}
