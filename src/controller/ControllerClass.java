@@ -838,10 +838,14 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void editTask(String content) throws Exception {
-		if (isEmptyCommand(content)) {
+		if (displayListType==DisplayList.MAIN) {
+			if (isEmptyCommand(content)) {
 			throw new Exception("Please specify what to edit.");
 		} else {
 			proceedWithEdit(content);
+		} 
+		} else {
+			throw new Exception("Editing can only be done on the main list.");
 		}
 
 	}
@@ -972,8 +976,12 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void deleteTask(String content) throws Exception {
+		if (displayListType == DisplayList.MAIN) {
 		if (isValidDelete(content)) {
 			proceedWithDelete(content);
+		}
+		} else {
+			throw new Exception("Deletion can only be done in main list.");
 		}
 	}
 
