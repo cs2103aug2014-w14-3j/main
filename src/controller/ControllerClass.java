@@ -299,7 +299,6 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
-
 		case FREETIME:
 			findFreeTime(content);
 			break;
@@ -829,9 +828,8 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Checks if the user has specified any task to edit and if specified,
-	 * proceeds with the edit.
-	 * 
+	 * Checks if the list the user is on is the main list. IF it is the main list, deems
+	 *  the edit valid and proceeds with it.
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
@@ -839,15 +837,26 @@ public class ControllerClass implements Controller {
 	 */
 	private void editTask(String content) throws Exception {
 		if (displayListType==DisplayList.MAIN) {
-			if (isEmptyCommand(content)) {
-			throw new Exception("Please specify what to edit.");
-		} else {
-			proceedWithEdit(content);
-		} 
+			validEdit(content); 
 		} else {
 			throw new Exception("Editing can only be done on the main list.");
 		}
 
+	}
+	/**
+	 * Checks if the user has specified any task to edit and if specified,
+	 * proceeds with the edit.
+	 * @param content
+	 * @throws Exception
+	 * @return
+	 * @author G. Vishnu Priya
+	 */
+	private void validEdit(String content) throws Exception {
+		if (isEmptyCommand(content)) {
+		throw new Exception("Please specify what to edit.");
+} else {
+		proceedWithEdit(content);
+}
 	}
 
 	/**
@@ -903,7 +912,12 @@ public class ControllerClass implements Controller {
 		}
 
 	}
-
+	/**
+	 * Checks if the user wants to edit priority of multiple tasks.
+	 * @param attributeToChange
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
 	private boolean isMultipleEditPriority(String attributeToChange) {
 		try {
 			Integer.parseInt(attributeToChange);
@@ -929,8 +943,7 @@ public class ControllerClass implements Controller {
 			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
 			processTime(taskToEdit, editDetails);
-		}
-		else if (attribute.equalsIgnoreCase("!")) {
+		} else if (attribute.equalsIgnoreCase("!")) {
 			editPriority(taskToEdit);
 		} else {
 			throw new Exception("Please specify what to edit (time/desc/!)");
@@ -938,8 +951,8 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * This methods edits the priority of a task so that the existing priority
-	 * of the task is reversed.
+	 * This methods edits the priority of a task by reversing the existing priority
+	 * of the task.
 	 * 
 	 * @return void
 	 * @author G. Vishnu Priya
