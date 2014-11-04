@@ -60,6 +60,7 @@ public class UIControl extends BorderPane {
 		suggest.getContent().add(popupList.getPane());
 		suggest.setAutoFix(false);
 		suggest.setAutoHide(true);
+		suggest.setConsumeAutoHidingEvents(false);
 		suggest.setHideOnEscape(true);
 		suggest.setAnchorLocation(AnchorLocation.CONTENT_TOP_LEFT);
 	}
