@@ -1128,15 +1128,23 @@ public class ControllerClass implements Controller {
 	}
 	
 	private int getTotalNumOfPages(DisplayList displayListType) {
-		if(displayListType.equals("MAIN")) {
-			return tasks.getTotalPageNum();
-		} else if(displayListType.equals("ARCHIVE")) {
-			return archiveTasks.getTotalPageNum();
-		} else if(displayListType.equals("SEARCH")) {
-			return resultTasks.getTotalPageNum();
-		} else {
-			return 0;
+		int totalNumPages;
+		
+		switch (displayListType) {
+		case MAIN:
+			totalNumPages = tasks.getTotalPageNum();
+			break;
+		case ARCHIVE:
+			totalNumPages = archiveTasks.getTotalPageNum();
+			break;
+		case SEARCH:
+			totalNumPages = resultTasks.getTotalPageNum();
+		default:
+			totalNumPages = 0;
+			break;
 		}
+		
+		return totalNumPages;
 	}
 	
 	/**
