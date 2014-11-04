@@ -857,10 +857,10 @@ public class ControllerClass implements Controller {
 	private void proceedWithEdit(String content) throws Exception {
 		String[] words = content.split(" ");
 		int positionOfTask = Integer.parseInt(words[0]) - 1;
-
+		
 		if (positionOfTask < 0 || positionOfTask >= tasks.size()
 				|| words.length < 2) {
-			throw new Exception("Invalid arguments");
+			throw new Exception("Invalid edit format.");
 		}
 
 		String attributeToChange = words[1];
@@ -877,6 +877,9 @@ public class ControllerClass implements Controller {
 		} else {
 
 			String editDetails = "";
+			if ((!attributeToChange.equals("!")) && (words.length==2)) {
+				throw new Exception("Please specify details to edit.");
+			}
 			for (int i = 2; i < words.length; i++) {
 				editDetails += words[i] + " ";
 			}
