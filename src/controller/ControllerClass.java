@@ -761,7 +761,13 @@ public class ControllerClass implements Controller {
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
-	}
+		
+		if(resultList.size() == 1) {
+			setFeedback(resultList.size() + " search result.");
+		} else {
+			setFeedback(resultList.size() + " search results.");
+		}
+	} 
 
 	// return the list of tasks that are overdue at current time
 	// Author: Tran Cong Thien
@@ -1086,6 +1092,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageUp()) {
 				currentPageNum--;
 				recentChange = 0;
+				setFeedback("Page " + currentPageNum + " out of " + totalNumPages);
 			} else {
 				throw new Exception("On first page.");
 			}
@@ -1093,6 +1100,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
+				setFeedback("Page " + currentPageNum + " out of " + totalNumPages);
 			} else {
 				throw new Exception("On last page.");
 			}
