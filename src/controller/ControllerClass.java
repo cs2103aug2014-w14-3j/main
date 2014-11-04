@@ -338,6 +338,12 @@ public class ControllerClass implements Controller {
 					throw new Exception("Invalid arguments");
 				}
 			}
+			
+			if(taskNumbers.length == 1) {
+				setFeedback("Task is marked as done successfully.");
+			} else {
+				setFeedback(taskNumbers.length + " tasks are marked as done successfully.");
+			}
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid format. Please enter the task number!");
 		}
@@ -754,7 +760,13 @@ public class ControllerClass implements Controller {
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
-	}
+		
+		if(resultList.size() == 1) {
+			setFeedback(resultList.size() + " search result.");
+		} else {
+			setFeedback(resultList.size() + " search results.");
+		}
+	} 
 
 	// return the list of tasks that are overdue at current time
 	// Author: Tran Cong Thien
@@ -795,8 +807,8 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String content) throws Exception {
 		try {
-			if (displayListType != DisplayList.MAIN) {
-				throw new Exception("Postpone can only be done in main list.");
+			if (displayListType == DisplayList.ARCHIVE) {
+				throw new Exception("Postpone can only be done in main list or search list.");
 			} else {
 				String[] taskNumbers = content.split(" ");
 
@@ -808,6 +820,12 @@ public class ControllerClass implements Controller {
 				}
 
 				tasks.sort();
+				
+				if(taskNumbers.length == 1) {
+					setFeedback("Task is postponed successfully.");
+				} else {
+					setFeedback(taskNumbers.length + " tasks are postponed successfully.");
+				}
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
@@ -889,6 +907,12 @@ public class ControllerClass implements Controller {
 					setRecentChange(task, tasks);
 				}
 			}
+			
+			if(words.length == 1) {
+				setFeedback("Task is edited successfully");
+			} else {
+				setFeedback(words.length + " tasks are edited successfully.");
+			}
 		} else {
 
 			String editDetails = "";
@@ -905,6 +929,7 @@ public class ControllerClass implements Controller {
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
 			setRecentChange(taskToEdit, tasks);
+			setFeedback("Task is edited successfully.");
 		}
 		displayMainList();
 		} catch (NumberFormatException e) {
@@ -1025,7 +1050,12 @@ public class ControllerClass implements Controller {
 				taskNum -= 1;
 			}
 			tasks.sort();
-
+			
+			if(taskNumDescending.size() == 1) {
+				setFeedback("Task is successfully deleted.");
+			} else {
+				setFeedback(taskNumDescending.size() + " tasks are successfully deleted.");
+			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
 					"Invalid delete format. Please enter task number.");
@@ -1075,6 +1105,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageUp()) {
 				currentPageNum--;
 				recentChange = 0;
+				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On first page.");
 			}
@@ -1082,6 +1113,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
+				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On last page.");
 			}
@@ -1101,25 +1133,25 @@ public class ControllerClass implements Controller {
 		Integer totalNumPages;
 		// quick fix
 		// TODO: getCurDisplayList() after fix search
-		switch (displayListType) {
-		case MAIN:
-			totalNumPages = tasks.getTotalPageNum();
-			break;
-		case ARCHIVE:
-			totalNumPages = archiveTasks.getTotalPageNum();
-			break;
-		case SEARCH:
-			totalNumPages = resultTasks.getTotalPageNum();
-		default:
-			totalNumPages = 0;
-			break;
-		}
+		totalNumPages = getTotalNumOfPages(displayListType);
 		if (currentPageNum < totalNumPages) {
 			return true;
 		}
 		return false;
 	}
-
+	
+	private int getTotalNumOfPages(DisplayList displayListType) {
+		if(displayListType.equals("MAIN")) {
+			return tasks.getTotalPageNum();
+		} else if(displayListType.equals("ARCHIVE")) {
+			return archiveTasks.getTotalPageNum();
+		} else if(displayListType.equals("SEARCH")) {
+			return resultTasks.getTotalPageNum();
+		} else {
+			return 0;
+		}
+	}
+	
 	/**
 	 * This method checks if it is possible to go to the previous page. If
 	 * currently on first page, it will return false. Otherwise, it will return
@@ -1193,7 +1225,7 @@ public class ControllerClass implements Controller {
 		Task task = processUserInput(content);
 		this.tasks.add(task);
 		
-		setFeedback("task is added successfully");
+		setFeedback("task is successfully added.");
 		displayMainList();
 		setRecentChange(task, tasks);
 	}
