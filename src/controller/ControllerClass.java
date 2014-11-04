@@ -796,8 +796,8 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String content) throws Exception {
 		try {
-			if (displayListType != DisplayList.MAIN) {
-				throw new Exception("Postpone can only be done in main list.");
+			if (displayListType == DisplayList.ARCHIVE) {
+				throw new Exception("Postpone can only be done in main list or search list.");
 			} else {
 				String[] taskNumbers = content.split(" ");
 
