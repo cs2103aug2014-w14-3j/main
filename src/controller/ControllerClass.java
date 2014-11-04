@@ -895,7 +895,7 @@ public class ControllerClass implements Controller {
 		}
 		displayMainList();
 		} catch (NumberFormatException e) {
-			throw new Exception("Invalid edit format please enter task number followed by attribute to edit.");
+			throw new Exception("Invalid edit format.");
 		}
 
 	}
