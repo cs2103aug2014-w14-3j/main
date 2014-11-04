@@ -1131,7 +1131,6 @@ public class ControllerClass implements Controller {
 	 */
 	private boolean checkValidPageDown() {
 		Integer totalNumPages;
-		// quick fix
 		// TODO: getCurDisplayList() after fix search
 		totalNumPages = getTotalNumOfPages(displayListType);
 		if (currentPageNum < totalNumPages) {
