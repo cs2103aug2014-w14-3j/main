@@ -116,12 +116,18 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	// For UI to get feedback message
+	/*
+	 * Accessor for UI to get the feedback message of current action.
+	 * @author Koh Xian Hui
+	 */
 	public String getFeedback() {
 		return feedbackMessage;
 	}
 	
-	// Sets feedback message
+	/*
+	 * Sets feedback messsage.
+	 * @author Koh Xian Hui
+	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
@@ -299,7 +305,6 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			markAsDone(content);
 			break;
-
 		case FREETIME:
 			findFreeTime(content);
 			break;
@@ -338,6 +343,12 @@ public class ControllerClass implements Controller {
 				} else {
 					throw new Exception("Invalid arguments");
 				}
+			}
+			
+			if(taskNumbers.length == 1) {
+				setFeedback("Task is marked as done successfully.");
+			} else {
+				setFeedback(taskNumbers.length + " tasks are marked as done successfully.");
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid format. Please enter the task number!");
@@ -755,7 +766,13 @@ public class ControllerClass implements Controller {
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
-	}
+		
+		if(resultList.size() == 1) {
+			setFeedback(resultList.size() + " search result.");
+		} else {
+			setFeedback(resultList.size() + " search results.");
+		}
+	} 
 
 	// return the list of tasks that are overdue at current time
 	// Author: Tran Cong Thien
@@ -796,8 +813,8 @@ public class ControllerClass implements Controller {
 	 */
 	private void postpone(String content) throws Exception {
 		try {
-			if (displayListType != DisplayList.MAIN) {
-				throw new Exception("Postpone can only be done in main list.");
+			if (displayListType == DisplayList.ARCHIVE) {
+				throw new Exception("Postpone can only be done in main list or search list.");
 			} else {
 				String[] taskNumbers = content.split(" ");
 
@@ -809,6 +826,12 @@ public class ControllerClass implements Controller {
 				}
 
 				tasks.sort();
+				
+				if(taskNumbers.length == 1) {
+					setFeedback("Task is postponed successfully.");
+				} else {
+					setFeedback(taskNumbers.length + " tasks are postponed successfully.");
+				}
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
@@ -831,9 +854,8 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Checks if the user has specified any task to edit and if specified,
-	 * proceeds with the edit.
-	 * 
+	 * Checks if the list the user is on is the main list. IF it is the main list, deems
+	 *  the edit valid and proceeds with it.
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
@@ -841,15 +863,28 @@ public class ControllerClass implements Controller {
 	 */
 	private void editTask(String content) throws Exception {
 		if (displayListType==DisplayList.MAIN) {
-			if (isEmptyCommand(content)) {
-			throw new Exception("Please specify what to edit.");
-		} else {
-			proceedWithEdit(content);
-		} 
+			validEdit(content); 
 		} else {
 			throw new Exception("Editing can only be done on the main list.");
 		}
 
+	}
+	/**
+	 * Checks if the user has specified any task to edit and if specified,
+	 * proceeds with the edit.
+	 * @param content
+	 * @throws Exception
+	 * @return
+	 * @author G. Vishnu Priya
+	 */
+	private void validEdit(String content) throws Exception {
+		if(tasks.isEmpty()) {
+			throw new Exception("Nothing to edit list is empty.");
+		} if (isEmptyCommand(content)) {
+		throw new Exception("Please specify what to edit.");
+} else {
+		proceedWithEdit(content);
+}
 	}
 
 	/**
@@ -882,6 +917,12 @@ public class ControllerClass implements Controller {
 					setRecentChange(task, tasks);
 				}
 			}
+			
+			if(words.length == 1) {
+				setFeedback("Task is edited successfully");
+			} else {
+				setFeedback(words.length + " tasks are edited successfully.");
+			}
 		} else {
 
 			String editDetails = "";
@@ -898,6 +939,7 @@ public class ControllerClass implements Controller {
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
 			setRecentChange(taskToEdit, tasks);
+			setFeedback("Task is edited successfully.");
 		}
 		displayMainList();
 		} catch (NumberFormatException e) {
@@ -905,7 +947,12 @@ public class ControllerClass implements Controller {
 		}
 
 	}
-
+	/**
+	 * Checks if the user wants to edit priority of multiple tasks.
+	 * @param attributeToChange
+	 * @return boolean
+	 * @author G. Vishnu Priya
+	 */
 	private boolean isMultipleEditPriority(String attributeToChange) {
 		try {
 			Integer.parseInt(attributeToChange);
@@ -931,8 +978,7 @@ public class ControllerClass implements Controller {
 			editDescription(taskToEdit, editDetails);
 		} else if (attribute.equalsIgnoreCase("time")) {
 			processTime(taskToEdit, editDetails);
-		}
-		else if (attribute.equalsIgnoreCase("!")) {
+		} else if (attribute.equalsIgnoreCase("!")) {
 			editPriority(taskToEdit);
 		} else {
 			throw new Exception("Please specify what to edit (time/desc/!)");
@@ -940,8 +986,8 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * This methods edits the priority of a task so that the existing priority
-	 * of the task is reversed.
+	 * This methods edits the priority of a task by reversing the existing priority
+	 * of the task.
 	 * 
 	 * @return void
 	 * @author G. Vishnu Priya
@@ -1014,7 +1060,12 @@ public class ControllerClass implements Controller {
 				taskNum -= 1;
 			}
 			tasks.sort();
-
+			
+			if(taskNumDescending.size() == 1) {
+				setFeedback("Task is successfully deleted.");
+			} else {
+				setFeedback(taskNumDescending.size() + " tasks are successfully deleted.");
+			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
 					"Invalid delete format. Please enter task number.");
@@ -1064,6 +1115,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageUp()) {
 				currentPageNum--;
 				recentChange = 0;
+				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On first page.");
 			}
@@ -1071,6 +1123,7 @@ public class ControllerClass implements Controller {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
+				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On last page.");
 			}
@@ -1088,8 +1141,17 @@ public class ControllerClass implements Controller {
 	 */
 	private boolean checkValidPageDown() {
 		Integer totalNumPages;
-		// quick fix
 		// TODO: getCurDisplayList() after fix search
+		totalNumPages = getTotalNumOfPages(displayListType);
+		if (currentPageNum < totalNumPages) {
+			return true;
+		}
+		return false;
+	}
+	
+	private int getTotalNumOfPages(DisplayList displayListType) {
+		int totalNumPages;
+		
 		switch (displayListType) {
 		case MAIN:
 			totalNumPages = tasks.getTotalPageNum();
@@ -1103,12 +1165,10 @@ public class ControllerClass implements Controller {
 			totalNumPages = 0;
 			break;
 		}
-		if (currentPageNum < totalNumPages) {
-			return true;
-		}
-		return false;
+		
+		return totalNumPages;
 	}
-
+	
 	/**
 	 * This method checks if it is possible to go to the previous page. If
 	 * currently on first page, it will return false. Otherwise, it will return
@@ -1182,7 +1242,7 @@ public class ControllerClass implements Controller {
 		Task task = processUserInput(content);
 		this.tasks.add(task);
 		
-		setFeedback("task is added successfully");
+		setFeedback("task is successfully added.");
 		displayMainList();
 		setRecentChange(task, tasks);
 	}
