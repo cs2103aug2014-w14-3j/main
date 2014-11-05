@@ -45,10 +45,10 @@ public class ControllerClass implements Controller {
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE = "find";
-	public static final String CMD_CLEARARCHIVE = "clear archive";
+	public static final String CMD_CLEARARCHIVE = "clear";
 
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE
 	};
 
 	enum DisplayList {
@@ -71,6 +71,7 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_PAGE, CommandType.CHANGEPAGE);
 		aMap.put(CMD_OVERDUE, CommandType.OVERDUE);
 		aMap.put(CMD_FREE, CommandType.FREETIME);
+		aMap.put(CMD_CLEARARCHIVE, CommandType.CLEARARCHIVE);
 		commandMap = Collections.unmodifiableMap(aMap);
 	}
 
@@ -312,8 +313,25 @@ public class ControllerClass implements Controller {
 		case CHANGEPAGE:
 			changePage(content);
 			break;
+		case CLEARARCHIVE:
+			updateForUndo();
+			clearArchive();
+			break;
 		default:
 			throw new Exception("Invalid command.");
+		}
+	}
+		
+	/**
+	 * This method clears all the tasks in the archive.
+	 * @return void
+	 * @author G. Vishnu Priya
+	 */
+	private void clearArchive() throws Exception {
+		if(displayListType == DisplayList.ARCHIVE) {
+			archiveTasks.clear();
+		} else {
+			throw new Exception("Only can clear tasks on archive list.");
 		}
 	}
 
