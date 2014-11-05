@@ -52,7 +52,7 @@ public class ControllerClass implements Controller {
 	};
 
 	enum DisplayList {
-		MAIN, ARCHIVE, SEARCH
+		MAIN, ARCHIVE, SEARCH, FREESLOTS
 	};
 
 	public static final Map<String, CommandType> commandMap;
@@ -155,6 +155,10 @@ public class ControllerClass implements Controller {
 			if (list.isEmpty()) {
 				list.add("**No search result**");
 			}
+			break;
+			
+		case FREESLOTS:
+			list = new ArrayList<String>();
 			break;
 		}
 
