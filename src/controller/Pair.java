@@ -18,10 +18,5 @@ public class Pair {
 	}
 	
 	
-/*	public int compareTo(Pair pair){
-		return (int) this.getFirst()- (int)pair.getFirst();
-	}
-	
-*/
 	
 }
