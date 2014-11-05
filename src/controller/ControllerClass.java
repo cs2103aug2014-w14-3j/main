@@ -870,7 +870,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void validEdit(String content) throws Exception {
-		if(tasks.isEmpty()) {
+		if (tasks.isEmpty()) {
 			throw new Exception("Nothing to edit list is empty.");
 		} if (isEmptyCommand(content)) {
 		throw new Exception("Please specify what to edit.");
