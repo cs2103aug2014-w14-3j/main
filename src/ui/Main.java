@@ -85,7 +85,7 @@ public class Main extends Application{
 				return;
 			}
 			mainControl.loadList(displayBuf, recentChange);
-			System.out.println("mark" + controller.getFeedback());
+			//System.out.println("mark" + controller.getFeedback());
 			mainControl.showNoti(controller.getFeedback());
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
