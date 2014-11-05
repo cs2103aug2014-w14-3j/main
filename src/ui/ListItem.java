@@ -20,7 +20,7 @@ import javafx.scene.text.TextFlow;
  * @author Luo Shaohuai
  *
  */
-class ListItem{
+public class ListItem{
 	@FXML
 	private HBox box;
 	
@@ -33,7 +33,7 @@ class ListItem{
 	@FXML
 	private Circle priority;
 	
-	ListItem() {
+	public ListItem() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ListItem.fxml"));
 		fxmlLoader.setController(this);
 		
