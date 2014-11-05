@@ -355,7 +355,7 @@ public class SimpleTaskList implements TaskList {
 		Date date = timeParser(content);
 		
 		if (isDesc == true  || date==null) {
-			System.out.println("content is: "+content);
+			//System.out.println("content is: "+content);
 			
 			return searchDesc(content, listToSearch);
 		
@@ -505,12 +505,12 @@ public class SimpleTaskList implements TaskList {
 					}
 				}
 			}
-		System.out.println("End of exact search");
+		//System.out.println("End of exact search");
 		return result;
 	}
 
 	private boolean isTheSame(String keyWord, String strToSearch) {
-		System.out.println("has is the same");
+		//System.out.println("has is the same");
 		String[] paraKey = keyWord.trim().split("s++");
 		int lenKey = paraKey.length;
 
@@ -535,7 +535,7 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	private boolean isInside(String keyWord, String strToSearch) {
-		System.out.println("inside");
+		//System.out.println("inside");
 		String[] paraKey = keyWord.trim().split("s++");
 		int lenKey = paraKey.length;
 
@@ -600,7 +600,7 @@ public class SimpleTaskList implements TaskList {
 		
 		
 		for (int i=0;i<resultList.size();i++){
-			System.out.println(resultList.get(i).toString());
+			//System.out.println(resultList.get(i).toString());
 		}
 		return resultList;
 	}
@@ -640,7 +640,7 @@ public class SimpleTaskList implements TaskList {
 			searchScore += matchScore[i];
 		}
 		
-		System.out.println("searchScore="+searchScore);
+		//System.out.println("searchScore="+searchScore);
 		return new Pair(numOfMatch, searchScore);
 	}
 

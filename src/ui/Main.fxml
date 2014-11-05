@@ -15,7 +15,7 @@
 
 <BorderPane prefHeight="620.0" prefWidth="600.0" style="-fx-background-radius: 10px,10px,10px,10px;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.UIControl">
 	<top>
-		<HBox fx:id="title" prefHeight="57.0" prefWidth="611.0" style="-fx-background-color: #22A7F0;">
+		<HBox fx:id="title" prefHeight="41.0" prefWidth="611.0" style="-fx-background-color: #22A7F0;">
    			<children>
 	   			<Text style="-fx-fill: #FFFFFF;" text="Forget-Me-Not" wrappingWidth="200">
 	               <font>
@@ -45,30 +45,46 @@
 		</HBox>
 	</top>
 	<bottom>
-		<HBox style="-fx-background-color: #22A7F0;">
-		   <children>
-		   		<TextField fx:id="input" prefHeight="40.0" prefWidth="609.0" promptText="I want to" style="-fx-background-radius: 25px,25px;">
+      <VBox>
+         <children>
+            <HBox prefHeight="21.0" prefWidth="611.0">
+               <children>
+                  <Text fx:id="noti" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="589.6829261779785">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Text>
+               </children>
                <padding>
-                  <Insets left="15.0" right="15.0" />
-               </padding>
-               <font>
-                  <Font name="Tahoma Bold" size="16.0" />
-               </font>
-               <effect>
-                  <Blend mode="BLUE" opacity="0.78">
-                     <topInput>
-                        <ColorInput />
-                     </topInput>
-                  </Blend>
-               </effect>
-               <HBox.margin>
-                  <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
-               </HBox.margin></TextField>
-		   </children>
-		</HBox>
+                  <Insets left="10.0" right="10.0" />
+               </padding></HBox>
+      		<HBox style="-fx-background-color: #22A7F0;">
+      		   <children>
+      		   		<TextField fx:id="input" prefHeight="40.0" prefWidth="609.0" promptText="I want to" style="-fx-background-radius: 25px,25px;">
+                     <padding>
+                        <Insets left="15.0" right="15.0" />
+                     </padding>
+                     <font>
+                        <Font name="Tahoma Bold" size="16.0" />
+                     </font>
+                     <effect>
+                        <Blend mode="BLUE" opacity="0.78">
+                           <topInput>
+                              <ColorInput />
+                           </topInput>
+                        </Blend>
+                     </effect>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+      		   </children>
+      		</HBox>
+         </children>
+      </VBox>
 	</bottom>
 	<center>
-		<ListView fx:id="list" prefHeight="500.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
+		<ListView fx:id="list" prefHeight="510.0" prefWidth="580.0" style="-fx-background-color: #C5EFF7;">
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin></ListView>

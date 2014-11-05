@@ -32,4 +32,6 @@ public interface Controller {
 	public List<String> getCurrentList();
 	
 	public List<String> suggest(String content);
+	
+	public String getFeedback();
 }

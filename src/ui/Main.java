@@ -78,7 +78,6 @@ public class Main extends Application{
 		
 		try {
 			log.log("Command: " + cmd);
-			mainControl.hideNoti();
 			
 			recentChange = controller.execCmd(cmd);
 			displayBuf = controller.getCurrentList();
@@ -86,6 +85,8 @@ public class Main extends Application{
 				return;
 			}
 			mainControl.loadList(displayBuf, recentChange);
+			System.out.println("mark" + controller.getFeedback());
+			mainControl.showNoti(controller.getFeedback());
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
 				e.printStackTrace();
