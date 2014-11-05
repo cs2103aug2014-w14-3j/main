@@ -1,4 +1,4 @@
-package storage;
+package tests;
 
 import static org.junit.Assert.*;
 
@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import storage.Storage;
+import storage.StoragePlus;
 
 public class StoragePlusTest {
 

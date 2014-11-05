@@ -1,10 +1,9 @@
 /**
  * 
  */
-package ui;
+package tests;
 
 import java.time.Instant;
-
 
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -12,6 +11,8 @@ import javafx.scene.text.TextFlow;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import ui.ListItem;
 
 /**
  * @author Luo Shaohuai

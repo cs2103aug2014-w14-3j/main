@@ -1,10 +1,13 @@
-package controller;
+package tests;
 
 import static org.junit.Assert.*;
 
 import java.util.List;
 
 import org.junit.Test;
+
+import controller.Controller;
+import controller.ControllerClass;
 
 public class TestSearch {
 

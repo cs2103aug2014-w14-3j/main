@@ -1,4 +1,4 @@
-package controller;
+package tests;
 
 import java.util.List;
 
@@ -7,6 +7,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import controller.Controller;
+import controller.ControllerClass;
 import static org.junit.Assert.*;
 
 /**
