@@ -906,7 +906,11 @@ public class ControllerClass implements Controller {
 		} if (isEmptyCommand(content)) {
 		throw new Exception("Please specify what to edit.");
 } else {
-		proceedWithEdit(content);
+		Task taskEdited = proceedWithEdit(content);
+		tasks.sort();
+		setDisplayList(displayListType);
+		setRecentChange(taskEdited, tasks);
+		setFeedback("Task is edited successfully.");
 }
 	}
 
@@ -918,7 +922,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 * @throws Exception
 	 */
-	private void proceedWithEdit(String content) throws Exception {
+	private Task proceedWithEdit(String content) throws Exception {
 		try {
 			String[] words = content.split(" ");
 
@@ -961,15 +965,12 @@ public class ControllerClass implements Controller {
 			}
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
-			setRecentChange(taskToEdit, tasks);
-			setFeedback("Task is edited successfully.");
 		}
-		tasks.sort();
-		setDisplayList(displayListType);
+		
+		return taskToEdit;
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid edit format.");
 		}
-
 	}
 	/**
 	 * Checks if the user wants to edit priority of multiple tasks.
