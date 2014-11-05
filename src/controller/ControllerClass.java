@@ -885,10 +885,10 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void editTask(String content) throws Exception {
-		if (displayListType==DisplayList.MAIN) {
+		if ((displayListType==DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 			validEdit(content); 
 		} else {
-			throw new Exception("Editing can only be done on the main list.");
+			throw new Exception("Editing can only be done on the main list or search list.");
 		}
 
 	}
@@ -1049,12 +1049,12 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void deleteTask(String content) throws Exception {
-		if (displayListType == DisplayList.MAIN) {
+		if ((displayListType == DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 		if (isValidDelete(content)) {
 			proceedWithDelete(content);
-		}
+		} 
 		} else {
-			throw new Exception("Deletion can only be done in main list.");
+			throw new Exception("Deletion can only be done in main list or search list.");
 		}
 	}
 
