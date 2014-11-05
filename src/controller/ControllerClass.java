@@ -319,6 +319,7 @@ public class ControllerClass implements Controller {
 
 	private void moveToArchive() {
 		setDisplayList(DisplayList.ARCHIVE);
+		setFeedback("Archive List.");
 	}
 
 	// the format will be "done <number>"
@@ -854,6 +855,7 @@ public class ControllerClass implements Controller {
 		//setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
 		setDisplayList(DisplayList.MAIN);
+		setFeedback("Main List.");
 	}
 
 	/**
