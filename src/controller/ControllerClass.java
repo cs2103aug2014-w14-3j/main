@@ -845,6 +845,14 @@ public class ControllerClass implements Controller {
 					Task postponedTask = tasks.get(taskNum);
 					postponedTask.clearTimes();
 					postponedTask.setType(TaskType.FLOATING);
+					
+					if(i == taskNumbers.length - 1) {
+						if(displayListType == DisplayList.MAIN) {
+							setRecentChange(postponedTask, tasks);
+						} else {
+							setRecentChange(postponedTask, resultTasks);
+						}
+					}
 				}
 
 				tasks.sort();
