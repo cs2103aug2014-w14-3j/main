@@ -49,4 +49,6 @@ public interface TaskList {
 	TaskList search(String content);
 	
 	TaskList searchOnDate(Date date, TaskList list);
+	
+	TaskList searchDesc(String key, TaskList list);
 }

@@ -116,12 +116,18 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	// For UI to get feedback message
+	/*
+	 * Accessor for UI to get the feedback message of current action.
+	 * @author Koh Xian Hui
+	 */
 	public String getFeedback() {
 		return feedbackMessage;
 	}
 	
-	// Sets feedback message
+	/*
+	 * Sets feedback messsage.
+	 * @author Koh Xian Hui
+	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
@@ -168,7 +174,8 @@ public class ControllerClass implements Controller {
 		}
 
 		// suggest search
-		TaskList resultList = tasks.search(content);
+		TaskList resultList = tasks.searchDesc(content,tasks);
+		
 		suggestList.addAll(resultList.getStringList());
 
 		return suggestList;
@@ -758,7 +765,9 @@ public class ControllerClass implements Controller {
 	}
 
 	private void search(String content) {
+		System.out.println("Start of search");
 		TaskList resultList = tasks.search(content);
+		System.out.println("result size="+ resultList.size());
 		setResultList(resultList);
 		
 		if(resultList.size() == 1) {
@@ -841,6 +850,8 @@ public class ControllerClass implements Controller {
 	 * @author Koh Xian Hui
 	 */
 	private void displayMainList() {
+		//getFileContent();
+		//setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
 		setDisplayList(DisplayList.MAIN);
 	}
