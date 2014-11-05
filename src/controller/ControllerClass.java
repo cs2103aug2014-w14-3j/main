@@ -771,7 +771,7 @@ public class ControllerClass implements Controller {
 		//System.out.println("result size="+ resultList.size());
 		setResultList(resultList);
 		
-		if(resultList.size() == 1) {
+		if(resultList.size() == 0 || resultList.size() == 1) {
 			setFeedback(resultList.size() + " search result.");
 		} else {
 			setFeedback(resultList.size() + " search results.");
@@ -918,16 +918,16 @@ public class ControllerClass implements Controller {
 			for (int i = 0; i < words.length - 1; i++) {
 				Task task = tasks.get(Integer.parseInt(words[i]) - 1);
 				editPriority(task);
+				if(words.length == 1) {
+					setFeedback("Task is edited successfully");
+				} else {
+					setFeedback(words.length - 1 + " tasks are edited successfully.");
+				}
 				if (i == words.length - 2) {
 					setRecentChange(task, tasks);
 				}
 			}
 			
-			if(words.length == 1) {
-				setFeedback("Task is edited successfully");
-			} else {
-				setFeedback(words.length + " tasks are edited successfully.");
-			}
 		} else {
 
 			String editDetails = "";
@@ -946,7 +946,8 @@ public class ControllerClass implements Controller {
 			setRecentChange(taskToEdit, tasks);
 			setFeedback("Task is edited successfully.");
 		}
-		displayMainList();
+		tasks.sort();
+		setDisplayList(displayListType);
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid edit format.");
 		}
@@ -1247,8 +1248,9 @@ public class ControllerClass implements Controller {
 		Task task = processUserInput(content);
 		this.tasks.add(task);
 		
-		setFeedback("task is successfully added.");
-		displayMainList();
+		setFeedback("Task is successfully added.");
+		tasks.sort();
+		setDisplayList(displayListType);
 		setRecentChange(task, tasks);
 	}
 
