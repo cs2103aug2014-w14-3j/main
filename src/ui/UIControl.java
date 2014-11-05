@@ -41,25 +41,18 @@ public class UIControl extends BorderPane {
 	@FXML
 	private HBox title;
 	
-	private Popup noti;
+	@FXML
+	private Text noti;
+	
 	private Popup suggest;
 	PopupList popupList;
-	Noti notiBox;
 	
 	private double mouseX;
 	private double mouseY;
 	
 	public UIControl() {
 		displayCurTime();
-		noti = new Popup();	
-		notiBox = new Noti();
-		noti.getContent().add(notiBox.getBox());
-		noti.setAutoFix(false);
-		noti.setAutoHide(true);
-		noti.setConsumeAutoHidingEvents(false);
-		noti.setHideOnEscape(true);
-		noti.setAnchorLocation(AnchorLocation.CONTENT_TOP_LEFT);
-		
+				
 		suggest = new Popup();
 		popupList = new PopupList();
 		suggest.getContent().add(popupList.getPane());
@@ -101,21 +94,8 @@ public class UIControl extends BorderPane {
 		input.requestFocus();
 	}
 	
-	public void hideNoti() {
-		noti.hide();
-	}
-	
 	public void showNoti(String message) {
-		notiBox.setText(message);
-		noti.setHeight(20.0);
-		
-		double posX = input.localToScene(0.0, 0.0).getX() 
-				+ input.getScene().getWindow().getX();
-		double posY = input.localToScene(0.0, 0.0).getY() 
-				+ input.getScene().getWindow().getY()
-				- noti.getHeight();
-		
-		noti.show(input, posX, posY);
+		noti.setText(message);
 	}
 	
 	public void setInputOnEnter(OnEvent value) {
