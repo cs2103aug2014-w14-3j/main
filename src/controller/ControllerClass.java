@@ -918,7 +918,7 @@ public class ControllerClass implements Controller {
 		tasks.sort();
 		setDisplayList(displayListType);
 		setRecentChange(taskEdited, tasks);
-		setFeedback("Task is edited successfully.");
+		
 }
 	}
 
@@ -948,11 +948,7 @@ public class ControllerClass implements Controller {
 			for (int i = 0; i < words.length - 1; i++) {
 				Task task = tasks.get(Integer.parseInt(words[i]) - 1);
 				editPriority(task);
-				if(words.length == 1) {
-					setFeedback("Task is edited successfully");
-				} else {
-					setFeedback(words.length - 1 + " tasks are edited successfully.");
-				}
+				setFeedback(words.length - 1 + " tasks are edited successfully.");
 				if (i == words.length - 2) {
 					setRecentChange(task, tasks);
 				}
@@ -973,6 +969,8 @@ public class ControllerClass implements Controller {
 			}
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
+			setFeedback("Task is edited successfully.");
+			
 		}
 		
 		return taskToEdit;
