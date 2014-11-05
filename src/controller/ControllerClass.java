@@ -897,10 +897,10 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 */
 	private void editTask(String content) throws Exception {
-		if (displayListType==DisplayList.MAIN) {
+		if ((displayListType==DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 			validEdit(content); 
 		} else {
-			throw new Exception("Editing can only be done on the main list.");
+			throw new Exception("Editing can only be done on the main list or search list.");
 		}
 
 	}
@@ -922,7 +922,7 @@ public class ControllerClass implements Controller {
 		tasks.sort();
 		setDisplayList(displayListType);
 		setRecentChange(taskEdited, tasks);
-		setFeedback("Task is edited successfully.");
+		
 }
 	}
 
@@ -952,11 +952,7 @@ public class ControllerClass implements Controller {
 			for (int i = 0; i < words.length - 1; i++) {
 				Task task = tasks.get(Integer.parseInt(words[i]) - 1);
 				editPriority(task);
-				if(words.length == 1) {
-					setFeedback("Task is edited successfully");
-				} else {
-					setFeedback(words.length - 1 + " tasks are edited successfully.");
-				}
+				setFeedback(words.length - 1 + " tasks are edited successfully.");
 				if (i == words.length - 2) {
 					setRecentChange(task, tasks);
 				}
@@ -977,6 +973,8 @@ public class ControllerClass implements Controller {
 			}
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
+			setFeedback("Task is edited successfully.");
+			
 		}
 		
 		return taskToEdit;
@@ -1061,12 +1059,12 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void deleteTask(String content) throws Exception {
-		if (displayListType == DisplayList.MAIN) {
+		if ((displayListType == DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 		if (isValidDelete(content)) {
 			proceedWithDelete(content);
-		}
+		} 
 		} else {
-			throw new Exception("Deletion can only be done in main list.");
+			throw new Exception("Deletion can only be done in main list or search list.");
 		}
 	}
 
