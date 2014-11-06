@@ -83,7 +83,7 @@ public class ControllerClass implements Controller {
 	private TaskList tasks;
 	private TaskList archiveTasks;
 	private TaskList resultTasks;
-	private boolean[][] timeSlots;
+	
 
 	private DisplayList displayListType;
 	private Integer recentChange;
@@ -94,7 +94,7 @@ public class ControllerClass implements Controller {
 	private FixedSizeStack<TaskList> undoArchiveList;
 
 	private String feedbackMessage = "";
-	
+
 	private ControllerClass() {
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
@@ -119,20 +119,22 @@ public class ControllerClass implements Controller {
 
 	/*
 	 * Accessor for UI to get the feedback message of current action.
+	 * 
 	 * @author Koh Xian Hui
 	 */
 	public String getFeedback() {
 		return feedbackMessage;
 	}
-	
+
 	/*
 	 * Sets feedback messsage.
+	 * 
 	 * @author Koh Xian Hui
 	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
-	
+
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
@@ -179,8 +181,8 @@ public class ControllerClass implements Controller {
 		}
 
 		// suggest search
-		TaskList resultList = tasks.searchDesc(content,tasks);
-		
+		TaskList resultList = tasks.searchDesc(content, tasks);
+
 		suggestList.addAll(resultList.getStringList());
 
 		return suggestList;
@@ -312,7 +314,7 @@ public class ControllerClass implements Controller {
 			markAsDone(content);
 			break;
 		case FREETIME:
-			findFreeTime(content);
+			TestfreeIntervals();
 			break;
 		case CHANGEPAGE:
 			changePage(content);
@@ -354,8 +356,6 @@ public class ControllerClass implements Controller {
 			}
 		});
 
-		
-		
 		try {
 			for (int i = 0; i < taskNumbers.length; i++) {
 				int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
@@ -368,11 +368,12 @@ public class ControllerClass implements Controller {
 					throw new Exception("Invalid arguments");
 				}
 			}
-			
-			if(taskNumbers.length == 1) {
+
+			if (taskNumbers.length == 1) {
 				setFeedback("Task is marked as done successfully.");
 			} else {
-				setFeedback(taskNumbers.length + " tasks are marked as done successfully.");
+				setFeedback(taskNumbers.length
+						+ " tasks are marked as done successfully.");
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception("Invalid format. Please enter the task number!");
@@ -380,69 +381,13 @@ public class ControllerClass implements Controller {
 		tasks.sort();
 	}
 
-	//get the first 5 in the date list only
-	
-	private ArrayList<ArrayList<String>> findFreeTime(String content) throws Exception{
-		
-		ArrayList<Date> resultList=freeTime(content);
-		ArrayList<ArrayList<String>> listToShow=new ArrayList<ArrayList<String>>();
-	
-		
-		for (int i=0;i<resultList.size() && i<5;i++){
-			
-			ArrayList<String> arr=new ArrayList<String>();
-			
-			Date date=resultList.get(i);
-			TaskList taskOnDate=tasks.searchOnDate(date,tasks);
-			
-			arr.add(date.toString());
-			for (int j=0;j<taskOnDate.size();j++){
-				arr.add(taskOnDate.get(j).toString());
-			}
-			
-			listToShow.add(arr);
-		}	
-		
-		for (int i=0;i<listToShow.size();i++)
-		{
-			ArrayList<String> arr=listToShow.get(i);
-			for (int j=0;j<arr.size();j++){
-				System.out.println(arr.get(j));
-			}
-		}
-		
-		
-		return listToShow;
-		
-	}
 	
 	
+	//format of find
+	//	**Find for a time to time period to be free.Ex: find 10pm to 1pm date
+	//	**Find intervals of free time that in the schedule.Ex: find 3 hours 30 mins by date(before a date) or
+	//find 3 hours 30 mins on date (check on that date)
 	
-	private ArrayList<Date> freeTime(String content) throws Exception {
-		
-		Pair pair = parserForFind(content);
-		int first = pair.getFirst();
-		int second = pair.getSecond();
-
-		initTimeSlots();
-		processDate();
-		if (first == -1) {
-			ArrayList<Date> resultList = findFreeTime(second);
-			return resultList;
-		} else {
-				
-			ArrayList<Date> resultList = dateList(checkDate(first, second));
-		/*	for (int i=0;i<resultList.size();i++)
-				System.out.println(resultList.get(i));*/
-			return resultList;
-
-		}
-
-	}
-
-	// xx hours, xx hours yy mins/minute
-	// yy minutes
-
 	private Pair parserForFind(String content) throws Exception {
 
 		if (content.indexOf("to") == -1) {
@@ -489,7 +434,6 @@ public class ControllerClass implements Controller {
 					throw new Exception("Please specify the period of time!");
 				}
 
-		
 				Calendar cal1 = Calendar.getInstance();
 				cal1.setTime(date1);
 
@@ -527,278 +471,109 @@ public class ControllerClass implements Controller {
 			return null;
 		}
 	}
+	
+	
+	//just for testing, can ignore
+	private void TestfreeIntervals(){
 
-	private ArrayList<Date> findFreeTime(int numOfSlots) {
+		Date now=new Date();
+		Date endTime=new Date(now.getTime()+24*60*60*1000*7);
+	
+		ArrayList<longPair> intervalFree=freeIntervals(now,endTime);
 		
-
-		ArrayList<Integer> indexList = findEmptySlots(numOfSlots);
-		return dateList(indexList);
-
-	}
-
-	private ArrayList<Integer> checkDate(int start, int end) {
-		
-		ArrayList<Integer> resultList = new ArrayList<Integer>();
-
-		for (int i = 0; i < 30; i++) {
-			boolean take = true;
-		
-			for (int j = start;j <end &&take==true; j++) {
+		for (int i=0;i<intervalFree.size();i++){
+			longPair inter=intervalFree.get(i);
+			Date start=new Date(inter.getFirst());
+			Date end=new Date(inter.getSecond());
 			
-				if (timeSlots[i][j] == false) {
-					take = false;
-				}
-			}
-			if (take) {
-				resultList.add(i);
-			}
+			System.out.println("[ "+start+"to "+end+" ]");
 		}
-
-		return resultList;
-
 	}
 
-	private ArrayList<Date> dateList(ArrayList<Integer> number) {
+	private ArrayList<longPair> freeIntervals(Date start, Date end) {
 
-		ArrayList<Date> resultList = new ArrayList<Date>();
+		ArrayList<longPair> occupiedIntervals = getOccupied(tasks);
+		ArrayList<longPair> intervalFree = new ArrayList<longPair>();
 
-		for (int i = 0; i < number.size(); i++) {
+		// initialize
+		intervalFree.add(new longPair(start.getTime(), end.getTime()));
+	
+		for (int i = 0; i < occupiedIntervals.size() && i<10; i++) {
+			longPair occu = occupiedIntervals.get(i);
 
-			int num = number.get(i);
-
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.DATE, num);
-
-			resultList.add(cal.getTime());
-		}
-
-		return resultList;
-	}
-
-	private void initTimeSlots() {
-		timeSlots = new boolean[30][144];
-
-		
-		// avoid time from 0.00am to 7.00am
-		for (int i = 0; i < 30; i++) {
-			for (int j = 0; j < 144; j++) {
-				if (j >= 0 && j < 42) {
-					timeSlots[i][j] = false;
-				} else {
-					timeSlots[i][j] = true;
-				}
+			for (int j=0;j<intervalFree.size();j++){
+				longPair free=intervalFree.get(j);
+				if (hasOverLap(occu,free)){
+					//case 1: occu > free, update
+					if (occu.getFirst() > free.getFirst() && occu.getSecond() > free.getSecond()){
+						intervalFree.set(j, new longPair(free.getFirst(), occu.getFirst()));
+					}//cas2 2: occu< free, update
+					else if (occu.getFirst() <free.getFirst() && occu.getSecond()< free.getSecond()){
+						intervalFree.set(j, new longPair(occu.getSecond(),free.getSecond()));
+					}//case 3:occu covers free, remove
+					else if (occu.getFirst()< free.getFirst() && occu.getSecond() > free.getSecond()){
+						intervalFree.remove(j);
+						j--;
+					}//case 4: occu is covered by free, add 2 time slots
+					else if (occu.getFirst()> free.getFirst() && occu.getSecond()< free.getSecond()){
+						intervalFree.set(j,new longPair(free.getFirst(),occu.getFirst()));
+						intervalFree.add(j,new longPair(occu.getSecond(),free.getSecond()));
+						j++;
+					}				
+				}						
 			}
+			Collections.sort(intervalFree);
 		}
-		
-		Calendar now=Calendar.getInstance();
-		
-		int index=getUpperTimeIndex(now.getTime());
-		for (int j=0;j<index;j++){
-			timeSlots[0][j]=false;
-		}
+		return intervalFree;
 
 	}
+	
+	//Tran Cong Thien
+	//get the occupied slots of time
+	private ArrayList<longPair> getOccupied(TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
 
-	private ArrayList<Integer> findEmptySlots(int numOfSlot) {
-		ArrayList<Integer> list = new ArrayList<Integer>();
-
-		for (int i = 0; i < 30; i++) {
-			if (hasEmpty(numOfSlot, i)) {
-				list.add(i);
-			}
-		}
-		return list;
-	}
-
-	private boolean hasEmpty(int numOfSlot, int dateIndex) {
-
-		int count;
-		for (int i = 0; i < 144; i++) {
-			if (timeSlots[dateIndex][i] == true) {
-				count = 1;
-				boolean exit = false;
-				for (int j = i + 1; j < 144 && !exit; j++) {
-					if (timeSlots[dateIndex][j] == true) {
-						count++;
-						if (count >= numOfSlot)
-							return true;
-					} else
-						exit = true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	private void processDate() {
-		int numOfTask = tasks.size();
-		Date now = new Date();
-
-		Calendar lastDay = Calendar.getInstance();
-		lastDay.add(Calendar.DATE, 29);
-
-		Date lastday = lastDay.getTime();
+		ArrayList<longPair> resultList = new ArrayList<longPair>();
 
 		for (int i = 0; i < numOfTask; i++) {
-			Task task = tasks.get(i);
+			Task task = listToSearch.get(i);
+
 			if (task.getType() == TaskType.TIMED) {
-				Date startTime = task.getStartTime();
-				Date endTime = task.getEndTime();
-
-				if (compare(now, startTime) <= 0
-						&& compare(endTime, lastday) <= 0) {
-					occupySlot(startTime, endTime);
-				}
+				resultList.add(new longPair(task.getStartTime().getTime(), task
+						.getEndTime().getTime()));
 			}
 		}
+		// sort in order first
+		Collections.sort(resultList);
+		return resultList;
+
 	}
 
-	// return negative if date1 is before date2
-	// positive if date1 is after date2
-	// 0 if they are the same
+	
+	// if 2 intervals is overlapped
+	private boolean hasOverLap(longPair pair1, longPair pair2) {
 
-	private int compare(Date date1, Date date2) {
-
-		Calendar cal1 = Calendar.getInstance();
-		cal1.setTime(date1);
-
-		Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(date2);
-
-		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
-			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
-		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
-			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		if (Math.max(pair1.getFirst(), pair2.getFirst()) < Math.min(
+				pair1.getSecond(), pair2.getSecond())) {
+			return true;
 		} else {
-			return cal1.get(Calendar.DAY_OF_MONTH)
-					- cal2.get(Calendar.DAY_OF_MONTH);
+			return false;
 		}
-
 	}
 
-	private void occupySlot(Date start, Date end) {
-		int dateIndex = getDateIndex(start);
-		int timeIndex = getTimeIndex(start);
 
-		int dateEndIndex = getDateIndex(end);
-		int timeEndIndex = getUpperTimeIndex(end);
 
-	
-		int numOfSlots = numSlots(start, end);
-
-		if (dateIndex != -1 && dateEndIndex != -1) {
-			if (dateIndex != dateEndIndex) {
-				for (int i = dateIndex; i < 144; i++) {
-					timeSlots[dateIndex][i] = false;
-				}
-
-				for (int i = dateIndex + 1; i < dateEndIndex - 1; i++) {
-					for (int j = 0; j < 144; j++) {
-						timeSlots[i][j] = false;
-					}
-				}
-
-				for (int i = 0; i <= timeEndIndex; i++) {
-					timeSlots[dateEndIndex][i] = false;
-				}
-
-			} else {
-				for (int i = timeIndex; i < timeIndex + numOfSlots; i++)
-					timeSlots[dateIndex][i] = false;
-			}
-		} else if (dateIndex==-1 && dateEndIndex!=-1 &&dateEndIndex <30){
-			
-			int nowTimeIndex=getTimeIndex(new Date());
-			if (dateEndIndex!=0){
-					for (int i = nowTimeIndex; i < 144; i++) {
-						timeSlots[dateIndex][i] = false;
-					}
-
-					for (int i = 1; i < dateEndIndex - 1; i++) {
-						for (int j = 0; j < 144; j++) {
-							timeSlots[i][j] = false;
-						}
-					}
-
-					for (int i = 0; i <= timeEndIndex; i++) {
-						timeSlots[dateEndIndex][i] = false;
-					}
-			
-				
-			} else {
-				for (int i = nowTimeIndex; i < nowTimeIndex + numOfSlots; i++)
-					timeSlots[0][i] = false;
-				
-			}
-		}
-
-	}
-
-	private int getTimeIndex(Date date) {
-
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-
-		int hours = cal.get(Calendar.HOUR_OF_DAY);
-		int minutes = cal.get(Calendar.MINUTE);
-
-		return hours * 6 + minutes / 10;
-
-	}
-	
-	private int getUpperTimeIndex(Date date){
-		
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-
-		int hours = cal.get(Calendar.HOUR_OF_DAY);
-		int minutes = cal.get(Calendar.MINUTE);
-
-		return hours * 6 + (int) Math.ceil(minutes / 10);
-		
-	}
-
-	// return i if date is the i-th date from now
-	// -1 if date is before now
-	
-	private int getDateIndex(Date date) {
-		
-	Calendar now=Calendar.getInstance();
-	now.set(Calendar.HOUR_OF_DAY,0);
-	now.set(Calendar.MINUTE,0);
-	now.set(Calendar.SECOND,0);
-	
-	Date current=now.getTime();
-	
-	long diff = date.getTime() - current.getTime();
-	if (diff >= 0) {
-		return (int) Math.floor(diff / (1000 * 60 * 60 * 24));
-	} else {
-		return -1;
-	}
-	}
-
-	// number of time intervals
-	private int numSlots(Date start, Date end) {
-		long diff = end.getTime() - start.getTime();
-		int numOfSlots = (int) Math.ceil(diff / (1000 * 60 * 10));
-		return numOfSlots;
-
-	}
-
+	//Tran Cong Thien
 	private void search(String content) {
-		//System.out.println("Start of search");
 		TaskList resultList = tasks.search(content);
-		//System.out.println("result size="+ resultList.size());
 		setResultList(resultList);
-		
-		if(resultList.size() == 0 || resultList.size() == 1) {
+
+		if (resultList.size() == 0 || resultList.size() == 1) {
 			setFeedback(resultList.size() + " search result.");
 		} else {
 			setFeedback(resultList.size() + " search results.");
 		}
-	} 
+	}
 
 	// return the list of tasks that are overdue at current time
 	// Author: Tran Cong Thien
@@ -806,11 +581,13 @@ public class ControllerClass implements Controller {
 		setResultList(tasks.getOverdueTasks());
 	}
 
+	//Tran Cong Thien
 	private void updateForUndo() {
 		updateUndoList();
 		updateUndoArchiveList();
 	}
 
+	//Tran Cong Thien
 	private void updateUndoArchiveList() {
 		undoArchiveList.push(archiveTasks.clone());
 	}
@@ -840,7 +617,8 @@ public class ControllerClass implements Controller {
 	private void postpone(String content) throws Exception {
 		try {
 			if (displayListType == DisplayList.ARCHIVE) {
-				throw new Exception("Postpone can only be done in main list or search list.");
+				throw new Exception(
+						"Postpone can only be done in main list or search list.");
 			} else {
 				String[] taskNumbers = content.split(" ");
 
@@ -860,11 +638,12 @@ public class ControllerClass implements Controller {
 				}
 
 				tasks.sort();
-				
-				if(taskNumbers.length == 1) {
+
+				if (taskNumbers.length == 1) {
 					setFeedback("Task is postponed successfully.");
 				} else {
-					setFeedback(taskNumbers.length + " tasks are postponed successfully.");
+					setFeedback(taskNumbers.length
+							+ " tasks are postponed successfully.");
 				}
 			}
 		} catch (NumberFormatException e) {
@@ -881,22 +660,24 @@ public class ControllerClass implements Controller {
 	 * @author Koh Xian Hui
 	 */
 	private void displayMainList() {
-		//getFileContent();
-		//setNumTaskOnPage(numTasksInSinglePage);
+		// getFileContent();
+		// setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
 		setDisplayList(DisplayList.MAIN);
 		setFeedback("Main List.");
 	}
 
 	/**
-	 * Checks if the list the user is on is the main list. IF it is the main list, deems
-	 *  the edit valid and proceeds with it.
+	 * Checks if the list the user is on is the main list. IF it is the main
+	 * list, deems the edit valid and proceeds with it.
+	 * 
 	 * @param content
 	 * @return void
 	 * @author G. Vishnu Priya
 	 * @throws Exception
 	 */
 	private void editTask(String content) throws Exception {
+
 		if ((displayListType==DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 			validEdit(content); 
 		} else {
@@ -904,9 +685,11 @@ public class ControllerClass implements Controller {
 		}
 
 	}
+
 	/**
 	 * Checks if the user has specified any task to edit and if specified,
 	 * proceeds with the edit.
+	 * 
 	 * @param content
 	 * @throws Exception
 	 * @return
@@ -915,6 +698,7 @@ public class ControllerClass implements Controller {
 	private void validEdit(String content) throws Exception {
 		if (tasks.isEmpty()) {
 			throw new Exception("Nothing to edit list is empty.");
+
 		} if (isEmptyCommand(content)) {
 		throw new Exception("Please specify what to edit.");
 } else {
@@ -924,6 +708,7 @@ public class ControllerClass implements Controller {
 		setRecentChange(taskEdited, tasks);
 		
 }
+
 	}
 
 	/**
@@ -934,56 +719,58 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 * @throws Exception
 	 */
-	private Task proceedWithEdit(String content) throws Exception {
-		try {
-			String[] words = content.split(" ");
+private Task proceedWithEdit(String content) throws Exception {
+	try {
+		String[] words = content.split(" ");
 
-		int positionOfTask = Integer.parseInt(words[0]) - 1;
-		
-		if (positionOfTask < 0 || positionOfTask >= tasks.size()
-				|| words.length < 2) {
-			throw new Exception("Invalid edit format.");
-		}
-
-		String attributeToChange = words[1];
-		Task taskToEdit = tasks.get(positionOfTask);
-
-		if (isMultipleEditPriority(attributeToChange)) {
-			for (int i = 0; i < words.length - 1; i++) {
-				Task task = tasks.get(Integer.parseInt(words[i]) - 1);
-				editPriority(task);
-				setFeedback(words.length - 1 + " tasks are edited successfully.");
-				if (i == words.length - 2) {
-					setRecentChange(task, tasks);
-				}
-			}
-			
-		} else {
-
-			String editDetails = "";
-			if ((!attributeToChange.equals("!")) && (words.length==2)) {
-				throw new Exception("Please specify details to edit.");
-			}
-			for (int i = 2; i < words.length; i++) {
-				editDetails += words[i] + " ";
-			}
-			if (!editDetails.isEmpty()) {
-				editDetails = editDetails
-						.substring(0, editDetails.length() - 1);
-			}
-
-			editAttribute(taskToEdit, attributeToChange, editDetails);
-			setFeedback("Task is edited successfully.");
-			
-		}
-		
-		return taskToEdit;
-		} catch (NumberFormatException e) {
-			throw new Exception("Invalid edit format.");
-		}
+	int positionOfTask = Integer.parseInt(words[0]) - 1;
+	
+	if (positionOfTask < 0 || positionOfTask >= tasks.size()
+			|| words.length < 2) {
+		throw new Exception("Invalid edit format.");
 	}
+
+	String attributeToChange = words[1];
+	Task taskToEdit = tasks.get(positionOfTask);
+
+	if (isMultipleEditPriority(attributeToChange)) {
+		for (int i = 0; i < words.length - 1; i++) {
+			Task task = tasks.get(Integer.parseInt(words[i]) - 1);
+			editPriority(task);
+			setFeedback(words.length - 1 + " tasks are edited successfully.");
+			if (i == words.length - 2) {
+				setRecentChange(task, tasks);
+			}
+		}
+		
+	} else {
+
+		String editDetails = "";
+		if ((!attributeToChange.equals("!")) && (words.length==2)) {
+			throw new Exception("Please specify details to edit.");
+		}
+		for (int i = 2; i < words.length; i++) {
+			editDetails += words[i] + " ";
+		}
+		if (!editDetails.isEmpty()) {
+			editDetails = editDetails
+					.substring(0, editDetails.length() - 1);
+		}
+
+		editAttribute(taskToEdit, attributeToChange, editDetails);
+		setFeedback("Task is edited successfully.");
+		
+	}
+	
+	return taskToEdit;
+	} catch (NumberFormatException e) {
+		throw new Exception("Invalid edit format.");
+	}
+}
+
 	/**
 	 * Checks if the user wants to edit priority of multiple tasks.
+	 * 
 	 * @param attributeToChange
 	 * @return boolean
 	 * @author G. Vishnu Priya
@@ -1021,8 +808,8 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * This methods edits the priority of a task by reversing the existing priority
-	 * of the task.
+	 * This methods edits the priority of a task by reversing the existing
+	 * priority of the task.
 	 * 
 	 * @return void
 	 * @author G. Vishnu Priya
@@ -1059,6 +846,7 @@ public class ControllerClass implements Controller {
 	 * @author G. Vishnu Priya
 	 */
 	private void deleteTask(String content) throws Exception {
+
 		if ((displayListType == DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 		if (isValidDelete(content)) {
 			proceedWithDelete(content);
@@ -1095,11 +883,12 @@ public class ControllerClass implements Controller {
 				taskNum -= 1;
 			}
 			tasks.sort();
-			
-			if(taskNumDescending.size() == 1) {
+
+			if (taskNumDescending.size() == 1) {
 				setFeedback("Task is successfully deleted.");
 			} else {
-				setFeedback(taskNumDescending.size() + " tasks are successfully deleted.");
+				setFeedback(taskNumDescending.size()
+						+ " tasks are successfully deleted.");
 			}
 		} catch (NumberFormatException e) {
 			throw new Exception(
@@ -1150,7 +939,8 @@ public class ControllerClass implements Controller {
 			if (checkValidPageUp()) {
 				currentPageNum--;
 				recentChange = 0;
-				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
+				setFeedback("Page " + currentPageNum + " out of "
+						+ getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On first page.");
 			}
@@ -1158,7 +948,8 @@ public class ControllerClass implements Controller {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
-				setFeedback("Page " + currentPageNum + " out of " + getTotalNumOfPages(displayListType));
+				setFeedback("Page " + currentPageNum + " out of "
+						+ getTotalNumOfPages(displayListType));
 			} else {
 				throw new Exception("On last page.");
 			}
@@ -1183,10 +974,10 @@ public class ControllerClass implements Controller {
 		}
 		return false;
 	}
-	
+
 	private int getTotalNumOfPages(DisplayList displayListType) {
 		int totalNumPages;
-		
+
 		switch (displayListType) {
 		case MAIN:
 			totalNumPages = tasks.getTotalPageNum();
@@ -1200,10 +991,10 @@ public class ControllerClass implements Controller {
 			totalNumPages = 0;
 			break;
 		}
-		
+
 		return totalNumPages;
 	}
-	
+
 	/**
 	 * This method checks if it is possible to go to the previous page. If
 	 * currently on first page, it will return false. Otherwise, it will return
@@ -1276,7 +1067,7 @@ public class ControllerClass implements Controller {
 
 		Task task = processUserInput(content);
 		this.tasks.add(task);
-		
+
 		setFeedback("Task is successfully added.");
 		tasks.sort();
 		setDisplayList(displayListType);

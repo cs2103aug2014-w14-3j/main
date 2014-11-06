@@ -360,8 +360,6 @@ public class SimpleTaskList implements TaskList {
 			return searchDesc(content, listToSearch);
 		
 		} else {
-			
-		
 				String[] para = content.trim().split("\\s+");
 				if (para[0].equalsIgnoreCase("by")) {
 					return searchByDate(date, listToSearch);
@@ -452,36 +450,82 @@ public class SimpleTaskList implements TaskList {
 
 	public TaskList searchDesc(String keyWord, TaskList listToSearch) {
 
-	/*	TaskList result = searchExact(keyWord, listToSearch);
-		if (result.size() == 0) {	
-			return nearMatchSearch(keyWord, listToSearch);
+		TaskList result = exactSearch(keyWord, listToSearch);
+		if (result.size() == 0) {
+			TaskList resultList=insideSearch(keyWord,listToSearch);
+			if (resultList.size()==0){
+				return nearMatchSearch(keyWord, listToSearch);
+			}else {
+				return resultList;
+			}
 		} else {
-			System.out.println("Enter exact search");
-			return searchExact(keyWord,listToSearch);
+			return result;
 		}
-*/
-		return nearMatchSearch(keyWord, listToSearch);
 	}
 
-	private TaskList searchExact(String keyWord, TaskList listToSearch) {
+	private TaskList insideSearch(String keyWord, TaskList listToSearch) {
 	
 		TaskList result = new SimpleTaskList();
 		
 		int numOfTask = listToSearch.size();
-		boolean[] isTaken=new boolean[numOfTask];
-		
-		for (int i=0;i<numOfTask;i++){
-			isTaken[i]=false;
-		}
+
+		//will not search for 2 character only
+		if (keyWord.length() > 2) {
 		
 
-		//will not search for 1 character only
-		if (keyWord.length() >= 2) {
+				for (int i = 0; i < numOfTask; i++) {
+					Task task = listToSearch.get(i);
+					if (isInside(keyWord, task.getDesc())) {
+						Task newTask = task.clone();
+
+						if (newTask.getDesc().indexOf(". ") == -1) {
+							String newDesc = (i + 1) + ". " + newTask.getDesc();
+							newTask.setDesc(newDesc);
+							result.add(newTask);
+						}
+					}
+				}
+			}
+	
+		return result;
+	}
+
+	private boolean isInside(String keyWord,String strToSearch) {
+		String[] para=keyWord.trim().split("s++");
+		int keyLen=para.length;
+		
+		for (int i=0;i<keyLen;i++){
+			if (!isSubstring(para[i],strToSearch)){
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	
+	private boolean isSubstring(String keyWord, String strToSearch) {		
+		String[] para=strToSearch.trim().split("s++");
+		int strLen=para.length;
+		
+		for (int i=0;i<strLen;i++){
+			if (keyWord.indexOf(para[i])!=-1){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private TaskList exactSearch(String keyWord, TaskList listToSearch){
+		
+			TaskList result = new SimpleTaskList();
+			int numOfTask = listToSearch.size();
+			
 			for (int i = 0; i < numOfTask; i++) {
 				Task task = listToSearch.get(i);
-				if (isTheSame(keyWord, task.getDesc())) {
+				if (isExact(keyWord, task.getDesc())) {
 					Task newTask = task.clone();
-					isTaken[i]=true;
 
 					if (newTask.getDesc().indexOf(". ") == -1) {
 						String newDesc = (i + 1) + ". " + newTask.getDesc();
@@ -490,74 +534,36 @@ public class SimpleTaskList implements TaskList {
 					}
 				}
 			}
-
-
-				for (int i = 0; i < numOfTask; i++) {
-					Task task = listToSearch.get(i);
-					if (isInside(keyWord, task.getDesc())) {
-						Task newTask = task.clone();
-
-						if (newTask.getDesc().indexOf(". ") == -1 && isTaken[i]==false) {
-							String newDesc = (i + 1) + ". " + newTask.getDesc();
-							newTask.setDesc(newDesc);
-							result.add(newTask);
-						}
-					}
-				}
-			}
-		//System.out.println("End of exact search");
-		return result;
+			
+			return result;
 	}
-
-	private boolean isTheSame(String keyWord, String strToSearch) {
-		//System.out.println("has is the same");
-		String[] paraKey = keyWord.trim().split("s++");
-		int lenKey = paraKey.length;
-
-		String[] paraStr = strToSearch.trim().split("s++");
-		int lenStr = paraStr.length;
-		boolean isTheSame = true;
-
-		for (int i = 0; i < lenKey && isTheSame == true; i++) {
-			boolean equal = false;
-			for (int j = 0; j < lenStr && equal == false; j++) {
-				if (paraKey[i].equalsIgnoreCase(paraStr[j])) {
-					equal = true;
-				}
-			}
-
-			if (equal == false) {
-				isTheSame = false;
+	private boolean isExact(String keyWord,String strToSearch) {
+		String[] para=keyWord.trim().split("s++");
+		int keyLen=para.length;
+		
+		for (int i=0;i<keyLen;i++){
+			if (!isEqual(para[i],strToSearch)){
+				return false;
 			}
 		}
-		return isTheSame;
-
+		
+		return true;
 	}
-
-	private boolean isInside(String keyWord, String strToSearch) {
-		//System.out.println("inside");
-		String[] paraKey = keyWord.trim().split("s++");
-		int lenKey = paraKey.length;
-
-		String[] paraStr = strToSearch.trim().split("s++");
-		int lenStr = paraStr.length;
-
-		boolean isInside = true;
-
-		for (int i = 0; i < lenKey && isInside == true; i++) {
-			boolean subString = false;
-			for (int j = 0; j < lenStr && subString == false; j++) {
-				if (paraStr[j].indexOf(paraKey[i]) != -1) {
-					subString = true;
-				}
-			}
-
-			if (subString == false) {
-				isInside = false;
+	private boolean isEqual(String keyWord, String strToSearch) {
+		
+		String[] para=strToSearch.trim().split("s++");
+		int strLen=para.length;
+		
+		for (int i=0;i<strLen;i++){
+			if (keyWord.equalsIgnoreCase(para[i])){
+				return true;
 			}
 		}
-		return isInside;
+		
+		return false;
 	}
+	
+	
 
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
 		
@@ -598,10 +604,7 @@ public class SimpleTaskList implements TaskList {
 			resultList.add(task);
 		}
 		
-		
-		for (int i=0;i<resultList.size();i++){
-			//System.out.println(resultList.get(i).toString());
-		}
+	
 		return resultList;
 	}
 
