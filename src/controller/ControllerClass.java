@@ -114,9 +114,9 @@ public class ControllerClass implements Controller {
 	 * Executes command entered by user.
 	 * It first retrieves all existing tasks stored in Storage, then proceeds on executing the command specified by user
 	 * 
-	 * @param command	Input command from user.
-	 * @return			Task position of a page on the current list.
-	 * @throws			Exception 	If command entered by user is invalid.	
+	 * @param command		Input command from user.
+	 * @return				Task position of a page on the current list.
+	 * @throws Exception 	If command entered by user is invalid.	
 	 */
 	//@author
 	public Integer execCmd(String command) throws Exception {
@@ -309,8 +309,8 @@ public class ControllerClass implements Controller {
 	/**
 	 * Parses user input by getting the command type of the user input and executing the command.
 	 * 
-	 * @param command	User input.
-	 * @throws			Exception	If user enters an invalid command.
+	 * @param command		User input.
+	 * @throws Exception	If user enters an invalid command.
 	 */
 	//@author
 	private void parseCommand(String command) throws Exception {
@@ -402,7 +402,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Clears all the tasks in the archive.
 	 * 
-	 * @throws	Exception	If the user clears the list on other types of lists besides archive list.
+	 * @throws Exception	If the user clears the list on other types of lists besides archive list.
 	 */
 	//@author G. Vishnu Priya
 	private void clearArchive() throws Exception {
@@ -422,7 +422,14 @@ public class ControllerClass implements Controller {
 		setFeedback("Archive List.");
 	}
 
-	// the format will be "done <number>"
+	/**
+	 * Marks tasks as done.
+	 * 
+	 * @param content					Task numbers entered by user.
+	 * @throws Exception				If task numbers entered are out of range.
+	 * @throws NumberFormatException	If task numbers entered are not numbers.
+	 */
+	//@author
 	private void markAsDone(String content) throws Exception {
 		String[] taskNumbers = content.trim().split("\\s+");
 		Arrays.sort(taskNumbers, new Comparator<String>() {
@@ -435,7 +442,8 @@ public class ControllerClass implements Controller {
 		try {
 			for (int i = 0; i < taskNumbers.length; i++) {
 				int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
-				// move task from task List to archive
+				
+				// move task from task List to archive list
 				if (taskID >= 0 && taskID < tasks.size()) {
 					Task task = tasks.get(taskID);
 					archiveTasks.add(0, task);
@@ -463,7 +471,15 @@ public class ControllerClass implements Controller {
 	//	**Find for a time to time period to be free.Ex: find 10pm to 1pm date
 	//	**Find intervals of free time that in the schedule.Ex: find 3 hours 30 mins by date(before a date) or
 	//find 3 hours 30 mins on date (check on that date)
-	
+	/**
+	 * Parses user input to find the time interval where the user is free.
+	 * 
+	 * @param content					User input.
+	 * @return							Time with hours and minutes in a pair.
+	 * @throws NumberFormatException	If user input is not a valid time.
+	 * @throws Exception				If user input is invalid.
+	 */
+	//@author
 	private Pair parserForFind(String content) throws Exception {
 
 		if (content.indexOf("to") == -1) {
@@ -529,8 +545,14 @@ public class ControllerClass implements Controller {
 		return null;
 	}
 
-	// return the date time
-	// return null if no date time is recognized
+	/**
+	 * Parses user input to find the time interval where the user is free.
+	 * If no date time is recognized, return null.
+	 * 
+	 * @param input	User input.
+	 * @return		Date time when user is free.
+	 */
+	//@author
 	private Date parserForFindTime(String input) {
 
 		Parser parser = new Parser();
@@ -638,8 +660,12 @@ public class ControllerClass implements Controller {
 	}
 
 
-
-	//Tran Cong Thien
+	/**
+	 * Searches for tasks that consist of the keywords that the user enters.
+	 * 
+	 * @param content	User input
+	 */
+	//@author Tran Cong Thien
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
@@ -651,33 +677,45 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	// return the list of tasks that are overdue at current time
-	// Author: Tran Cong Thien
+	/**
+	 * Sets the result list of current overdue tasks.
+	 */
+	//@author Tran Cong Thien
 	private void overDue() {
 		setResultList(tasks.getOverdueTasks());
 	}
 
-	//Tran Cong Thien
+	/**
+	 * Updates the current lists with the previous changes.
+	 */
+	//@author Tran Cong Thien
 	private void updateForUndo() {
 		updateUndoList();
 		updateUndoArchiveList();
 	}
 
-	//Tran Cong Thien
+	/**
+	 * Updates the current archive list with the previous changes.
+	 */
+	//@author Tran Cong Thien
 	private void updateUndoArchiveList() {
 		undoArchiveList.push(archiveTasks.clone());
 	}
 
-	// push the current state to the undoList
-	// Tran Cong Thien
+	/**
+	 * Pushes the current state into the undo list.
+	 */
+	//@author Tran Cong Thien
 	private void updateUndoList() {
 		undoList.push(tasks.clone());
 	}
 
-	// undo command, the tasks will be replaced by the previous state
-	// Tran Cong Thien
+	/**
+	 * Replaces the current state with the previous states.
+	 */
+	//@author Tran Cong Thien
 	private void undo() {
-		// if there is states to undo
+		// if there are states to undo
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
@@ -688,8 +726,11 @@ public class ControllerClass implements Controller {
 	/*
 	 * Postpones the desired task.
 	 * 
-	 * @author Koh Xian Hui
+	 * @param content					Task numbers entered by user.
+	 * @throws Exception				If current displayed list is the archive list.
+	 * @throws NumberFormatException	If the task numbers entered by user are not numbers.
 	 */
+	//@author A0115584A
 	private void postpone(String content) throws Exception {
 		try {
 			if (displayListType == DisplayList.ARCHIVE) {
@@ -730,11 +771,8 @@ public class ControllerClass implements Controller {
 
 	/*
 	 * Displays the existing tasks to the user.
-	 * 
-	 * @return ArrayList<String>
-	 * 
-	 * @author Koh Xian Hui
 	 */
+	//@author A0115584A
 	private void displayMainList() {
 		// getFileContent();
 		// setNumTaskOnPage(numTasksInSinglePage);
@@ -744,14 +782,13 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Checks if the list the user is on is the main list. IF it is the main
-	 * list, deems the edit valid and proceeds with it.
+	 * Checks if the list the user is on is the main list. 
+	 * If it is the main list, deems the edit valid and proceeds with it.
 	 * 
-	 * @param content
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param content		User input
+	 * @throws Exception	If current displayed list is not on the main or search list.
 	 */
+	//@author G. Vishnu Priya
 	private void editTask(String content) throws Exception {
 
 		if ((displayListType==DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
@@ -763,94 +800,93 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Checks if the user has specified any task to edit and if specified,
-	 * proceeds with the edit.
+	 * Checks if the user has specified any task to edit and if specified, proceeds with the edit.
 	 * 
-	 * @param content
-	 * @throws Exception
-	 * @return
-	 * @author G. Vishnu Priya
+	 * @param content		User input.
+	 * @throws Exception	If user did not specify what to edit or when list is empty.
 	 */
+	//@author G. Vishnu Priya
 	private void validEdit(String content) throws Exception {
 		if (tasks.isEmpty()) {
 			throw new Exception("Nothing to edit list is empty.");
 
-		} if (isEmptyCommand(content)) {
-		throw new Exception("Please specify what to edit.");
-} else {
-		Task taskEdited = proceedWithEdit(content);
-		tasks.sort();
-		setDisplayList(displayListType);
-		setRecentChange(taskEdited, tasks);
+		} else if (isEmptyCommand(content)) {
+			throw new Exception("Please specify what to edit.");
+		} else {
+			Task taskEdited = proceedWithEdit(content);
+			tasks.sort();
+			setDisplayList(displayListType);
+			setRecentChange(taskEdited, tasks);
 		
-}
-
+		}
 	}
 
 	/**
 	 * Edits the task using the specified content.
 	 * 
-	 * @param content
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param content					User input.
+	 * @return 							Edited Task object.
+	 * @throws Exception				If user input is in the incorrect edit format.
+	 * @throws NumberFormatException	If the task numbers entered by user are not numbers.
 	 */
-private Task proceedWithEdit(String content) throws Exception {
-	try {
-		String[] words = content.split(" ");
+	//@author G. Vishnu Priya
+	private Task proceedWithEdit(String content) throws Exception {
+		try {
+			String[] words = content.split(" ");
 
-	int positionOfTask = Integer.parseInt(words[0]) - 1;
+			int positionOfTask = Integer.parseInt(words[0]) - 1;
 	
-	if (positionOfTask < 0 || positionOfTask >= tasks.size()
-			|| words.length < 2) {
-		throw new Exception("Invalid edit format.");
-	}
-
-	String attributeToChange = words[1];
-	Task taskToEdit = tasks.get(positionOfTask);
-
-	if (isMultipleEditPriority(attributeToChange)) {
-		for (int i = 0; i < words.length - 1; i++) {
-			Task task = tasks.get(Integer.parseInt(words[i]) - 1);
-			editPriority(task);
-			setFeedback(words.length - 1 + " tasks are edited successfully.");
-			if (i == words.length - 2) {
-				setRecentChange(task, tasks);
+			if (positionOfTask < 0 || positionOfTask >= tasks.size()
+					|| words.length < 2) {
+				throw new Exception("Invalid edit format.");
 			}
-		}
-		
-	} else {
 
-		String editDetails = "";
-		if ((!attributeToChange.equals("!")) && (words.length==2)) {
-			throw new Exception("Please specify details to edit.");
-		}
-		for (int i = 2; i < words.length; i++) {
-			editDetails += words[i] + " ";
-		}
-		if (!editDetails.isEmpty()) {
-			editDetails = editDetails
-					.substring(0, editDetails.length() - 1);
-		}
+			String attributeToChange = words[1];
+			Task taskToEdit = tasks.get(positionOfTask);
 
-		editAttribute(taskToEdit, attributeToChange, editDetails);
-		setFeedback("Task is edited successfully.");
+			if (isMultipleEditPriority(attributeToChange)) {
+				for (int i = 0; i < words.length - 1; i++) {
+					Task task = tasks.get(Integer.parseInt(words[i]) - 1);
+					editPriority(task);
+					setFeedback(words.length - 1 + " tasks are edited successfully.");
+					if (i == words.length - 2) {
+						setRecentChange(task, tasks);
+					}
+				}
 		
-	}
+			} else {
+
+				String editDetails = "";
+				if ((!attributeToChange.equals("!")) && (words.length==2)) {
+					throw new Exception("Please specify details to edit.");
+				}
+				for (int i = 2; i < words.length; i++) {
+					editDetails += words[i] + " ";
+				}
+				if (!editDetails.isEmpty()) {
+					editDetails = editDetails
+							.substring(0, editDetails.length() - 1);
+				}
+
+				editAttribute(taskToEdit, attributeToChange, editDetails);
+				setFeedback("Task is edited successfully.");
+		
+			}
 	
-	return taskToEdit;
-	} catch (NumberFormatException e) {
-		throw new Exception("Invalid edit format.");
+			return taskToEdit;
+		} catch (NumberFormatException e) {
+			throw new Exception("Invalid edit format.");
+		}
 	}
-}
 
 	/**
 	 * Checks if the user wants to edit priority of multiple tasks.
 	 * 
-	 * @param attributeToChange
-	 * @return boolean
-	 * @author G. Vishnu Priya
+	 * @param attributeToChange			Task numbers specified by user.
+	 * @return 							true if task numbers are numbers.
+	 * @throws NumberFormatException	If task numbers entered by users are not numbers.
 	 */
+	//@author G. Vishnu Priya
 	private boolean isMultipleEditPriority(String attributeToChange) {
 		try {
 			Integer.parseInt(attributeToChange);
@@ -863,13 +899,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	/**
 	 * Matches the attribute to be edited and calls the relevant function.
 	 * 
-	 * @param taskToEdit
-	 * @param attribute
-	 * @param editDetails
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param taskToEdit	Task object to be edited.
+	 * @param attribute		Attribute to be edited.
+	 * @param editDetails	Changes that user specifies.
+	 * @throws Exception	If user did not specify the attribute to be edited.	
 	 */
+	//@author G. Vishnu Priya
 	private void editAttribute(Task taskToEdit, String attribute,
 			String editDetails) throws Exception {
 		if (attribute.equalsIgnoreCase("desc")) {
@@ -884,12 +919,11 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This methods edits the priority of a task by reversing the existing
-	 * priority of the task.
+	 * Edits the priority of a task by reversing the existing priority of the task.
 	 * 
-	 * @return void
-	 * @author G. Vishnu Priya
+	 * @param taskToEdit	Task object to be edited.
 	 */
+	//@author G. Vishnu Priya
 	private void editPriority(Task taskToEdit) {
 		boolean priorityOfTask = taskToEdit.isPrioritized();
 		if (priorityOfTask) {
@@ -902,11 +936,10 @@ private Task proceedWithEdit(String content) throws Exception {
 	/**
 	 * Replaces the description of task with the desc string.
 	 * 
-	 * @param taskToEdit
-	 * @param details
-	 * @return Task Object
-	 * @author G. Vishnu Priya
+	 * @param taskToEdit	Task object to be edited.
+	 * @param desc			Changes that user specifies.		
 	 */
+	//@author G. Vishnu Priya
 	private void editDescription(Task taskToEdit, String desc) {
 		if (desc != null) {
 			taskToEdit.setDesc(desc);
@@ -914,13 +947,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method checks if the task to be deleted exists or is specified and
-	 * if it is valid, proceeds with deletion.
+	 * Checks if the task to be deleted exists or is specified and if it is valid, proceeds with deletion.
 	 * 
-	 * @param content
-	 * @return void
-	 * @author G. Vishnu Priya
+	 * @param content		Task numbers specified by user
+	 * @throws Exception	If the current displayed list is the archive list.
 	 */
+	//@author G. Vishnu Priya
 	private void deleteTask(String content) throws Exception {
 
 		if ((displayListType == DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
@@ -933,15 +965,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method goes on to delete task after knowing the task to delete
-	 * exists.
+	 * Deletes task after knowing the task to delete exists.
 	 * 
-	 * @param content
-	 * @throws NumberFormatException
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param content					Task numbers specified by user.
+	 * @throws NumberFormatException	If user enters invalid task numbers.
 	 */
+	//@author G. Vishnu Priya
 	private void proceedWithDelete(String content) throws Exception {
 		try {
 
@@ -973,13 +1002,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method deletes the task with the specified number.
+	 * Deletes the task with the specified number.
 	 * 
-	 * @param taskNum
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param taskNum						Task number.
+	 * @throws IndexOutOfBoundsException	If task number entered are out of range.
 	 */
+	//@author
 	private void executeDelete(int taskNum) throws Exception {
 		try {
 			int positionOfTask = taskNum - 1;
@@ -991,25 +1019,24 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method changes the attributes related to the changing of a page.
+	 * Changes the attributes related to the changing of a page.
 	 * 
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param content		User input.
+	 * @throws Exception	If user keys in an invalid direction or if the page is the first or the last.
 	 */
+	//@author
 	private void changePage(String content) throws Exception {
 		String direction = content.trim();
 		changeCurrentPageNum(direction);
 	}
 
 	/**
-	 * This method checks if it is valid to change the current page number and
-	 * if so, changes the current page number.
+	 * Checks if it is valid to change the current page number and if so, changes the current page number.
 	 * 
-	 * @throws Exception
-	 * @return void
-	 * @author G. Vishnu Priya
+	 * @param direction		Direction to change page.
+	 * @throws Exception	If user keys in an invalid direction or if the page is the first or the last.
 	 */
+	//@author
 	private void changeCurrentPageNum(String direction) throws Exception {
 		if (direction.equalsIgnoreCase("up")) {
 			if (checkValidPageUp()) {
@@ -1035,12 +1062,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method checks if it is possible to go to the next page by checking
+	 * Checks if it is possible to go to the next page by checking
 	 * if there are more tasks in the list which are pushed to the next page.
 	 * 
-	 * @return boolean
-	 * @author G. Vishnu Priya
+	 * @return true if it is possible to go to the next page.
 	 */
+	//@author
 	private boolean checkValidPageDown() {
 		Integer totalNumPages;
 		// TODO: getCurDisplayList() after fix search
@@ -1051,6 +1078,13 @@ private Task proceedWithEdit(String content) throws Exception {
 		return false;
 	}
 
+	/**
+	 * Gets the total number of pages for a type of list.
+	 * 
+	 * @param displayListType	Type of list.
+	 * @return					Total number of pages for a list.
+	 */
+	//@author
 	private int getTotalNumOfPages(DisplayList displayListType) {
 		int totalNumPages;
 
@@ -1072,13 +1106,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method checks if it is possible to go to the previous page. If
-	 * currently on first page, it will return false. Otherwise, it will return
-	 * true.
+	 * Checks if it is possible to go to the previous page. 
+	 * If currently on first page, it will return false. 
 	 * 
-	 * @return boolean
-	 * @author G. Vishnu Priya
+	 * @return true if it is possible to go to the previous page.
 	 */
+	//@author G. Vishnu Priya
 	private boolean checkValidPageUp() {
 		if (currentPageNum <= 1) {
 			return false;
@@ -1088,11 +1121,9 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method updates the content stored.
-	 * 
-	 * @return void
-	 * @author G. Vishnu Priya
+	 * Updates the content stored.
 	 */
+	//@author G. Vishnu Priya
 	private void updateStorage() {
 
 		storage.write(tasks.getStringList());
@@ -1100,15 +1131,14 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method checks if the list of tasks is empty or if the user has not
-	 * specified the task number to delete. Otherwise, the deletion is deemed
-	 * valid and it returns true.
+	 * Checks if the list of tasks is empty or if the user has not
+	 * specified the task number to delete. 
 	 * 
-	 * @param content
-	 * @return boolean
-	 * @throws Exception
-	 * @author G. Vishnu Priya
+	 * @param content		User input.
+	 * @return boolean		true if delete is valid.
+	 * @throws Exception	If there is nothing to delete or user did not specify what to delete.
 	 */
+	//@author G. Vishnu Priya
 	private boolean isValidDelete(String content) throws Exception {
 		if (tasks.isEmpty()) {
 			throw new Exception("Nothing to delete list is empty!");
@@ -1120,22 +1150,23 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method checks if the user has entered anything after the command
-	 * type.
+	 * Checks if the user has entered anything after the command type.
 	 * 
-	 * @param content
-	 * @return boolean
-	 * @author G. Vishnu Priya
+	 * @param content	User input
+	 * @return 			Trimmed user input.
 	 */
+	//@author G. Vishnu Priya
 	private boolean isEmptyCommand(String content) {
 		return content.trim().equals("");
 	}
 
 	/**
-	 * @author Luo Shaohuai
-	 * @param content
-	 * @throws Exception
+	 * Adds tasks
+	 * 
+	 * @param content		User input.
+	 * @throws Exception	If user did not specify what to add.
 	 */
+	//@author Luo Shaohuai
 	private void addTask(String content) throws Exception {
 		if (isEmptyCommand(content)) {
 			throw new Exception("Please specify what to add.");
@@ -1151,10 +1182,12 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * @author Luo Shaohuai
-	 * @param content
-	 * @return
+	 * Processes user input and creates a Task object.
+	 * 
+	 * @param content	User input.
+	 * @return			Task object made from user input.
 	 */
+	//@author
 	private Task processUserInput(String content) {
 		String desc = "";
 		Integer singlePos = 0;
@@ -1193,6 +1226,14 @@ private Task proceedWithEdit(String content) throws Exception {
 		return task;
 	}
 
+	/**
+	 * Processes user input into time.
+	 * 
+	 * @param task		Task object that time will be added to.
+	 * @param content	Stringed time input from user.
+	 * @return			true if time is added to Task object.
+	 */
+	//@author
 	private boolean processTime(Task task, String content) {
 		content = content.trim();
 		if (content.isEmpty()) {
@@ -1225,25 +1266,24 @@ private Task proceedWithEdit(String content) throws Exception {
 	}
 
 	/**
-	 * This method removes the command, either add, delete, edit or display,
-	 * from the command string.
+	 * Removes the command, either add, delete, edit or display from the command string.
 	 * 
-	 * @param command
-	 * @param operation
-	 * @return String
-	 * @author G. Vishnu Priya
+	 * @param command	User input.
+	 * @param operation	Command that user wants to execute.
+	 * @return 			Trimmed user input without the command type.	
 	 */
+	//@author G. Vishnu Priya
 	private String removeCommandType(String command, String operation) {
 		return command.replaceFirst(operation, "").trim();
 	}
 
 	/**
-	 * This method returns the command type for each operation.
+	 * Matches the command type for each operation.
 	 * 
-	 * @param operation
-	 * @return CommandType
-	 * @author G. Vishnu Priya
+	 * @param operation		Command input by user.
+	 * @return 				CommandType
 	 */
+	//@author
 	private CommandType matchCommandType(String operation) {
 		CommandType command = commandMap.get(operation.toLowerCase());
 		if (command == null) {
@@ -1253,6 +1293,12 @@ private Task proceedWithEdit(String content) throws Exception {
 		return command;
 	}
 
+	/**
+	 * Gets an instance of the Controller object.
+	 * 
+	 * @return	An instance of the Controller object.
+	 */
+	//@author
 	public static Controller getInstance() {
 		if (theController == null) {
 			theController = new ControllerClass();
