@@ -7,31 +7,44 @@ import java.util.List;
 
 
 /**
- * This interface represent Controller
+ * Interface for ControllerClass which contains the Logic of the software
  * 
- * Controller should take a UI object in constructor for display()
- * 
- * Please use this interface for implementing ListController
- * 
- * @author 
- * 
+ * @author
  */
 public interface Controller {
 	
 	/**
-	 * This method translate and execute a command
-	 * The command may or may not be a valid command
+	 * Executes command entered by user
 	 * 
-	 * Whenever error occurs, an exception will be thrown
-	 * 
-	 * @param cmd
-	 * @throws Exception
+	 * @param cmd	Input command from user
+	 * @return		Task position of a page on the current list
+	 * @throws		Exception 	If command entered by user is invalid
+	 * @author		
 	 */
 	public Integer execCmd(String cmd) throws Exception;
 	
+	/**
+	 * Gets the current list that user is viewing
+	 * 
+	 * @return	List of stringed tasks
+	 * @author
+	 */
 	public List<String> getCurrentList();
 	
+	/**
+	 * Generates a list of stringed commands and words to suggest to user
+	 * 
+	 * @param content	Input from user
+	 * @return			List of suggested stringed commands and words
+	 * @author			
+	 */
 	public List<String> suggest(String content);
 	
+	/**
+	 * Gets the feedback message after each operation
+	 * 
+	 * @return	Stringed feedback messages
+	 * @author	Koh Xian Hui
+	 */
 	public String getFeedback();
 }
