@@ -27,8 +27,9 @@ import controller.Task.TaskType;
  */
 
 /**
+ * ControllerClass which implements the Controller interface
  * 
- * 
+ * @author 
  */
 
 public class ControllerClass implements Controller {
@@ -83,6 +84,7 @@ public class ControllerClass implements Controller {
 	private TaskList tasks;
 	private TaskList archiveTasks;
 	private TaskList resultTasks;
+	private List<String> freeSlots;
 	
 
 	private DisplayList displayListType;
@@ -95,6 +97,11 @@ public class ControllerClass implements Controller {
 
 	private String feedbackMessage = "";
 
+	/**
+	 * Constructs the Controller Class object
+	 * 
+	 * @author
+	 */
 	private ControllerClass() {
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
@@ -106,9 +113,15 @@ public class ControllerClass implements Controller {
 		resetRecentChange();
 	}
 
-	// This method starts execution of each user command by first retrieving
-	// all existing tasks stored and goes on to parse user command, to determine
-	// which course of action to take.
+	/**
+	 * Executes command entered by user
+	 * It first retrieves all existing tasks stored in Storage, then proceeds on the operation according to the command entered
+	 * 
+	 * @param command	Input command from user
+	 * @return			Task position of a page on the current list
+	 * @throws			Exception 	If command entered by user is invalid	
+	 * @author
+	 */
 	public Integer execCmd(String command) throws Exception {
 		getFileContent();
 		setNumTaskOnPage(numTasksInSinglePage);
@@ -117,24 +130,31 @@ public class ControllerClass implements Controller {
 		return recentChange;
 	}
 
-	/*
-	 * Accessor for UI to get the feedback message of current action.
+	/**
+	 * Gets feedback message after each operation
 	 * 
-	 * @author Koh Xian Hui
+	 * @return	Stringed feedback message
+	 * @author	A0115584A
 	 */
 	public String getFeedback() {
 		return feedbackMessage;
 	}
 
-	/*
-	 * Sets feedback messsage.
-	 * 
-	 * @author Koh Xian Hui
+	/**
+	 * Sets feedback message
+	 * @param feedback	Feedback message after each operation
+	 * @author			A0115584A
 	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
 
+	/**
+	 * Gets the current list that user is viewing
+	 * 
+	 * @return	List of stringed tasks
+	 * @author
+	 */
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
@@ -160,7 +180,11 @@ public class ControllerClass implements Controller {
 			break;
 			
 		case FREESLOTS:
-			list = new ArrayList<String>();
+			if(freeSlots.size() < 10) {
+				list = freeSlots;
+			} else {
+				list = freeSlots.subList(0, 10);
+			}
 			break;
 		}
 
