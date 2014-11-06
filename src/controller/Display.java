@@ -37,7 +37,7 @@ public class Display {
 	/**
 	 * Gets the maximum number of tasks per page.
 	 * 
-	 * @return Maximum number of tasks per page.
+	 * @return	Maximum number of tasks per page.
 	 */
 	//@author
 	public int getMaxNumOfTaskPerPage(){
@@ -47,7 +47,7 @@ public class Display {
 	/**
 	 * Gets the number of pages for a list.
 	 * 
-	 * @return Number of pages.
+	 * @return	Number of pages.
 	 */
 	//@author
 	public int getNumOfPage(){
@@ -57,7 +57,7 @@ public class Display {
 	/**
 	 * Gets the number of tasks in a list.
 	 * 
-	 * @return Number of tasks.
+	 * @return	Number of tasks.
 	 */
 	//@author
 	public int getNumOfTask(){
@@ -67,7 +67,7 @@ public class Display {
 	/**
 	 * Gets the pages of a list.
 	 * 
-	 * @return pages of a task list.
+	 * @return	pages of a task list.
 	 */
 	//@author
 	public ArrayList<ArrayList<Task>> getPageList(){
@@ -77,7 +77,7 @@ public class Display {
 	/**
 	 * Gets the task list.
 	 * 
-	 * @return list of tasks.
+	 * @return	list of tasks.
 	 */
 	//@author
 	public ArrayList<Task> getTaskList(){

@@ -15,24 +15,40 @@ import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
 /**
- * @author
- *
+ * Class for task lists.
  */
+//@author
 public class SimpleTaskList implements TaskList {
 
 	private List<Task> tasks;
 	private Integer numTaskOnPage;
 
+	/**
+	 * Constructs a SimpleTaskList object.
+	 */
+	//@author
 	public SimpleTaskList() {
 		tasks = new ArrayList<Task>();
 		numTaskOnPage = null;
 	}
 
+	/**
+	 * Constructs a SimpleTaskList object using a list of strings.
+	 * 
+	 * @param strList	List of strings.
+	 */
+	//@author
 	public SimpleTaskList(List<String> strList) {
 		this();
 		addAll(strList);
 	}
 
+	/**
+	 * Constructs Task objects from the list of strings and adds them into a task list.
+	 * 
+	 * @param strList	List of stringed tasks.
+	 */
+	//@author
 	@Override
 	public void addAll(List<String> strList) {
 		for (String str : strList) {
@@ -40,26 +56,57 @@ public class SimpleTaskList implements TaskList {
 		}
 	}
 
+	/**
+	 * Clears the list.
+	 */
+	//@author
 	@Override
 	public void clear() {
 		tasks.clear();
 	}
 
+	/**
+	 * Adds a Task object into a task list.
+	 * 
+	 * @param task	Task object.
+	 * @return		true if Task object is successfully added into the task list.
+	 */
+	//@author
 	@Override
 	public boolean add(Task task) {
 		return tasks.add(task);
 	}
 
+	/**
+	 * Adds a Task object into a task list at a specific position.
+	 * 
+	 * @param index	Specified position to add task.
+	 * @param task	Task object.
+	 */
+	//@author
 	@Override
 	public void add(int index, Task task) {
 		tasks.add(index, task);
 	}
 
+	/** 
+	 * Sets a Task object at a specific position.
+	 * 
+	 * @param pos	Specified position to set the Task object.
+	 * @param task	Task object.
+	 */ 
+	//@author
 	@Override
 	public void set(int pos, Task task) {
 		tasks.set(pos, task);
 	}
-
+	
+	/**
+	 * Removes a task from a specific position. 
+	 * 
+	 * @param pos	Specified position to remove the Task object.
+	 */
+	//@author
 	@Override
 	public void remove(int pos) {
 		tasks.remove(pos);

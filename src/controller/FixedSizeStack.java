@@ -28,7 +28,7 @@ public class FixedSizeStack<E> {
 	/**
 	 * Gets the size of stack.
 	 * 
-	 * @return Size of stack.
+	 * @return	Size of stack.
 	 */
 	//@author
 	public int size(){
@@ -38,7 +38,7 @@ public class FixedSizeStack<E> {
 	/**
 	 * Gets the maximum size of ??
 	 * 
-	 * @return Maximum size.
+	 * @return	Maximum size.
 	 */
 	//@author
 	public int getMaxSize(){
@@ -48,7 +48,7 @@ public class FixedSizeStack<E> {
 	/**
 	 * Checks if the stack is empty.
 	 * 
-	 * @return true if stack is empty.
+	 * @return	true if stack is empty.
 	 */
 	//@author
 	public boolean empty(){
@@ -62,7 +62,7 @@ public class FixedSizeStack<E> {
 	/**
 	 * Peeks the top item of the stack.
 	 * 
-	 * @return First item of the stack.
+	 * @return	First item of the stack.
 	 */
 	//@author
 	public E peek(){
@@ -72,7 +72,7 @@ public class FixedSizeStack<E> {
 	/**
 	 * Gets the top item of the stack.
 	 * 
-	 * @return First item of the stack.
+	 * @return	First item of the stack.
 	 */
 	public E pop(){
 		return stack.removeFirst();
@@ -81,7 +81,7 @@ public class FixedSizeStack<E> {
 	/**
 	 * Inserts item into the stack.
 	 * 
-	 * @param item Item to be inserted into the stack.
+	 * @param item	Item to be inserted into the stack.
 	 */
 	//@author
 	public void push(E item){
