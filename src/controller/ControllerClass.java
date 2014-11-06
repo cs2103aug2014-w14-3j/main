@@ -27,11 +27,9 @@ import controller.Task.TaskType;
  */
 
 /**
- * ControllerClass which implements the Controller interface
- * 
- * @author 
+ * ControllerClass which implements the Controller interface. 
  */
-
+//@author
 public class ControllerClass implements Controller {
 
 	public static final String CMD_ADD = "add";
@@ -98,10 +96,9 @@ public class ControllerClass implements Controller {
 	private String feedbackMessage = "";
 
 	/**
-	 * Constructs the Controller Class object
-	 * 
-	 * @author
+	 * Constructs the Controller Class object.
 	 */
+	//@author
 	private ControllerClass() {
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
@@ -114,14 +111,14 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Executes command entered by user
-	 * It first retrieves all existing tasks stored in Storage, then proceeds on the operation according to the command entered
+	 * Executes command entered by user.
+	 * It first retrieves all existing tasks stored in Storage, then proceeds on executing the command specified by user
 	 * 
-	 * @param command	Input command from user
-	 * @return			Task position of a page on the current list
-	 * @throws			Exception 	If command entered by user is invalid	
-	 * @author
+	 * @param command	Input command from user.
+	 * @return			Task position of a page on the current list.
+	 * @throws			Exception 	If command entered by user is invalid.	
 	 */
+	//@author
 	public Integer execCmd(String command) throws Exception {
 		getFileContent();
 		setNumTaskOnPage(numTasksInSinglePage);
@@ -131,30 +128,31 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Gets feedback message after each operation
+	 * Gets feedback message after a command is executed.
 	 * 
-	 * @return	Stringed feedback message
-	 * @author	A0115584A
+	 * @return	Stringed feedback message.
 	 */
+	//@author
 	public String getFeedback() {
 		return feedbackMessage;
 	}
 
 	/**
-	 * Sets feedback message
-	 * @param feedback	Feedback message after each operation
-	 * @author			A0115584A
+	 * Sets feedback message.
+	 * 
+	 * @param feedback	Feedback message after a command is executed.
 	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
 
 	/**
-	 * Gets the current list that user is viewing
+	 * Gets the current list based on the list that user is currently viewing.
+	 * If user is viewing free slots, no page system is implemented as the displayed results for free slots will always be at most 10.
 	 * 
-	 * @return	List of stringed tasks
-	 * @author
+	 * @return	List of stringed tasks.
 	 */
+	//@author
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
@@ -191,6 +189,13 @@ public class ControllerClass implements Controller {
 		return list;
 	}
 
+	/**
+	 * Generates a list of stringed commands and possible words found in description of tasks to suggest to user.
+	 *  
+	 * @param content	Input from user.
+	 * @return			List of suggested stringed commands and words.
+	 */
+	//@author
 	public List<String> suggest(String content) {
 		List<String> suggestList = new ArrayList<String>();
 
@@ -212,41 +217,54 @@ public class ControllerClass implements Controller {
 		return suggestList;
 	}
 
+	/**
+	 * Sets the number of tasks on a page.
+	 * If number of tasks > 10, set only 10 tasks on a page.
+	 * 
+	 * @param number	Number of tasks on a page (10).
+	 */
+	//@author
 	private void setNumTaskOnPage(Integer number) {
 		tasks.setNumTaskOnPage(number);
 		archiveTasks.setNumTaskOnPage(number);
 	}
 
 	/**
-	 * This method returns all the existing tasks in the list, if any.
-	 * 
-	 * @return void
-	 * @author G. Vishnu Priya
+	 * Reads stored tasks in Storage into task list and archive list.
 	 */
+	//@author G. Vishnu Priya
 	private void getFileContent() {
 		tasks = new SimpleTaskList(storage.read());
 		archiveTasks = new SimpleTaskList(storage.readArchive());
 	}
 
 	/**
-	 * This method returns a storage object, storagePlus.
+	 * Creates a Storage object.
 	 * 
-	 * @return StoragePlus Object
-	 * @author G. Vishnu Priya
+	 * @return	A Storage object.
 	 */
+	//@author G. Vishnu Priya
 	private Storage createStorageObject() {
 		return new StoragePlus();
 	}
 
 	/**
-	 * @author Luo Shaohuai
-	 * @param taskList
+	 * Updates the current list type to be displayed to user.
+	 * 
+	 * @param listType	Type of displayed list.
 	 */
+	//@author
 	private void setDisplayList(DisplayList listType) {
 		this.displayListType = listType;
 		resetRecentChange();
 	}
 
+	/**
+	 * Sets the current displayed list to a list of searched results.
+	 * 
+	 * @param list	A list of searched results.
+	 */
+	//@author
 	private void setResultList(TaskList list) {
 		this.resultTasks = list;
 		resultTasks.setNumTaskOnPage(numTasksInSinglePage);
@@ -254,24 +272,47 @@ public class ControllerClass implements Controller {
 		setDisplayList(DisplayList.SEARCH);
 	}
 
+	/**
+	 * Resets recent change to page 1 when changing to another displayed list type.
+	 */
+	//@author
 	private void resetRecentChange() {
 		currentPageNum = 1;
 		recentChange = 0;
 	}
 
+	/**
+	 * Sets recent change and sorts the current displayed list when a task's position is changed.
+	 * 
+	 * @param task		A Task object whose position is changed after a command is executed.
+	 * @param taskList	Current displayed list.
+	 */
+	//@author
 	private void setRecentChange(Task task, TaskList taskList) {
 		taskList.sort();
 		Integer index = taskList.indexOf(task);
 		setRecentChange(index, taskList);
 	}
 
+	/**
+	 * Gets the current page number that the task is on and its new task number on the displayed list.
+	 * 
+	 * @param recent	Index of task in the displayed list.
+	 * @param taskList	Current displayed list.
+	 */
+	//@author
 	private void setRecentChange(Integer recent, TaskList taskList) {
 		currentPageNum = taskList.getIndexPageContainTask(recent);
 		recentChange = taskList.getIndexTaskOnPage(recent);
 	}
 
-	// This method gets the command type of user input and further processes the
-	// input.
+	/**
+	 * Parses user input by getting the command type of the user input and executing the command.
+	 * 
+	 * @param command	User input.
+	 * @throws			Exception	If user enters an invalid command.
+	 */
+	//@author
 	private void parseCommand(String command) throws Exception {
 		String operation = getOperation(command);
 		CommandType commandType = matchCommandType(operation);
@@ -284,8 +325,13 @@ public class ControllerClass implements Controller {
 		updateStorage();
 	}
 
-	// This method returns the type of operation to be carried out, either add,
-	// delete, edit or display.
+	/**
+	 * Gets the command specified by user input.
+	 * 
+	 * @param command	User input.
+	 * @return			Command specified by user.
+	 */
+	//@author
 	private String getOperation(String command) {
 		String[] splitCommandIntoWords = command.split(" ");
 		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
@@ -295,10 +341,11 @@ public class ControllerClass implements Controller {
 	/**
 	 * Chooses which course of action to take according to the command type.
 	 *
-	 * @return void
-	 * @author G. Vishnu Priya
-	 * @throws Exception
+	 * @param commandType	Type of command.
+	 * @param content		Content of user input besides the command specified.
+	 * @throws Exception	If an invalid command is entered.
 	 */
+	//@author G. Vishnu Priya
 	private void processInput(CommandType commandType, String content)
 			throws Exception {
 		switch (commandType) {
@@ -353,10 +400,11 @@ public class ControllerClass implements Controller {
 	}
 		
 	/**
-	 * This method clears all the tasks in the archive.
-	 * @return void
-	 * @author G. Vishnu Priya
+	 * Clears all the tasks in the archive.
+	 * 
+	 * @throws	Exception	If the user clears the list on other types of lists besides archive list.
 	 */
+	//@author G. Vishnu Priya
 	private void clearArchive() throws Exception {
 		if(displayListType == DisplayList.ARCHIVE) {
 			archiveTasks.clear();
@@ -365,6 +413,10 @@ public class ControllerClass implements Controller {
 		}
 	}
 
+	/**
+	 * Changes current displayed list to archive list.
+	 */
+	//@author
 	private void moveToArchive() {
 		setDisplayList(DisplayList.ARCHIVE);
 		setFeedback("Archive List.");

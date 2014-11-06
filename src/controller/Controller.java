@@ -7,10 +7,9 @@ import java.util.List;
 
 
 /**
- * Interface for ControllerClass which contains the Logic of the software
- * 
- * @author
+ * Interface for ControllerClass which contains the Logic of the software.
  */
+//@author
 public interface Controller {
 	
 	/**
@@ -18,33 +17,33 @@ public interface Controller {
 	 * 
 	 * @param cmd	Input command from user.
 	 * @return		Task position of a page on the current list.
-	 * @throws		Exception 	If command entered by user is invalid.
-	 * @author		
+	 * @throws		Exception 	If command entered by user is invalid.	
 	 */
+	//@author 
 	public Integer execCmd(String cmd) throws Exception;
 	
 	/**
 	 * Gets the current list that user is viewing.
 	 * 
 	 * @return	List of stringed tasks.
-	 * @author
 	 */
+	//@author
 	public List<String> getCurrentList();
 	
 	/**
 	 * Generates a list of stringed commands and words to suggest to user.
 	 * 
 	 * @param content	Input from user.
-	 * @return			List of suggested stringed commands and words.
-	 * @author			
+	 * @return			List of suggested stringed commands and words.			
 	 */
+	//@author
 	public List<String> suggest(String content);
 	
 	/**
 	 * Gets feedback message after each operation.
 	 * 
 	 * @return	Stringed feedback message.
-	 * @author	A01155884A
 	 */
+	//@author A0115584A
 	public String getFeedback();
 }
