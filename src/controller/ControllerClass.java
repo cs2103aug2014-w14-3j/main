@@ -46,6 +46,27 @@ public class ControllerClass implements Controller {
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE = "find";
 	public static final String CMD_CLEARARCHIVE = "clear";
+	
+	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
+	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
+	private static final String MESSAGE_INVALID = "Invalid command.";
+	private static final String MESSAGE_FEEDBACK_CLEAR = "Only can clear tasks on archive list.";
+	private static final String MESSAGE_FEEDBACK_ARCHIVELIST = "Archive list.";
+	private static final String MESSAGE_FEEDBACK_MAINLIST = "Main List.";
+	private static final String MESSAGE_FEEDBACK_INVALID = "Invalid %1$s format.";
+	private static final String MESSAGE_FEEDBACK_DONE = "Task is marked as done successfully.";
+	private static final String MESSAGE_FEEDBACK_DONE_MULTIPLE = " tasks are marked as done successfully.";
+	private static final String MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT = "Invalid format. Please enter the task number!";
+	private static final String MESSAGE_FEEDBACK_UNDO = "Undo is successful";
+	private static final String MESSAGE_FEEDBACK_INVALIDLIST = "%1$s can only be done on the main list or search list";
+	private static final String MESSAGE_FEEDBACK_POSTPONE = "Task is postponed successfully.";
+	private static final String MESSAGE_FEEDBACK_POSTPONEMULTIPLE = " tasks are postponed successfully.";
+	private static final String MESSAGE_FEEDBACK_EDIT = "Task is edited successfully.";
+	private static final String MESSAGE_FEEDBACK_EDIT_MULTIPLE = " tasks are edited successfully.";
+	private static final String MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS = "Please specify details to edit.";
+	private static final String MESSAGE_FEEDBACK_DELETE = "Task is marked as done successfully.";
+	private static final String MESSAGE_FEEDBACK_ADD = "Task is marked as done successfully.";
+	private static final String MESSAGE_FEEDBACK_INVALID_EMPTYLIST = "Nothing to %1$s list is empty.";
 
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE
@@ -139,21 +160,21 @@ public class ControllerClass implements Controller {
 		case MAIN:
 			list = tasks.getNumberedPage(currentPageNum);
 			if (list.isEmpty()) {
-				list.add("**No task in the main list**");
+				list.add(String.format(MESSAGE_EMPTYLIST, "main"));
 			}
 			break;
 
 		case ARCHIVE:
 			list = archiveTasks.getNumberedPage(currentPageNum);
 			if (list.isEmpty()) {
-				list.add("**No task in the archive list**");
+				list.add(String.format(MESSAGE_EMPTYLIST, "archive"));
 			}
 			break;
 
 		case SEARCH:
 			list = resultTasks.getPage(currentPageNum);
 			if (list.isEmpty()) {
-				list.add("**No search result**");
+				list.add(MESSAGE_EMPTYSEARCHRESULT);
 			}
 			break;
 		}
@@ -318,7 +339,7 @@ public class ControllerClass implements Controller {
 			clearArchive();
 			break;
 		default:
-			throw new Exception("Invalid command.");
+			throw new Exception(MESSAGE_INVALID);
 		}
 	}
 		
@@ -331,13 +352,13 @@ public class ControllerClass implements Controller {
 		if(displayListType == DisplayList.ARCHIVE) {
 			archiveTasks.clear();
 		} else {
-			throw new Exception("Only can clear tasks on archive list.");
+			throw new Exception(MESSAGE_FEEDBACK_CLEAR);
 		}
 	}
 
 	private void moveToArchive() {
 		setDisplayList(DisplayList.ARCHIVE);
-		setFeedback("Archive List.");
+		setFeedback(MESSAGE_FEEDBACK_ARCHIVELIST);
 	}
 
 	// the format will be "done <number>"
@@ -361,17 +382,17 @@ public class ControllerClass implements Controller {
 					archiveTasks.add(0, task);
 					tasks.remove(taskID);
 				} else {
-					throw new Exception("Invalid arguments");
+					throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, "done"));
 				}
 			}
 			
 			if(taskNumbers.length == 1) {
-				setFeedback("Task is marked as done successfully.");
+				setFeedback(MESSAGE_FEEDBACK_DONE);
 			} else {
-				setFeedback(taskNumbers.length + " tasks are marked as done successfully.");
+				setFeedback(taskNumbers.length + MESSAGE_FEEDBACK_DONE_MULTIPLE);
 			}
 		} catch (NumberFormatException e) {
-			throw new Exception("Invalid format. Please enter the task number!");
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		}
 		tasks.sort();
 	}
@@ -824,7 +845,7 @@ public class ControllerClass implements Controller {
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
-			setFeedback("Undo is successful");
+			setFeedback(MESSAGE_FEEDBACK_UNDO);
 		}
 	}
 
@@ -836,7 +857,7 @@ public class ControllerClass implements Controller {
 	private void postpone(String content) throws Exception {
 		try {
 			if (displayListType == DisplayList.ARCHIVE) {
-				throw new Exception("Postpone can only be done in main list or search list.");
+				throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, "Postpone"));
 			} else {
 				String[] taskNumbers = content.split(" ");
 
@@ -858,14 +879,13 @@ public class ControllerClass implements Controller {
 				tasks.sort();
 				
 				if(taskNumbers.length == 1) {
-					setFeedback("Task is postponed successfully.");
+					setFeedback(MESSAGE_FEEDBACK_POSTPONE);
 				} else {
-					setFeedback(taskNumbers.length + " tasks are postponed successfully.");
+					setFeedback(taskNumbers.length + MESSAGE_FEEDBACK_POSTPONEMULTIPLE);
 				}
 			}
 		} catch (NumberFormatException e) {
-			throw new Exception(
-					"Invalid postpone format. Please enter task number.");
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		}
 	}
 
@@ -881,7 +901,7 @@ public class ControllerClass implements Controller {
 		//setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
 		setDisplayList(DisplayList.MAIN);
-		setFeedback("Main List.");
+		setFeedback(MESSAGE_FEEDBACK_MAINLIST);
 	}
 
 	/**
@@ -896,7 +916,7 @@ public class ControllerClass implements Controller {
 		if ((displayListType==DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 			validEdit(content); 
 		} else {
-			throw new Exception("Editing can only be done on the main list or search list.");
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, "Edit"));
 		}
 
 	}
@@ -910,9 +930,9 @@ public class ControllerClass implements Controller {
 	 */
 	private void validEdit(String content) throws Exception {
 		if (tasks.isEmpty()) {
-			throw new Exception("Nothing to edit list is empty.");
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_EMPTYLIST);
 		} if (isEmptyCommand(content)) {
-		throw new Exception("Please specify what to edit.");
+		throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 } else {
 		Task taskEdited = proceedWithEdit(content);
 		tasks.sort();
@@ -938,7 +958,7 @@ public class ControllerClass implements Controller {
 		
 		if (positionOfTask < 0 || positionOfTask >= tasks.size()
 				|| words.length < 2) {
-			throw new Exception("Invalid edit format.");
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, "edit"));
 		}
 
 		String attributeToChange = words[1];
@@ -948,7 +968,7 @@ public class ControllerClass implements Controller {
 			for (int i = 0; i < words.length - 1; i++) {
 				Task task = tasks.get(Integer.parseInt(words[i]) - 1);
 				editPriority(task);
-				setFeedback(words.length - 1 + " tasks are edited successfully.");
+				setFeedback(words.length - 1 + MESSAGE_FEEDBACK_EDIT_MULTIPLE);
 				if (i == words.length - 2) {
 					setRecentChange(task, tasks);
 				}
@@ -958,7 +978,7 @@ public class ControllerClass implements Controller {
 
 			String editDetails = "";
 			if ((!attributeToChange.equals("!")) && (words.length==2)) {
-				throw new Exception("Please specify details to edit.");
+				throw new Exception(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
 			}
 			for (int i = 2; i < words.length; i++) {
 				editDetails += words[i] + " ";
@@ -969,13 +989,13 @@ public class ControllerClass implements Controller {
 			}
 
 			editAttribute(taskToEdit, attributeToChange, editDetails);
-			setFeedback("Task is edited successfully.");
+			setFeedback(MESSAGE_FEEDBACK_EDIT);
 			
 		}
 		
 		return taskToEdit;
 		} catch (NumberFormatException e) {
-			throw new Exception("Invalid edit format.");
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, "edit"));
 		}
 	}
 	/**
