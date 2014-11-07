@@ -47,43 +47,51 @@ public class ControllerClass implements Controller {
 	public static final String CMD_CLEARARCHIVE = "clear";
 	
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
-	private static final String MESSAGE_FEEDBACK_MAIN = "main";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
 	private static final String MESSAGE_INVALID = "Invalid command.";
+	private static final String MESSAGE_FEEDBACK_MAIN = "main";
 	private static final String MESSAGE_FEEDBACK_CLEAR = "Only can clear tasks on archive list.";
 	private static final String MESSAGE_FEEDBACK_ARCHIVELIST = "Archive list.";
 	private static final String MESSAGE_FEEDBACK_MAINLIST = "Main List.";
 	private static final String MESSAGE_FEEDBACK_INVALID = "Invalid %1$s format.";
+	private static final String MESSAGE_FEEDBACK_INVALID_EMPTYLIST = "Nothing to %1$s list is empty.";
 	private static final String MESSAGE_FEEDBACK_DONE = "Task is marked as done successfully.";
 	private static final String MESSAGE_FEEDBACK_DONE_MULTIPLE = " tasks are marked as done successfully.";
 	private static final String MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT = "Invalid format. Please enter the task number!";
-	private static final String MESSAGE_FEEDBACK_UNDO = "Undo is successful";
 	private static final String MESSAGE_FEEDBACK_INVALIDLIST = "%1$s can only be done on the main list or search list";
+	private static final String MESSAGE_FEEDBACK_UNDO = "Undo is successful";
 	private static final String MESSAGE_FEEDBACK_POSTPONE = "Task is postponed successfully.";
 	private static final String MESSAGE_FEEDBACK_POSTPONEMULTIPLE = " tasks are postponed successfully.";
 	private static final String MESSAGE_FEEDBACK_EDIT = "Task is edited successfully.";
 	private static final String MESSAGE_FEEDBACK_EDIT_MULTIPLE = " tasks are edited successfully.";
+	private static final String MESSAGE_FEEDBACK_EDIT_SPECIFY = "Please specify what to edit (time/desc/!)";
 	private static final String MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS = "Please specify details to edit.";
 	private static final String MESSAGE_FEEDBACK_DELETE = "Task is successfully deleted.";
 	private static final String MESSAGE_FEEDBACK_DELETE_MULTIPLE = " tasks are successfully deleted.";
 	private static final String MESSAGE_FEEDBACK_ADD = "Task is successfully added.";
-	private static final String MESSAGE_FEEDBACK_INVALID_EMPTYLIST = "Nothing to %1$s list is empty.";
-	private static final String EDIT_ATTRIBUTE_DESC = "desc";
-	private static final String EDIT_ATTRIBUTE_TIME = "time";
-	private static final String EDIT_ATTRIBUTE_PRIORITY = "!";
-	private static final String MESSAGE_FEEDBACK_EDIT_SPECIFY = "Please specify what to edit (time/desc/!)";
-	private static final String BOOLEAN_FALSE = "false";
-	private static final String BOOLEAN_TRUE = "true";
+	private static final String MESSAGE_FEEDBACK_ADD_SPECIFY= "Please specify what to add.";
 	private static final String MESSAGE_FEEDBACK_OUTOFRANGE = "Task does not exist. Please enter task numbers within the range.";
 	private static final String MESSAGE_FEEDBACK_PAGE_FIRST = "On first page.";
 	private static final String MESSAGE_FEEDBACK_PAGE_LAST = "On last page.";
+	private static final String MESSAGE_FEEDBACK_PAGE_CONNECTOR= " out of ";
+	private static final String MESSAGE_FEEDBACK_PAGE= "Page ";
+	private static final String MESSAGE_FEEDBACK_PAGE_COMMAND= "Page up/down.";
+	private static final String MESSAGE_FEEDBACK_FREETIME_INVALID = "Please specify time!";
+	private static final String MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD = "Please specify the period of time!";
+	private static final String EDIT_ATTRIBUTE_DESC = "desc";
+	private static final String EDIT_ATTRIBUTE_TIME = "time";
+	private static final String EDIT_ATTRIBUTE_PRIORITY = "!";
+	private static final String BOOLEAN_FALSE = "false";
+	private static final String BOOLEAN_TRUE = "true";
 	private static final String PAGE_DIRECTION_UP = "up";
 	private static final String PAGE_DIRECTION_DOWN = "down";
-	private static final String  MESSAGE_FEEDBACK_PAGE_CONNECTOR= " out of ";
-	private static final String  MESSAGE_FEEDBACK_PAGE= "Page ";
-	private static final String  MESSAGE_FEEDBACK_PAGE_COMMAND= "Page up/down.";
-	private static final String  EMPTY_STRING= "";
-	private static final String  MESSAGE_FEEDBACK_ADD_SPECIFY= "Please specify what to add.";
+	private static final String EMPTY_STRING = "";
+	private static final String FREETIME_CONNECTOR = "to";
+	private static final String FREETIME_HOUR1 = "hours";
+	private static final String FREETIME_HOUR2 = "hour";
+	private static final String FREETIME_MINUTES1 = "minutes";
+	private static final String FREETIME_MINUTES2 = "mins";
+	private static final String FREETIME_MINUTES3 = "min";
 	
 
 	enum CommandType {
@@ -529,7 +537,7 @@ public class ControllerClass implements Controller {
 	//@author
 	private Pair parserForFind(String content) throws Exception {
 
-		if (content.indexOf("to") == -1) {
+		if (content.indexOf(FREETIME_CONNECTOR) == -1) {
 			String[] para = content.trim().split("\\s+");
 			int len = para.length;
 			if (len == 4) {
@@ -540,37 +548,37 @@ public class ControllerClass implements Controller {
 				return new Pair(-1, num);
 			} else if (len == 2) {
 				try {
-					if (para[1].equalsIgnoreCase("hours")
-							|| para[1].equalsIgnoreCase("hour")) {
+					if (para[1].equalsIgnoreCase(FREETIME_HOUR1)
+							|| para[1].equalsIgnoreCase(FREETIME_HOUR2)) {
 						int hh = Integer.parseInt(para[0]);
 						return new Pair(-1, hh * 6);
-					} else if (para[1].equalsIgnoreCase("minutes")
+					} else if (para[1].equalsIgnoreCase(FREETIME_MINUTES1)
 							|| para[1].equalsIgnoreCase("minutes")
-							|| para[1].equalsIgnoreCase("mins")
-							|| para[1].equalsIgnoreCase("min")) {
+							|| para[1].equalsIgnoreCase(FREETIME_MINUTES2)
+							|| para[1].equalsIgnoreCase(FREETIME_MINUTES3)) {
 
 						int mm = Integer.parseInt(para[0]);
 						return new Pair(-1, (int) Math.ceil(mm / 10));
 					}
 				} catch (NumberFormatException e) {
-					throw new Exception("Please specify time!");
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
 			} else {
-				throw new Exception("Please specify time");
+				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 			}
 
 		} else {
 
-			String[] para = content.trim().split("to");
+			String[] para = content.trim().split(FREETIME_CONNECTOR);
 
 			if (para.length != 2) {
-				throw new Exception("Please specify the period of time!");
+				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
 			} else {
 				Date date1 = parserForFindTime(para[0]);
 				Date date2 = parserForFindTime(para[1]);
 
 				if (date1 == null || date2 == null || date1.after(date2)) {
-					throw new Exception("Please specify the period of time!");
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
 				}
 
 				Calendar cal1 = Calendar.getInstance();
