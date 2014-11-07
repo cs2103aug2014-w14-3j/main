@@ -731,7 +731,7 @@ public class SimpleTaskList implements TaskList {
 		int strLen=para.length;
 		
 		for (int i=0;i<strLen;i++){
-			if (keyWord.indexOf(para[i])!=-1){
+			if (para[i].indexOf(keyWord)!=-1){
 				return true;
 			}
 		}
