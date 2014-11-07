@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * Interface for TaskClass.
  */
-//@author
+//@author A0115584A
 public interface Task {
 	public enum TaskType {
 		FLOATING, TIMED, DEADLINE
@@ -20,7 +20,6 @@ public interface Task {
 	 * 
 	 * @return 	Date object representing the deadline of a task.
 	 */
-	//@author
 	public Date getDeadline();
 	
 	/**
@@ -29,7 +28,6 @@ public interface Task {
 	 * 
 	 * @return	Date object representing the start time of a task.
 	 */
-	//@author
 	public Date getStartTime();
 	
 	/**
@@ -38,7 +36,6 @@ public interface Task {
 	 * 
 	 * @return	Date object representing the end time of a task.
 	 */
-	//@author
 	public Date getEndTime();
 	
 	/**
@@ -46,7 +43,6 @@ public interface Task {
 	 * 
 	 * @return	Stringed description of a task.
 	 */
-	//@author
 	public String getDesc();
 	
 	/**
@@ -54,7 +50,6 @@ public interface Task {
 	 * 
 	 * @return True if a task is prioritized.
 	 */
-	//@author
 	public Boolean isPrioritized();
 	
 	/**
@@ -62,7 +57,6 @@ public interface Task {
 	 * 
 	 * @return	True if a task is overdue.
 	 */
-	//@author
 	public Boolean isOverdue();
 	
 	/**
@@ -70,7 +64,6 @@ public interface Task {
 	 * 
 	 * @return	Type of task.
 	 */
-	//@author
 	public TaskType getType();
 	
 	/**
@@ -80,7 +73,6 @@ public interface Task {
 	 * 
 	 * @param priority	String of "true" or "false.
 	 */
-	//@author
 	public void setPriority(String priority);
 	
 	/**
@@ -88,7 +80,6 @@ public interface Task {
 	 * 
 	 * @param desc	Description of a task.
 	 */
-	//@author
 	public void setDesc(String desc);
 	
 	/**
@@ -97,7 +88,6 @@ public interface Task {
 	 * 
 	 * @param date	Deadline of a task.
 	 */
-	//@author
 	public void setDeadline(Date date);
 	
 	/**
@@ -106,7 +96,6 @@ public interface Task {
 	 * 
 	 * @param time	Start time of a task.
 	 */
-	//@author
 	public void setStartTime(Date time);
 	
 	/**
@@ -115,13 +104,11 @@ public interface Task {
 	 * 
 	 * @param time	End time of a task.
 	 */
-	//@author
 	public void setEndTime(Date time);
 	
 	/**
 	 * Removes the time attributes of a task.
 	 */
-	//@author
 	public void clearTimes();
 	
 	/**
@@ -129,7 +116,6 @@ public interface Task {
 	 * 
 	 * @param type	Type of task.
 	 */
-	//@author
 	public void setType(TaskType type);
 	
 	/**
@@ -137,7 +123,6 @@ public interface Task {
 	 * 
 	 * @return	Stringed task.
 	 */
-	//@author
 	public String toString();
 	
 	/**
