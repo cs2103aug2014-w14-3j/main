@@ -822,7 +822,6 @@ public class SimpleTaskList implements TaskList {
 	//@author
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
 		
-
 		TaskList resultList = new SimpleTaskList();
 		int numOfTask = listToSearch.size();
 		String[] str = key.trim().split("\\s+");
