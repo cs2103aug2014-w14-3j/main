@@ -15,24 +15,40 @@ import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
 /**
- * @author
- *
+ * Class for task lists.
  */
+//@author
 public class SimpleTaskList implements TaskList {
 
 	private List<Task> tasks;
 	private Integer numTaskOnPage;
 
+	/**
+	 * Constructs a SimpleTaskList object.
+	 */
+	//@author
 	public SimpleTaskList() {
 		tasks = new ArrayList<Task>();
 		numTaskOnPage = null;
 	}
 
+	/**
+	 * Constructs a SimpleTaskList object using a list of strings.
+	 * 
+	 * @param strList	List of strings.
+	 */
+	//@author
 	public SimpleTaskList(List<String> strList) {
 		this();
 		addAll(strList);
 	}
 
+	/**
+	 * Constructs Task objects from the list of strings and adds them into a task list.
+	 * 
+	 * @param strList	List of stringed tasks.
+	 */
+	//@author
 	@Override
 	public void addAll(List<String> strList) {
 		for (String str : strList) {
@@ -40,46 +56,102 @@ public class SimpleTaskList implements TaskList {
 		}
 	}
 
+	/**
+	 * Clears the list.
+	 */
+	//@author
 	@Override
 	public void clear() {
 		tasks.clear();
 	}
 
+	/**
+	 * Adds a Task object into a task list.
+	 * 
+	 * @param task	Task object.
+	 * @return		true if Task object is successfully added into the task list.
+	 */
+	//@author
 	@Override
 	public boolean add(Task task) {
 		return tasks.add(task);
 	}
 
+	/**
+	 * Adds a Task object into a task list at a specific position.
+	 * 
+	 * @param index	Specified position to add task.
+	 * @param task	Task object.
+	 */
+	//@author
 	@Override
 	public void add(int index, Task task) {
 		tasks.add(index, task);
 	}
 
+	/** 
+	 * Sets a Task object at a specific position.
+	 * 
+	 * @param pos	Specified position to set the Task object.
+	 * @param task	Task object.
+	 */ 
+	//@author
 	@Override
 	public void set(int pos, Task task) {
 		tasks.set(pos, task);
 	}
-
+	
+	/**
+	 * Removes a task from a specific position. 
+	 * 
+	 * @param pos	Specified position to remove the Task object.
+	 */
+	//@author
 	@Override
 	public void remove(int pos) {
 		tasks.remove(pos);
 	}
 
+	/**
+	 * Checks if the task list is empty.
+	 * 
+	 * @return	True if the task list is empty.
+	 */
+	//@author
 	@Override
 	public boolean isEmpty() {
 		return tasks.isEmpty();
 	}
 
+	/**
+	 * Gets the index of the task in the task list.
+	 * 
+	 * @return	Index of the task in the task list.
+	 */
+	//@author
 	@Override
 	public Integer indexOf(Task task) {
 		return tasks.indexOf(task);
 	}
 
+	/**
+	 * Gets a task based on its position.
+	 * 
+	 * @param pos	Position of the task in the task list.
+	 * @return 		Task object at that position in the task list.
+	 */
+	//@author
 	@Override
 	public Task get(Integer pos) {
 		return tasks.get(pos);
 	}
 
+	/**
+	 * Clones the task list of stringed tasks.
+	 * 
+	 * @return	List of tasks.
+	 */
+	//@author
 	@Override
 	public TaskList clone() {
 		TaskList clone = new SimpleTaskList(getStringList());
@@ -87,6 +159,12 @@ public class SimpleTaskList implements TaskList {
 		return clone;
 	}
 
+	/**
+	 * Converts list of Task objects to strings.
+	 * 
+	 * @return	List of stringed tasks.
+	 */
+	//@author
 	@Override
 	public List<String> getStringList() {
 		ArrayList<String> taskStrings = new ArrayList<String>();
@@ -97,6 +175,12 @@ public class SimpleTaskList implements TaskList {
 		return taskStrings;
 	}
 
+	/**
+	 * Generates a numbered stringed list of tasks.
+	 * 
+	 * @return	List of numbered stringed tasks.
+	 */
+	//@author
 	@Override
 	public List<String> getNumberedStringList() {
 		ArrayList<String> taskStrings = new ArrayList<String>();
@@ -107,6 +191,10 @@ public class SimpleTaskList implements TaskList {
 		return taskStrings;
 	}
 
+	/**
+	 * Sorts the list of Task objects in the task list according to priority, date, time and description.
+	 */
+	//@author
 	@Override
 	public void sort() {
 		Collections.sort(tasks, (task1, task2) -> {
@@ -135,11 +223,21 @@ public class SimpleTaskList implements TaskList {
 		});
 	}
 
+	/**
+	 * Gets the number of tasks in the task list.
+	 * 
+	 * @return	Number of tasks in the task list.
+	 */
+	//@author
 	@Override
 	public int size() {
 		return tasks.size();
 	}
 
+	/**
+	 * Sets the number of tasks on a page.
+	 */
+	//@author
 	@Override
 	public void setNumTaskOnPage(Integer number) {
 		assert number > 0;
@@ -147,6 +245,13 @@ public class SimpleTaskList implements TaskList {
 		numTaskOnPage = number;
 	}
 
+	/**
+	 * Generates a list of stringed tasks on a page.
+	 * 
+	 * @param pageNum	Page number of the task list.
+	 * @return			List of stringed tasks on that page.
+	 */
+	//@author
 	@Override
 	public List<String> getPage(Integer pageNum) {
 		assert numTaskOnPage != null;
@@ -173,6 +278,12 @@ public class SimpleTaskList implements TaskList {
 		return taskStrings;
 	}
 
+	/**
+	 * Gets the total number of pages the list has.
+	 * 
+	 * @return	Total number of pages.
+	 */
+	//@author
 	@Override
 	public Integer getTotalPageNum() {
 		assert numTaskOnPage != null;
@@ -182,6 +293,13 @@ public class SimpleTaskList implements TaskList {
 		return totalPage;
 	}
 
+	/**
+	 * Generates a list of numbered stringed tasks in a page.
+	 * 
+	 * @param pageNum	Page number.
+	 * @return			List of numbered stringed tasks in that page.
+	 */
+	//@author
 	@Override
 	public List<String> getNumberedPage(Integer pageNum) {
 		assert numTaskOnPage != null;
@@ -208,6 +326,13 @@ public class SimpleTaskList implements TaskList {
 		return taskStrings;
 	}
 
+	/**
+	 * Gets the page number that contains the task.
+	 * 
+	 * @param taskIndex	Position of the task in the task list.
+	 * @return			Page number of page that contains this task.
+	 */
+	//@author
 	@Override
 	public Integer getIndexPageContainTask(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
@@ -217,6 +342,13 @@ public class SimpleTaskList implements TaskList {
 		return taskIndex / numTaskOnPage + 1;
 	}
 
+	/**
+	 * Gets the task number of the task on a page.
+	 * 
+	 * @param taskIndex	Position of the task in the task list.
+	 * @return			Task number of the task on a page.
+	 */
+	//@author
 	@Override
 	public Integer getIndexTaskOnPage(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
@@ -226,6 +358,12 @@ public class SimpleTaskList implements TaskList {
 		return taskIndex % numTaskOnPage;
 	}
 
+	/**
+	 * Gets a list of overdue tasks.
+	 * 
+	 * @return	List of overdue tasks.
+	 */
+	//@author
 	@Override
 	public TaskList getOverdueTasks() {
 		int numOfTask = tasks.size();
@@ -246,11 +384,25 @@ public class SimpleTaskList implements TaskList {
 		return resultList;
 	}
 
+	/**
+	 * Searches for tasks that consist of the keyword entered by user.
+	 * 
+	 * @param content	Keyword entered by user.
+	 * @return			List of search results.
+	 */
+	//@author
 	@Override
 	public TaskList search(String content) {
 		return processSearch(content);
 	}
 
+	/**
+	 * Processes user input for search.
+	 * 
+	 * @param content	User input.
+	 * @return			List of search results.
+	 */
+	//@author
 	private TaskList processSearch(String content) {
 
 		content=content.trim();
@@ -285,6 +437,13 @@ public class SimpleTaskList implements TaskList {
 		}
 	}
 
+	/**
+	 * Parses user input for date and time.
+	 * 
+	 * @param input User input
+	 * @return		Date object consisting of the date and time user has entered.
+	 */
+	//@author
 	private Date timeParser(String input) {
 		Parser parser = new Parser();
 
@@ -336,9 +495,16 @@ public class SimpleTaskList implements TaskList {
 		}
 	}
 
-	// search for date and description
-	// if the user types in one date only,
-	// the software will understand as search for date
+	/**
+	 * Searches for date and description of tasks.
+	 * If user input contains only one date, it will search for date.  
+	 * 
+	 * @param desc			Description of tasks.
+	 * @param content		Attributes to search for?
+	 * @param listToSearch	Task list to search from.
+	 * @return				List of search results.
+	 */
+	//@author
 	private TaskList complexSearch(String desc, String content,
 			TaskList listToSearch) {
 		TaskList resultForTime = simpleSearch(content, listToSearch, false);
@@ -348,6 +514,15 @@ public class SimpleTaskList implements TaskList {
 
 	}
 
+	/**
+	 * Searches for tasks containing the keyword entered by user.
+	 * 
+	 * @param content		Keyword entered by user.
+	 * @param listToSearch	Task list to search from.
+	 * @param isDesc		True if keyword entered is the keyword for description.
+	 * @return				List of search results.
+	 */
+	//@author
 	private TaskList simpleSearch(String content, TaskList listToSearch,
 			boolean isDesc) {
 
@@ -360,8 +535,6 @@ public class SimpleTaskList implements TaskList {
 			return searchDesc(content, listToSearch);
 		
 		} else {
-			
-		
 				String[] para = content.trim().split("\\s+");
 				if (para[0].equalsIgnoreCase("by")) {
 					return searchByDate(date, listToSearch);
@@ -373,7 +546,14 @@ public class SimpleTaskList implements TaskList {
 	
 	}
 
-	// search on the exact date
+	/**
+	 * Searches on the exact date of tasks.
+	 * 
+	 * @param deadline		Date to search.
+	 * @param listToSearch	Task list to search from.
+	 * @return				List of search results.
+	 */
+	//@author
 	public TaskList searchOnDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
@@ -396,6 +576,14 @@ public class SimpleTaskList implements TaskList {
 		return resultList;
 	}
 
+	/**
+	 * Searches for tasks that have a deadline by the specified date.
+	 * 
+	 * @param deadline		Deadline entered by user.
+	 * @param listToSearch	Task list to search from.
+	 * @return				List of search results.
+	 */
+	//@author
 	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
@@ -419,10 +607,17 @@ public class SimpleTaskList implements TaskList {
 		return resultList;
 	}
 
-	// return negative if date1 is before date2
-	// positive if date1 is after date2
-	// 0 if they are the same
-
+	/**
+	 * Compares the two Date objects by computing their difference.
+	 * If date1 is before date2, return a negative difference,
+	 * If date1 is after date2, return a positive difference.
+	 * If they are the same, return 0.
+	 * 
+	 * @param date1		Date object to be compared with.
+	 * @param date2		Date object to be compared with.
+	 * @return			Difference between the two Date objects.
+	 */
+	//@author
 	private int compare(Date date1, Date date2) {
 
 		Calendar cal1 = Calendar.getInstance();
@@ -443,45 +638,124 @@ public class SimpleTaskList implements TaskList {
 	}
 
 	/**
+	 * Searches for the descriptions of tasks that contain the keyword.
+	 * If the keyword appears in the list of tasks, return the list of exact search.
+	 * Else, return the list of nearMatch search.
 	 * 
-	 * @return: the result list of task if the key appears in the list of task,
-	 *          return the list of exact search else return the list of
-	 *          nearMatch search
-	 * @author: Tran Cong Thien
+	 * @param keyword		Keyword entered by user.
+	 * @param listToSearch	Task list to search from.
+	 * @return				List of search results.
 	 */
-
+	//@author Tran Cong Thien
 	public TaskList searchDesc(String keyWord, TaskList listToSearch) {
 
-	/*	TaskList result = searchExact(keyWord, listToSearch);
-		if (result.size() == 0) {	
-			return nearMatchSearch(keyWord, listToSearch);
+		TaskList result = exactSearch(keyWord, listToSearch);
+		if (result.size() == 0) {
+			TaskList resultList=insideSearch(keyWord,listToSearch);
+			if (resultList.size()==0){
+				return nearMatchSearch(keyWord, listToSearch);
+			}else {
+				return resultList;
+			}
 		} else {
-			System.out.println("Enter exact search");
-			return searchExact(keyWord,listToSearch);
+			return result;
 		}
-*/
-		return nearMatchSearch(keyWord, listToSearch);
 	}
 
-	private TaskList searchExact(String keyWord, TaskList listToSearch) {
+	/**
+	 * Generates a list of search results.
+	 * 
+	 * @param keyword		Keyword entered by user.
+	 * @param listToSearch	Task list to search from.
+	 * @return				List of search results.
+	 */
+	//@author
+	private TaskList insideSearch(String keyWord, TaskList listToSearch) {
 	
 		TaskList result = new SimpleTaskList();
 		
 		int numOfTask = listToSearch.size();
-		boolean[] isTaken=new boolean[numOfTask];
-		
-		for (int i=0;i<numOfTask;i++){
-			isTaken[i]=false;
-		}
+
+		//will not search for 2 character only
+		if (keyWord.length() > 2) {
 		
 
-		//will not search for 1 character only
-		if (keyWord.length() >= 2) {
+				for (int i = 0; i < numOfTask; i++) {
+					Task task = listToSearch.get(i);
+					if (isInside(keyWord, task.getDesc())) {
+						Task newTask = task.clone();
+
+						if (newTask.getDesc().indexOf(". ") == -1) {
+							String newDesc = (i + 1) + ". " + newTask.getDesc();
+							newTask.setDesc(newDesc);
+							result.add(newTask);
+						}
+					}
+				}
+			}
+	
+		return result;
+	}
+
+	/**
+	 * Checks if keyword entered by user is inside the stringed task.
+	 * 
+	 * @param keyWord		Keyword entered by user.
+	 * @param strToSearch	Stringed task to search from.
+	 * @return				True if stringed task contains the keyword.
+	 */
+	//@author
+	private boolean isInside(String keyWord,String strToSearch) {
+		String[] para=keyWord.trim().split("s++");
+		int keyLen=para.length;
+		
+		for (int i=0;i<keyLen;i++){
+			if (!isSubstring(para[i],strToSearch)){
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Checks if keyword entered by user is a substring of the description of the stringed task.
+	 * 
+	 * @param keyWord		Keyword entered by user.
+	 * @param strToSearch	Stringed task to search from.
+	 * @return				True if the keyword is a substring.
+	 */
+	//@author
+	private boolean isSubstring(String keyWord, String strToSearch) {		
+		String[] para=strToSearch.trim().split("s++");
+		int strLen=para.length;
+		
+		for (int i=0;i<strLen;i++){
+			if (keyWord.indexOf(para[i])!=-1){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Searches for tasks that contain the exact keyword entered by user. 
+	 * 
+	 * @param keyWord		Keyword entered by user.
+	 * @param listToSearch	List of tasks to search from.
+	 * @return				List of search results.
+	 */
+	//@author
+	private TaskList exactSearch(String keyWord, TaskList listToSearch){
+		
+			TaskList result = new SimpleTaskList();
+			int numOfTask = listToSearch.size();
+			
 			for (int i = 0; i < numOfTask; i++) {
 				Task task = listToSearch.get(i);
-				if (isTheSame(keyWord, task.getDesc())) {
+				if (isExact(keyWord, task.getDesc())) {
 					Task newTask = task.clone();
-					isTaken[i]=true;
 
 					if (newTask.getDesc().indexOf(". ") == -1) {
 						String newDesc = (i + 1) + ". " + newTask.getDesc();
@@ -490,75 +764,62 @@ public class SimpleTaskList implements TaskList {
 					}
 				}
 			}
-
-
-				for (int i = 0; i < numOfTask; i++) {
-					Task task = listToSearch.get(i);
-					if (isInside(keyWord, task.getDesc())) {
-						Task newTask = task.clone();
-
-						if (newTask.getDesc().indexOf(". ") == -1 && isTaken[i]==false) {
-							String newDesc = (i + 1) + ". " + newTask.getDesc();
-							newTask.setDesc(newDesc);
-							result.add(newTask);
-						}
-					}
-				}
-			}
-		//System.out.println("End of exact search");
-		return result;
+			
+			return result;
 	}
-
-	private boolean isTheSame(String keyWord, String strToSearch) {
-		//System.out.println("has is the same");
-		String[] paraKey = keyWord.trim().split("s++");
-		int lenKey = paraKey.length;
-
-		String[] paraStr = strToSearch.trim().split("s++");
-		int lenStr = paraStr.length;
-		boolean isTheSame = true;
-
-		for (int i = 0; i < lenKey && isTheSame == true; i++) {
-			boolean equal = false;
-			for (int j = 0; j < lenStr && equal == false; j++) {
-				if (paraKey[i].equalsIgnoreCase(paraStr[j])) {
-					equal = true;
-				}
-			}
-
-			if (equal == false) {
-				isTheSame = false;
+	
+	/**
+	 * Checks if keyword entered by user matches exactly with the description of the stringed task.
+	 * 
+	 * @param keyWord		Keyword entered by user.
+	 * @param strToSearch	Stringed task to search from
+	 * @return				True if there is an exact match.
+	 */
+	//@author
+	private boolean isExact(String keyWord,String strToSearch) {
+		String[] para=keyWord.trim().split("s++");
+		int keyLen=para.length;
+		
+		for (int i=0;i<keyLen;i++){
+			if (!isEqual(para[i],strToSearch)){
+				return false;
 			}
 		}
-		return isTheSame;
-
+		
+		return true;
 	}
-
-	private boolean isInside(String keyWord, String strToSearch) {
-		//System.out.println("inside");
-		String[] paraKey = keyWord.trim().split("s++");
-		int lenKey = paraKey.length;
-
-		String[] paraStr = strToSearch.trim().split("s++");
-		int lenStr = paraStr.length;
-
-		boolean isInside = true;
-
-		for (int i = 0; i < lenKey && isInside == true; i++) {
-			boolean subString = false;
-			for (int j = 0; j < lenStr && subString == false; j++) {
-				if (paraStr[j].indexOf(paraKey[i]) != -1) {
-					subString = true;
-				}
-			}
-
-			if (subString == false) {
-				isInside = false;
+	
+	/**
+	 * Checks if keyword entered by user is exactly the same as the description of the stringed task.
+	 * 
+	 * @param keyWord		Keyword entered by user.
+	 * @param strToSearch	Stringed task to search from.
+	 * @return				True if there is an exact match.
+	 */
+	//@author
+	private boolean isEqual(String keyWord, String strToSearch) {
+		
+		String[] para=strToSearch.trim().split("s++");
+		int strLen=para.length;
+		
+		for (int i=0;i<strLen;i++){
+			if (keyWord.equalsIgnoreCase(para[i])){
+				return true;
 			}
 		}
-		return isInside;
+		
+		return false;
 	}
-
+	
+	
+	/**
+	 * Searches for tasks which contain words similar to the keyword entered by user.
+	 * 
+	 * @param key			Keyword entered by user.
+	 * @param listToSearch	Task list to search from.
+	 * @return				List of search results.
+	 */
+	//@author
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
 		
 
@@ -598,13 +859,18 @@ public class SimpleTaskList implements TaskList {
 			resultList.add(task);
 		}
 		
-		
-		for (int i=0;i<resultList.size();i++){
-			//System.out.println(resultList.get(i).toString());
-		}
+	
 		return resultList;
 	}
 
+	/**
+	 * Generates the score for each search result.
+	 * 
+	 * @param keyword		Keyword entered by user.
+	 * @param strToSearch	Description of task to search from.
+	 * @return				A pair of the search score and the number of matches the description has with the keyword. 
+	 */
+	//@author
 	private Pair searchScore(String keyword, String strToSearch) {
 		String[] key = keyword.trim().split("\\s+");
 		int strLen = key.length;
@@ -644,8 +910,14 @@ public class SimpleTaskList implements TaskList {
 		return new Pair(numOfMatch, searchScore);
 	}
 
-	// keyword is one word only
-	// return maxScore of matching of this keyword in the string
+	/**
+	 * Generates the score for the matching of keyword with the description of task.
+	 * 
+	 * @param key			Keyword entered by user.
+	 * @param strToSearch	Description of task.
+	 * @return				Score for match.
+	 */
+	//@author
 	private int matchScore(String key, String strToSearch) {
 
 		String[] string = strToSearch.trim().split("\\s+");
@@ -663,9 +935,15 @@ public class SimpleTaskList implements TaskList {
 		return maxScore;
 	}
 
-	// Criteria to be matched between 2 words, if the
-	// editDistance/lenghOfKeyWord is <0.2
-	// the 2 strings are considered approximately matched
+	/**
+	 * Generates the approximate match score.
+	 * If the editDistance/lengthOfKeyWord is <0.2, the 2 strings are considered approximately matched.
+	 * 
+	 * @param keyword	Keyword entered by user.
+	 * @param string	Description of task.
+	 * @return			Score for match.
+	 */
+	//@author
 	private int approximateMatchScore(String keyword, String string) {
 	
 		int editDist = editDistance(string, keyword);
@@ -679,9 +957,15 @@ public class SimpleTaskList implements TaskList {
 
 	}
 
-	// the edit Distance score between 2 strings, used for nearMatch Search
-	// the lower, the better
-	// Tran Cong Thien
+	/**
+	 * Gets the edit distance score between the 2 strings for nearMatch search.
+	 * The lower, the better
+	 * 
+	 * @param sourceString	??
+	 * @param destString	??
+	 * @return				Distance between the 2 strings.
+	 */
+	//@author Tran Cong Thien
 	private int editDistance(String sourceString, String destString) {
 		int sourceStrLen = sourceString.length();
 		int destStrLen = destString.length();
