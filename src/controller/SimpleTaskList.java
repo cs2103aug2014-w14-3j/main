@@ -676,13 +676,13 @@ public class SimpleTaskList implements TaskList {
 		
 		int numOfTask = listToSearch.size();
 
-		//will not search for 2 character only
-		if (keyWord.length() > 2) {
+		//will not search for 1 character only
+		if (keyWord.length() >= 2) {
 		
 
 				for (int i = 0; i < numOfTask; i++) {
 					Task task = listToSearch.get(i);
-					if (isInside(keyWord, task.getDesc())) {
+					if (isInside(keyWord.toLowerCase(), task.getDesc().toLowerCase())) {
 						Task newTask = task.clone();
 
 						if (newTask.getDesc().indexOf(". ") == -1) {
@@ -754,7 +754,7 @@ public class SimpleTaskList implements TaskList {
 			
 			for (int i = 0; i < numOfTask; i++) {
 				Task task = listToSearch.get(i);
-				if (isExact(keyWord, task.getDesc())) {
+				if (isExact(keyWord.toLowerCase(), task.getDesc().toLowerCase())) {
 					Task newTask = task.clone();
 
 					if (newTask.getDesc().indexOf(". ") == -1) {
@@ -947,8 +947,6 @@ public class SimpleTaskList implements TaskList {
 	
 		int editDist = editDistance(string, keyword);
 		int lenOfStr = string.length();
-//		System.out.println(editDist/(lenOfStr*1.0));
-	//	System.out.println(1000 -  (int) Math.floor(1000 * editDist / (lenOfStr*1.0)));
 		if ( (editDist / (lenOfStr*1.0)) < 0.5)
 			return 1000 -  (int) Math.floor(1000 * editDist / (lenOfStr*1.0));
 		else

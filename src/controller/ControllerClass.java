@@ -480,7 +480,7 @@ public class ControllerClass implements Controller {
 			markAsDone(content);
 			break;
 		case FREETIME:
-			TestfreeIntervals();
+			findFreeTime(content);
 			break;
 		case CHANGEPAGE:
 			changePage(content);
@@ -572,9 +572,36 @@ public class ControllerClass implements Controller {
 		}
 		tasks.sort();
 	}
+	
+	
+	private List<String> findFreeTime(String content) throws Exception {
+		
+		ArrayList<longPair> freeSlots=findTime(content);
+		
+		ArrayList<String> result=new ArrayList<String>();
+		
+		System.out.println("Enter find freeTime");
+		for (int i=0;i<freeSlots.size();i++){
+			longPair pair=freeSlots.get(i);
+			Date start=new Date(pair.getFirst());
+			Date end=new Date (pair.getSecond());
+			
+			String str="";
+			str=str+"[ "+start+" to "+end+" ]";
+			result.add(str);
+		}
+		
+		for (int i=0;i<result.size();i++)
+			System.out.println(result.get(i));
+		
+		System.out.println("End of find free time. Size of result is "+result.size());
+		return result;
+		
+		
+	}
 
 	// format of find
-	// **Find for a time to time period to be free.Ex: find 10pm to 1pm date
+	// **Find for a time to time period to be free.Ex: find 10pm to 1pm by date
 	// **Find intervals of free time that in the schedule.Ex: find 3 hours 30
 	// mins by date(before a date) or
 	// find 3 hours 30 mins on date (check on that date)
@@ -590,69 +617,91 @@ public class ControllerClass implements Controller {
 	 *             If user input is invalid.
 	 */
 	// @author
-	private Pair parserForFind(String content) throws Exception {
+	private ArrayList<longPair> findTime(String content) throws Exception {
 
+		Date now=new Date();
+		Calendar cal=Calendar.getInstance();//next 30 days
+		cal.add(Calendar.DATE, 30);
+		Date nextMonth = cal.getTime();
+		System.out.println("next month is "+nextMonth);
+		//case 1 :search for number of hours
+		
 		if (content.indexOf(FREETIME_CONNECTOR) == -1) {
+			
 			String[] para = content.trim().split("\\s+");
 			int len = para.length;
-			if (len == 4) {
-				int hh = Integer.parseInt(para[0]);
-				int mm = Integer.parseInt(para[2]);
-				int num = hh * 6 + (int) Math.ceil(mm / 10);
-
-				return new Pair(-1, num);
-			} else if (len == 2) {
+			if (len == 2) {
 				try {
+					//just hours
 					if (para[1].equalsIgnoreCase(FREETIME_HOUR1)
 							|| para[1].equalsIgnoreCase(FREETIME_HOUR2)) {
 						int hh = Integer.parseInt(para[0]);
-						return new Pair(-1, hh * 6);
+						return findTimeLength(hh*60,nextMonth);
 					} else if (para[1].equalsIgnoreCase(FREETIME_MINUTES1)
 							|| para[1].equalsIgnoreCase(FREETIME_MINUTES2)
 							|| para[1].equalsIgnoreCase(FREETIME_MINUTES3)
 							|| para[1].equalsIgnoreCase(FREETIME_MINUTES4)) {
-
-						int mm = Integer.parseInt(para[0]);
-						return new Pair(-1, (int) Math.ceil(mm / 10));
+						int mm= Integer.parseInt(para[0]);
+						
+						return findTimeLength(mm,nextMonth);
+						
 					}
 				} catch (NumberFormatException e) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
-			} else {
-				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+			//case 2: search for number of hours and minutes
+			}else if (len==4){
+				try{
+				int hh=Integer.parseInt(para[0]);
+				int mm=Integer.parseInt(para[2]);	
+					return findTimeLength(hh*60+mm,nextMonth);
+				}catch (NumberFormatException e){
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+			} else if (len>=5) {
+				String date=" ";
+				
+				try {
+				int hh=Integer.parseInt(para[0]);
+				int mm=Integer.parseInt(para[2]);
+				
+				for (int i=4;i<len;i++){
+					date=date+para[i]+" ";
+				}
+				
+				Date deadline=timeParser(date);
+				if (deadline!=null){
+					return findTimeLength(hh*60+mm,deadline);
+				}else {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+				}catch (NumberFormatException e){
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
 			}
 
 		} else {
 
 			String[] para = content.trim().split(FREETIME_CONNECTOR);
 
-			if (para.length != 2) {
+			if (para.length !=2) {
 				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
 			} else {
-				Date date1 = parserForFindTime(para[0]);
-				Date date2 = parserForFindTime(para[1]);
+				
+				//the default is today
+				Date date1 = timeParser(para[0]);
+				Date date2 = timeParser(para[1]);
 
 				if (date1 == null || date2 == null || date1.after(date2)) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
+				}else {
+					return findTimePeriod(date1,date2,nextMonth);
 				}
-
-				Calendar cal1 = Calendar.getInstance();
-				cal1.setTime(date1);
-
-				Calendar cal2 = Calendar.getInstance();
-				cal2.setTime(date2);
-
-				int hh1 = cal1.get(Calendar.HOUR_OF_DAY);
-				int mm1 = cal1.get(Calendar.MINUTE);
-
-				int hh2 = cal2.get(Calendar.HOUR_OF_DAY);
-				int mm2 = cal2.get(Calendar.MINUTE);
-
-				return new Pair(hh1 * 6 + mm1 / 10, hh2 * 6
-						+ (int) Math.ceil(mm2 / 10));
+				
 			}
 		}
-		return null;
+		
+		return new ArrayList<longPair>();
 	}
 
 	/**
@@ -664,7 +713,7 @@ public class ControllerClass implements Controller {
 	 * @return Date time when user is free.
 	 */
 	// @author
-	private Date parserForFindTime(String input) {
+	private Date timeParser(String input) {
 
 		Parser parser = new Parser();
 
@@ -681,6 +730,97 @@ public class ControllerClass implements Controller {
 		}
 	}
 
+	
+	/**
+	 * Compares the two Date objects by computing their difference.
+	 * If date1 is before date2, return a negative difference,
+	 * If date1 is after date2, return a positive difference.
+	 * If they are the same, return 0.
+	 * 
+	 * @param date1		Date object to be compared with.
+	 * @param date2		Date object to be compared with.
+	 * @return			Difference between the two Date objects.
+	 */
+	//@author
+	private int compare(Date date1, Date date2) {
+
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date1);
+
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+
+		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
+			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
+			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		} else {
+			return cal1.get(Calendar.DAY_OF_MONTH)
+					- cal2.get(Calendar.DAY_OF_MONTH);
+		}
+
+	}
+	
+	
+	private ArrayList<longPair> findTimePeriod (Date start,Date end, Date deadline ){
+		
+		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);
+		ArrayList<longPair> result=new ArrayList<longPair>();
+		
+		longPair interval=new longPair(start.getTime(), end.getTime());
+		Date current=new Date();
+		int numOfDate=0;
+		while (compare(current,deadline)<=0 && numOfDate<10){
+		
+			if (isFree(interval,freeSlots)){
+				result.add(interval);
+				numOfDate++;
+			}
+			
+			long first=interval.getFirst();
+			long second=interval.getSecond();
+			interval=new longPair(first+24*60*60*1000, second+24*60*60*1000);
+		
+		}
+		
+		return result;
+		
+	}
+	
+	private boolean isFree(longPair interval, ArrayList<longPair> list){
+		
+		for (int i=0;i<list.size();i++){
+			longPair free=list.get(i);
+			if (interval.getFirst()>=free.getFirst() && interval.getSecond()<=free.getSecond()){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private ArrayList<longPair> findTimeLength(int numOfMin, Date deadline){
+		
+		
+		
+		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);
+		System.out.println("Enter findTimeLengh.Size is "+freeSlots.size()+"deadline is "+deadline+ "now is"+ new Date());
+		
+		ArrayList<longPair> result=new ArrayList<longPair>();
+		int numOfSlot=0;
+		
+		for (int i=0;i<freeSlots.size() && numOfSlot<10;i++){
+			longPair slot=freeSlots.get(i);
+			
+			long timeLen=(slot.getSecond()-slot.getFirst())/(1000*60);
+			if (timeLen>= numOfMin){
+				result.add(slot);
+				numOfSlot++;
+			}
+			
+		}		
+		return result;
+	}
 	// just for testing, can ignore
 	private void TestfreeIntervals() {
 
