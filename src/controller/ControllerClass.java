@@ -47,6 +47,7 @@ public class ControllerClass implements Controller {
 	public static final String CMD_CLEARARCHIVE = "clear";
 	
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
+	private static final String MESSAGE_FEEDBACK_MAIN = "main";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
 	private static final String MESSAGE_INVALID = "Invalid command.";
 	private static final String MESSAGE_FEEDBACK_CLEAR = "Only can clear tasks on archive list.";
@@ -63,9 +64,27 @@ public class ControllerClass implements Controller {
 	private static final String MESSAGE_FEEDBACK_EDIT = "Task is edited successfully.";
 	private static final String MESSAGE_FEEDBACK_EDIT_MULTIPLE = " tasks are edited successfully.";
 	private static final String MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS = "Please specify details to edit.";
-	private static final String MESSAGE_FEEDBACK_DELETE = "Task is marked as done successfully.";
-	private static final String MESSAGE_FEEDBACK_ADD = "Task is marked as done successfully.";
+	private static final String MESSAGE_FEEDBACK_DELETE = "Task is successfully deleted.";
+	private static final String MESSAGE_FEEDBACK_DELETE_MULTIPLE = " tasks are successfully deleted.";
+	private static final String MESSAGE_FEEDBACK_ADD = "Task is successfully added.";
 	private static final String MESSAGE_FEEDBACK_INVALID_EMPTYLIST = "Nothing to %1$s list is empty.";
+	private static final String EDIT_ATTRIBUTE_DESC = "desc";
+	private static final String EDIT_ATTRIBUTE_TIME = "time";
+	private static final String EDIT_ATTRIBUTE_PRIORITY = "!";
+	private static final String MESSAGE_FEEDBACK_EDIT_SPECIFY = "Please specify what to edit (time/desc/!)";
+	private static final String BOOLEAN_FALSE = "false";
+	private static final String BOOLEAN_TRUE = "true";
+	private static final String MESSAGE_FEEDBACK_OUTOFRANGE = "Task does not exist. Please enter task numbers within the range.";
+	private static final String MESSAGE_FEEDBACK_PAGE_FIRST = "On first page.";
+	private static final String MESSAGE_FEEDBACK_PAGE_LAST = "On last page.";
+	private static final String PAGE_DIRECTION_UP = "up";
+	private static final String PAGE_DIRECTION_DOWN = "down";
+	private static final String  MESSAGE_FEEDBACK_PAGE_CONNECTOR= " out of ";
+	private static final String  MESSAGE_FEEDBACK_PAGE= "Page ";
+	private static final String  MESSAGE_FEEDBACK_PAGE_COMMAND= "Page up/down.";
+	private static final String  EMPTY_STRING= "";
+	private static final String  MESSAGE_FEEDBACK_ADD_SPECIFY= "Please specify what to add.";
+	
 
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE
@@ -114,7 +133,7 @@ public class ControllerClass implements Controller {
 	private FixedSizeStack<TaskList> undoList;
 	private FixedSizeStack<TaskList> undoArchiveList;
 
-	private String feedbackMessage = "";
+	private String feedbackMessage = EMPTY_STRING;
 
 	/**
 	 * Constructs the Controller Class object.
@@ -139,7 +158,7 @@ public class ControllerClass implements Controller {
 	 * @return				Task position of a page on the current list.
 	 * @throws Exception 	If command entered by user is invalid.	
 	 */
-	//@author
+	//@author A0115194J
 	public Integer execCmd(String command) throws Exception {
 		getFileContent();
 		setNumTaskOnPage(numTasksInSinglePage);
@@ -180,14 +199,14 @@ public class ControllerClass implements Controller {
 		case MAIN:
 			list = tasks.getNumberedPage(currentPageNum);
 			if (list.isEmpty()) {
-				list.add(String.format(MESSAGE_EMPTYLIST, "main"));
+				list.add(String.format(MESSAGE_EMPTYLIST, MESSAGE_FEEDBACK_MAIN));
 			}
 			break;
 
 		case ARCHIVE:
 			list = archiveTasks.getNumberedPage(currentPageNum);
 			if (list.isEmpty()) {
-				list.add(String.format(MESSAGE_EMPTYLIST, "archive"));
+				list.add(String.format(MESSAGE_EMPTYLIST, CMD_ARCHIVE));
 			}
 			break;
 
@@ -762,7 +781,7 @@ public class ControllerClass implements Controller {
 	private void postpone(String content) throws Exception {
 		try {
 			if (displayListType == DisplayList.ARCHIVE) {
-				throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, "Postpone"));
+				throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, CMD_POSTPONE));
 
 			} else {
 				String[] taskNumbers = content.split(" ");
@@ -821,7 +840,7 @@ public class ControllerClass implements Controller {
 		if ((displayListType==DisplayList.MAIN) || (displayListType == DisplayList.SEARCH) ) {
 			validEdit(content); 
 		} else {
-			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, "Edit"));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, CMD_EDIT));
 		}
 
 	}
@@ -863,7 +882,7 @@ public class ControllerClass implements Controller {
 		
 		if (positionOfTask < 0 || positionOfTask >= tasks.size()
 				|| words.length < 2) {
-			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, "edit"));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, CMD_EDIT));
 		}
 
 			String attributeToChange = words[1];
@@ -882,7 +901,7 @@ public class ControllerClass implements Controller {
 		} else {
 
 
-			String editDetails = "";
+			String editDetails = EMPTY_STRING;
 			if ((!attributeToChange.equals("!")) && (words.length==2)) {
 				throw new Exception(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
 			}
@@ -900,7 +919,7 @@ public class ControllerClass implements Controller {
 		}
 			return taskToEdit;
 		} catch (NumberFormatException e) {
-			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, "edit"));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, CMD_EDIT));
 		}
 	}
 
@@ -932,14 +951,14 @@ public class ControllerClass implements Controller {
 	//@author G. Vishnu Priya
 	private void editAttribute(Task taskToEdit, String attribute,
 			String editDetails) throws Exception {
-		if (attribute.equalsIgnoreCase("desc")) {
+		if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_DESC)) {
 			editDescription(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("time")) {
+		} else if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_TIME)) {
 			processTime(taskToEdit, editDetails);
-		} else if (attribute.equalsIgnoreCase("!")) {
+		} else if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_PRIORITY)) {
 			editPriority(taskToEdit);
 		} else {
-			throw new Exception("Please specify what to edit (time/desc/!)");
+			throw new Exception(MESSAGE_FEEDBACK_EDIT_SPECIFY);
 		}
 	}
 
@@ -952,9 +971,9 @@ public class ControllerClass implements Controller {
 	private void editPriority(Task taskToEdit) {
 		boolean priorityOfTask = taskToEdit.isPrioritized();
 		if (priorityOfTask) {
-			taskToEdit.setPriority("false");
+			taskToEdit.setPriority(BOOLEAN_FALSE);
 		} else {
-			taskToEdit.setPriority("true");
+			taskToEdit.setPriority(BOOLEAN_TRUE);
 		}
 	}
 
@@ -985,7 +1004,7 @@ public class ControllerClass implements Controller {
 			proceedWithDelete(content);
 		} 
 		} else {
-			throw new Exception("Deletion can only be done in main list or search list.");
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST, CMD_DELETE));
 		}
 	}
 
@@ -1015,14 +1034,13 @@ public class ControllerClass implements Controller {
 			tasks.sort();
 
 			if (taskNumDescending.size() == 1) {
-				setFeedback("Task is successfully deleted.");
+				setFeedback(MESSAGE_FEEDBACK_DELETE);
 			} else {
 				setFeedback(taskNumDescending.size()
-						+ " tasks are successfully deleted.");
+						+ MESSAGE_FEEDBACK_DELETE_MULTIPLE);
 			}
 		} catch (NumberFormatException e) {
-			throw new Exception(
-					"Invalid delete format. Please enter task number.");
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID, CMD_DELETE));
 		}
 	}
 
@@ -1038,8 +1056,7 @@ public class ControllerClass implements Controller {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
-			throw new Exception(
-					"Task does not exist. Please enter task numbers within the range.");
+			throw new Exception(MESSAGE_FEEDBACK_OUTOFRANGE);
 		}
 	}
 
@@ -1063,26 +1080,26 @@ public class ControllerClass implements Controller {
 	 */
 	//@author
 	private void changeCurrentPageNum(String direction) throws Exception {
-		if (direction.equalsIgnoreCase("up")) {
+		if (direction.equalsIgnoreCase(PAGE_DIRECTION_UP)) {
 			if (checkValidPageUp()) {
 				currentPageNum--;
 				recentChange = 0;
-				setFeedback("Page " + currentPageNum + " out of "
+				setFeedback(MESSAGE_FEEDBACK_PAGE + currentPageNum + MESSAGE_FEEDBACK_PAGE_CONNECTOR
 						+ getTotalNumOfPages(displayListType));
 			} else {
-				throw new Exception("On first page.");
+				throw new Exception(MESSAGE_FEEDBACK_PAGE_FIRST);
 			}
-		} else if (direction.equalsIgnoreCase("down")) {
+		} else if (direction.equalsIgnoreCase(PAGE_DIRECTION_DOWN)) {
 			if (checkValidPageDown()) {
 				currentPageNum++;
 				recentChange = 0;
-				setFeedback("Page " + currentPageNum + " out of "
+				setFeedback(MESSAGE_FEEDBACK_PAGE + currentPageNum + MESSAGE_FEEDBACK_PAGE_CONNECTOR
 						+ getTotalNumOfPages(displayListType));
 			} else {
-				throw new Exception("On last page.");
+				throw new Exception(MESSAGE_FEEDBACK_PAGE_LAST);
 			}
 		} else {
-			throw new Exception("Page up/down");
+			throw new Exception(MESSAGE_FEEDBACK_PAGE_COMMAND);
 		}
 	}
 
@@ -1166,9 +1183,9 @@ public class ControllerClass implements Controller {
 	//@author G. Vishnu Priya
 	private boolean isValidDelete(String content) throws Exception {
 		if (tasks.isEmpty()) {
-			throw new Exception("Nothing to delete list is empty!");
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID_EMPTYLIST, CMD_DELETE));
 		} else if (isEmptyCommand(content)) {
-			throw new Exception("Please specify what to delete.");
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		} else {
 			return true;
 		}
@@ -1182,7 +1199,7 @@ public class ControllerClass implements Controller {
 	 */
 	//@author G. Vishnu Priya
 	private boolean isEmptyCommand(String content) {
-		return content.trim().equals("");
+		return content.trim().equals(EMPTY_STRING);
 	}
 
 	/**
@@ -1194,13 +1211,13 @@ public class ControllerClass implements Controller {
 	//@author Luo Shaohuai
 	private void addTask(String content) throws Exception {
 		if (isEmptyCommand(content)) {
-			throw new Exception("Please specify what to add.");
+			throw new Exception(MESSAGE_FEEDBACK_ADD_SPECIFY);
 		}
 
 		Task task = processUserInput(content);
 		this.tasks.add(task);
 
-		setFeedback("Task is successfully added.");
+		setFeedback(MESSAGE_FEEDBACK_ADD);
 		tasks.sort();
 		setDisplayList(displayListType);
 		setRecentChange(task, tasks);
@@ -1214,7 +1231,7 @@ public class ControllerClass implements Controller {
 	 */
 	//@author
 	private Task processUserInput(String content) {
-		String desc = "";
+		String desc = EMPTY_STRING;
 		Integer singlePos = 0;
 		Integer doublePos = 0;
 		singlePos = content.indexOf('\'', 0);
@@ -1222,7 +1239,7 @@ public class ControllerClass implements Controller {
 		if (singlePos == -1 && doublePos == -1) {
 			// return processUserInputClassic(content);
 			desc = content + " ";
-			content = "";
+			content = EMPTY_STRING;
 		}
 
 		String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
@@ -1232,12 +1249,12 @@ public class ControllerClass implements Controller {
 					+ " ";
 		}
 		desc = desc.substring(0, desc.length() - 1);
-		content = content.replaceAll(regex, "");
+		content = content.replaceAll(regex, EMPTY_STRING);
 
 		Task task = new TaskClass();
 		Boolean priority;
 		if (content.indexOf('!') != -1) {
-			content = content.replaceAll("!", "");
+			content = content.replaceAll("!", EMPTY_STRING);
 			priority = true;
 		} else {
 			priority = false;
@@ -1299,7 +1316,7 @@ public class ControllerClass implements Controller {
 	 */
 	//@author G. Vishnu Priya
 	private String removeCommandType(String command, String operation) {
-		return command.replaceFirst(operation, "").trim();
+		return command.replaceFirst(operation, EMPTY_STRING).trim();
 	}
 
 	/**
