@@ -706,7 +706,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private boolean isInside(String keyWord,String strToSearch) {
-		String[] para=keyWord.trim().split("s++");
+		String[] para=keyWord.trim().split("\\s+");
 		int keyLen=para.length;
 		
 		for (int i=0;i<keyLen;i++){
@@ -727,7 +727,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private boolean isSubstring(String keyWord, String strToSearch) {		
-		String[] para=strToSearch.trim().split("s++");
+		String[] para=strToSearch.trim().split("\\s+");
 		int strLen=para.length;
 		
 		for (int i=0;i<strLen;i++){
@@ -777,7 +777,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private boolean isExact(String keyWord,String strToSearch) {
-		String[] para=keyWord.trim().split("s++");
+		String[] para=keyWord.trim().split("\\s+");
 		int keyLen=para.length;
 		
 		for (int i=0;i<keyLen;i++){
@@ -799,7 +799,7 @@ public class SimpleTaskList implements TaskList {
 	//@author
 	private boolean isEqual(String keyWord, String strToSearch) {
 		
-		String[] para=strToSearch.trim().split("s++");
+		String[] para=strToSearch.trim().split("\\s+");
 		int strLen=para.length;
 		
 		for (int i=0;i<strLen;i++){
