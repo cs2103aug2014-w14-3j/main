@@ -48,7 +48,6 @@ public class ControllerClass implements Controller {
 
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
-	private static final String MESSAGE_INVALID = "Invalid command.";
 	private static final String MESSAGE_FEEDBACK_MAIN = "main";
 	private static final String MESSAGE_FEEDBACK_CLEAR = "Only can clear tasks on archive list.";
 	private static final String MESSAGE_FEEDBACK_ARCHIVELIST = "Archive list.";
@@ -491,7 +490,7 @@ public class ControllerClass implements Controller {
 			clearArchive();
 			break;
 		default:
-			throw new Exception(MESSAGE_INVALID);
+			assert false: commandType;
 		}
 	}
 
