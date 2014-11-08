@@ -194,7 +194,7 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Sorts the list of Task objects in the task list according to priority, date, time and description.
 	 */
-	//@author
+	//@author A0115584A
 	@Override
 	public void sort() {
 		Collections.sort(tasks, (task1, task2) -> {
