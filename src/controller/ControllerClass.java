@@ -1003,7 +1003,7 @@ public class ControllerClass implements Controller {
 
 			} else {
 				String[] taskNumbers = content.split(SPACE_STRING);
-
+				Arrays.sort(taskNumbers);
 				for (int i = 0; i < taskNumbers.length; i++) {
 					Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
 					Task postponedTask = tasks.get(taskNum);
