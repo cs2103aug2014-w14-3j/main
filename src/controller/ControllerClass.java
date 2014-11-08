@@ -76,6 +76,7 @@ public class ControllerClass implements Controller {
 	private static final String MESSAGE_FEEDBACK_PAGE_CONNECTOR = " out of ";
 	private static final String MESSAGE_FEEDBACK_PAGE = "Page ";
 	private static final String MESSAGE_FEEDBACK_PAGE_COMMAND = "Page up/down.";
+	private static final String MESSAGE_FEEDBACK_ARCHIVE_CLEAR = "All tasks in archive are deleted.";
 	private static final String MESSAGE_FEEDBACK_FREETIME_INVALID = "Please specify time!";
 	private static final String MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD = "Please specify the period of time!";
 	private static final String EDIT_ATTRIBUTE_DESC = "desc";
@@ -505,6 +506,7 @@ public class ControllerClass implements Controller {
 	private void clearArchive() throws Exception {
 		if (displayListType == DisplayList.ARCHIVE) {
 			archiveTasks.clear();
+			setFeedback(MESSAGE_FEEDBACK_ARCHIVE_CLEAR);
 		} else {
 			throw new Exception(MESSAGE_FEEDBACK_CLEAR);
 		}

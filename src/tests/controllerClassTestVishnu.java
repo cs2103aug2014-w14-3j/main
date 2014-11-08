@@ -13,9 +13,9 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for controller class for delete and edit functionality.
- * @author G. Vishnu Priya
  *
  */
+// @author A0115194J
 public class controllerClassTestVishnu {
 	
 	Controller controller;
