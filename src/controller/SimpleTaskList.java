@@ -22,7 +22,7 @@ import controller.Task.TaskType;
 //@author
 public class SimpleTaskList implements TaskList {
 
-	public static final String SPACE="\\s+";
+	private  static final String SPACE="\\s+";
 
 	private List<Task> tasks;
 	private Integer numTaskOnPage;
@@ -476,7 +476,24 @@ public class SimpleTaskList implements TaskList {
 
 		if (dates.size() == 1) {
 			// avoid ambiguous cases for natty
-
+			
+			if (input.toLowerCase().indexOf("today")==-1){
+				
+				Date now=new Date();
+				boolean hasDigit=false;
+				for (int i=0;i<input.length();i++){
+					if (Character.isDigit(input.charAt(i))){
+						hasDigit=true;
+					}
+				}
+				
+				if (!hasDigit && compare(dates.get(0),now )==0){
+					return null;
+				}
+				
+			}
+			
+			
 			if (input.length() == 1 || input.length() == 2) {
 				// can not get a date form these length
 				return null;
@@ -551,7 +568,7 @@ public class SimpleTaskList implements TaskList {
 		Date date = timeParser(content);
 		
 		if (isDesc == true  || date==null) {
-			//System.out.println("content is: "+content);
+			
 			
 			return searchDesc(content, listToSearch);
 		
@@ -671,7 +688,9 @@ public class SimpleTaskList implements TaskList {
 	public TaskList searchDesc(String keyWord, TaskList listToSearch) {
 
 		TaskList result = exactSearch(keyWord, listToSearch);
+
 		if (result.size() == 0) {
+			
 			TaskList resultList=insideSearch(keyWord,listToSearch);
 			if (resultList.size()==0){
 				return nearMatchSearch(keyWord, listToSearch);
@@ -747,7 +766,8 @@ public class SimpleTaskList implements TaskList {
 	 * @return				True if the keyword is a substring.
 	 */
 	//@author
-	private boolean isSubstring(String keyWord, String strToSearch) {		
+	private boolean isSubstring(String keyWord, String strToSearch) {	
+		
 		String[] para=strToSearch.trim().split(SPACE);
 		int strLen=para.length;
 		
@@ -843,6 +863,7 @@ public class SimpleTaskList implements TaskList {
 	//@author
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
 		
+		
 		TaskList resultList = new SimpleTaskList();
 		int numOfTask = listToSearch.size();
 		String[] str = key.trim().split(SPACE);
@@ -926,7 +947,7 @@ public class SimpleTaskList implements TaskList {
 			searchScore += matchScore[i];
 		}
 		
-		//System.out.println("searchScore="+searchScore);
+	
 		return new Pair(numOfMatch, searchScore);
 	}
 
@@ -946,7 +967,7 @@ public class SimpleTaskList implements TaskList {
 
 		for (int i = 0; i < strLen; i++) {
 			int score = approximateMatchScore(key, string[i]);
-			//System.out.println("Score="+ score);
+			
 			if (maxScore < score) {
 				maxScore = score;
 			}

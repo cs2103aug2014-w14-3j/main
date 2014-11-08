@@ -270,10 +270,10 @@ public class ControllerClass implements Controller {
 				suggestList.add(str);
 			}
 		}
-
+	
 		// suggest search
 		TaskList resultList = tasks.searchDesc(content, tasks);
-
+		
 		suggestList.addAll(resultList.getStringList());
 
 		return suggestList;
