@@ -11,8 +11,8 @@ import java.util.Date;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -31,7 +31,10 @@ public class ListItem{
 	private TextFlow time;
 	
 	@FXML
-	private Circle priority;
+	private Label prior;
+	
+	@FXML
+	private Label overdue;
 	
 	public ListItem() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ListItem.fxml"));
@@ -56,11 +59,12 @@ public class ListItem{
 	}
 	
 	public void setPriority(boolean priority) {
-		this.priority.setVisible(priority);
+		this.prior.setVisible(priority);
 	}
 	
 	public void clearTime() {
 		time.getChildren().clear();
+		this.overdue.setVisible(false);
 	}
 	
 	public void setTimes() {
@@ -68,11 +72,14 @@ public class ListItem{
 		Text floating = new Text("Floating");
 		floating.setStyle("-fx-fill: #777777;");
 		time.getChildren().add(floating);
+		this.overdue.setVisible(false);
 	}
 	
 	public void setTimes(Long timeInMilli) {
 		clearTime();
 		time.getChildren().add(timeToText(timeInMilli));
+		this.overdue.setVisible(isOverdue(timeInMilli));
+		
 	}
 	
 	public void setTimes(Long timeStart, Long timeEnd) {
@@ -83,17 +90,33 @@ public class ListItem{
 		to.setText(" to ");
 		to.setStyle("-fx-fill: #777777");
 		time.getChildren().add(to);
-		time.getChildren().add(timeToText(timeEnd));	
+		time.getChildren().add(timeToText(timeEnd));
+		this.overdue.setVisible(isOverdue(timeStart));
 	}
 	
 	private Text timeToText(Long timeInMilli) {
 		Date time = new Date(timeInMilli);
-		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault());
+		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), 
+														ZoneId.systemDefault()
+														);
 		Text timeText = new Text();
 		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.taskDateFormat);
 		timeText.setText(format.format(timeobj));
 		timeText.setStyle("-fx-fill: #222222;");
 		return timeText;
+	}
+	
+	private boolean isOverdue(Long timeInMilli) {
+		LocalDateTime time = LocalDateTime.ofInstant(
+								new Date(timeInMilli).toInstant(), 
+								ZoneId.systemDefault()
+								);
+		
+		if (LocalDateTime.now().isAfter(time)) {
+			return true;
+		}
+
+		return false;
 	}
 	
 }

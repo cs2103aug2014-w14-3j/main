@@ -25,6 +25,7 @@ import controller.ControllerClass;
  */
 public class Main extends Application{
 	private UIControl mainControl;
+	private Stage stage;
 	public Main() {
 		controller = ControllerClass.getInstance();
 		log = new Log();
@@ -35,6 +36,7 @@ public class Main extends Application{
 	@Override
 	public void start(Stage stage) { 
 		try {
+			this.stage = stage;
 			stage.initStyle(StageStyle.UNDECORATED);
 			stage.setScene(loadScene());
 			mainControl.init();
@@ -140,6 +142,8 @@ public class Main extends Application{
 					|| (event.getCode() == KeyCode.LEFT && event.isAltDown())) {
 				execCmd("page up");
 				event.consume();
+			} else if (event.getCode() == KeyCode.ESCAPE) {
+				stage.setIconified(true);
 			}
 		});
 	}
