@@ -1,5 +1,8 @@
 package controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -15,6 +18,7 @@ import java.util.logging.*;
 
 import storage.Storage;
 import storage.StoragePlus;
+import ui.Config;
 
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
@@ -50,6 +54,7 @@ public class ControllerClass implements Controller {
 
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
+	private static final String MESSAGE_TOMANYRESULT = "**Please be more specific to get more results**";
 	private static final String MESSAGE_FEEDBACK_MAIN = "main";
 	private static final String MESSAGE_FEEDBACK_CLEAR = "Only can clear tasks on archive list.";
 	private static final String MESSAGE_FEEDBACK_ARCHIVELIST = "Archive list.";
@@ -238,10 +243,10 @@ public class ControllerClass implements Controller {
 			break;
 
 		case FREESLOTS:
-			if (freeSlots.size() < 10) {
+			if (freeSlots.size() < numTasksInSinglePage) {
 				list = freeSlots;
 			} else {
-				list = freeSlots.subList(0, 10);
+				list = freeSlots.subList(0, numTasksInSinglePage);
 			}
 			break;
 		}
@@ -335,6 +340,25 @@ public class ControllerClass implements Controller {
 		resultTasks.setNumTaskOnPage(numTasksInSinglePage);
 		resetRecentChange();
 		setDisplayList(DisplayList.SEARCH);
+	}
+	
+	/**
+	 * Sets the current displayed list to a list of searched results.
+	 * 
+	 * @param list
+	 *            A list of searched results.
+	 */
+	// @author
+	private void setFreeSlotList(List<String> list) {
+		if (list.size() <= 10) {
+			this.freeSlots = list;
+		} else {
+			this.freeSlots = list.subList(0, numTasksInSinglePage - 2);
+			this.freeSlots.add(MESSAGE_TOMANYRESULT);
+		}
+		
+		resetRecentChange();
+		setDisplayList(DisplayList.FREESLOTS);
 	}
 
 	/**
@@ -583,7 +607,7 @@ public class ControllerClass implements Controller {
 	}
 	
 	
-	private List<String> findFreeTime(String content) throws Exception {
+	private void findFreeTime(String content) throws Exception {
 		
 		ArrayList<longPair> freeSlots=findTime(content);
 		
@@ -591,20 +615,31 @@ public class ControllerClass implements Controller {
 		
 		for (int i=0;i<freeSlots.size();i++){
 			longPair pair=freeSlots.get(i);
-			Date start=new Date(pair.getFirst());
-			Date end=new Date (pair.getSecond());
 			
-			String str="";
-			str=str+"[ "+start+" to "+end+" ]";
+			String str = "[ " 
+						 + timeToText(pair.getFirst())
+						 + " to "
+						 + timeToText(pair.getSecond())
+						 + " ]";
 			result.add(str);
 		}
 		
+		/*
 		for (int i=0;i<result.size();i++)
 			System.out.println(result.get(i));
+			*/
 		
-		return result;
+		setFreeSlotList(result);
+	}
+	
+	private String timeToText(Long timeInMilli) {
+		Date time = new Date(timeInMilli);
+		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), 
+														ZoneId.systemDefault()
+														);
+		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.taskDateFormat);
 		
-		
+		return format.format(timeobj);
 	}
 
 	// format of find
@@ -1546,7 +1581,6 @@ public class ControllerClass implements Controller {
 	// @author
 	private boolean checkValidPageDown() {
 		Integer totalNumPages;
-		// TODO: getCurDisplayList() after fix search
 		totalNumPages = getTotalNumOfPages(displayListType);
 		if (currentPageNum < totalNumPages) {
 			return true;
@@ -1574,6 +1608,8 @@ public class ControllerClass implements Controller {
 			break;
 		case SEARCH:
 			totalNumPages = resultTasks.getTotalPageNum();
+		case FREESLOTS:
+			totalNumPages = 1;
 		default:
 			totalNumPages = 0;
 			break;
