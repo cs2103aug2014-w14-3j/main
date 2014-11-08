@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.*;
 
 import storage.Storage;
 import storage.StoragePlus;
@@ -127,6 +128,7 @@ public class ControllerClass implements Controller {
 	private static final int maxNumOfUndo = 40;
 	private static final int numTasksInSinglePage = 10;
 
+	private static final Logger logger = Logger.getLogger(ControllerClass.class.getName());
 	private static Controller theController = null;
 	private TaskList tasks;
 	private TaskList archiveTasks;
@@ -157,7 +159,7 @@ public class ControllerClass implements Controller {
 		displayListType = DisplayList.MAIN;
 		resetRecentChange();
 	}
-
+	
 	/**
 	 * Executes command entered by user. It first retrieves all existing tasks
 	 * stored in Storage, then proceeds on executing the command specified by
