@@ -60,7 +60,7 @@ public class ControllerClass implements Controller {
 	private static final String MESSAGE_FEEDBACK_DONE_MULTIPLE = " tasks are marked as done successfully.";
 	private static final String MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT = "Invalid format. Please enter the task number!";
 	private static final String MESSAGE_FEEDBACK_INVALIDLIST = "%1$s can only be done on the main list or search list";
-	private static final String MESSAGE_FEEDBACK_CAN_NOT_UNDO="Can not undo!";
+	private static final String MESSAGE_FEEDBACK_UNDO_MAXIMUM ="Reached maximum number of undo!";
 	private static final String MESSAGE_FEEDBACK_UNDO = "Undo is successful";
 	private static final String MESSAGE_FEEDBACK_POSTPONE = "Task is postponed successfully.";
 	private static final String MESSAGE_FEEDBACK_POSTPONEMULTIPLE = " tasks are postponed successfully.";
@@ -1052,7 +1052,7 @@ public class ControllerClass implements Controller {
 			archiveTasks = undoArchiveList.pop();
 			setFeedback(MESSAGE_FEEDBACK_UNDO);
 		}else {
-			setFeedback(MESSAGE_FEEDBACK_CAN_NOT_UNDO);
+			setFeedback(MESSAGE_FEEDBACK_UNDO_MAXIMUM);
 		}
 	}
 
