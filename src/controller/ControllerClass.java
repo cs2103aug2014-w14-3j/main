@@ -45,6 +45,7 @@ public class ControllerClass implements Controller {
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE = "find";
 	public static final String CMD_CLEARARCHIVE = "clear";
+	public static final String CMD_PENDING="pending";
 
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
@@ -96,7 +97,7 @@ public class ControllerClass implements Controller {
 	private static final String FREETIME_MINUTES4 = "min";
 
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE,PENDING
 	};
 
 	enum DisplayList {
@@ -120,6 +121,7 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_OVERDUE, CommandType.OVERDUE);
 		aMap.put(CMD_FREE, CommandType.FREETIME);
 		aMap.put(CMD_CLEARARCHIVE, CommandType.CLEARARCHIVE);
+		aMap.put(CMD_PENDING, CommandType.PENDING);
 		commandMap = Collections.unmodifiableMap(aMap);
 	}
 
@@ -471,6 +473,9 @@ public class ControllerClass implements Controller {
 		case OVERDUE:
 			overDue();
 			break;
+		case PENDING:
+			pending();
+			break;
 		case POSTPONE:
 			updateForUndo();
 			postpone(content);
@@ -580,7 +585,6 @@ public class ControllerClass implements Controller {
 		
 		ArrayList<String> result=new ArrayList<String>();
 		
-		System.out.println("Enter find freeTime");
 		for (int i=0;i<freeSlots.size();i++){
 			longPair pair=freeSlots.get(i);
 			Date start=new Date(pair.getFirst());
@@ -594,7 +598,6 @@ public class ControllerClass implements Controller {
 		for (int i=0;i<result.size();i++)
 			System.out.println(result.get(i));
 		
-		System.out.println("End of find free time. Size of result is "+result.size());
 		return result;
 		
 		
@@ -616,71 +619,124 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If user input is invalid.
 	 */
-	// @author
+	// @author: A0112044B
 	private ArrayList<longPair> findTime(String content) throws Exception {
 
-		Date now=new Date();
 		Calendar cal=Calendar.getInstance();//next 30 days
 		cal.add(Calendar.DATE, 30);
 		Date nextMonth = cal.getTime();
-		System.out.println("next month is "+nextMonth);
+	
 		//case 1 :search for number of hours
 		
 		if (content.indexOf(FREETIME_CONNECTOR) == -1) {
 			
-			String[] para = content.trim().split("\\s+");
-			int len = para.length;
-			if (len == 2) {
-				try {
-					//just hours
-					if (para[1].equalsIgnoreCase(FREETIME_HOUR1)
-							|| para[1].equalsIgnoreCase(FREETIME_HOUR2)) {
+			//only hours
+			if (hasHour(content) && !hasMinute(content)){
+				
+				String[] para = content.trim().split("\\s+");
+				int len = para.length;
+				
+				
+				if (len==2){
+					try{
 						int hh = Integer.parseInt(para[0]);
-						return findTimeLength(hh*60,nextMonth);
-					} else if (para[1].equalsIgnoreCase(FREETIME_MINUTES1)
-							|| para[1].equalsIgnoreCase(FREETIME_MINUTES2)
-							|| para[1].equalsIgnoreCase(FREETIME_MINUTES3)
-							|| para[1].equalsIgnoreCase(FREETIME_MINUTES4)) {
-						int mm= Integer.parseInt(para[0]);
-						
-						return findTimeLength(mm,nextMonth);
-						
+						return findTimeLength(hh*60, nextMonth);
+					}catch (NumberFormatException e) {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-				} catch (NumberFormatException e) {
-					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}else if (len>2){
+					String date=" ";
+					try{
+						int hh=Integer.parseInt(para[0]);
+					
+					for (int i=2;i<len;i++){
+						date=date+para[i]+" ";
+					}
+					
+					Date deadline=timeParser(date);
+					
+					if (deadline!=null){
+						return findTimeLength(hh*60,deadline);
+					}else {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+					}catch (NumberFormatException e) {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
 				}
-			//case 2: search for number of hours and minutes
-			}else if (len==4){
-				try{
-				int hh=Integer.parseInt(para[0]);
-				int mm=Integer.parseInt(para[2]);	
-					return findTimeLength(hh*60+mm,nextMonth);
-				}catch (NumberFormatException e){
-					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-				}
-			} else if (len>=5) {
-				String date=" ";
+			//case 2: search for number of minutes	
+			}else if (!hasHour(content) && hasMinute(content)){
+				String[] para = content.trim().split("\\s+");
+				int len = para.length;
 				
-				try {
-				int hh=Integer.parseInt(para[0]);
-				int mm=Integer.parseInt(para[2]);
 				
-				for (int i=4;i<len;i++){
-					date=date+para[i]+" ";
+				if (len==2){
+					try{
+						int mm = Integer.parseInt(para[0]);
+						return findTimeLength(mm, nextMonth);
+					}catch (NumberFormatException e) {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+				}else if (len>2){
+					String date=" ";
+					try{
+						int mm=Integer.parseInt(para[0]);
+					
+					for (int i=2;i<len;i++){
+						date=date+para[i]+" ";
+					}
+					
+					Date deadline=timeParser(date);
+					
+					if (deadline!=null){
+						return findTimeLength(mm,deadline);
+					}else {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+					}catch (NumberFormatException e) {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
 				}
+			//case 3: search for hours and minutes
+			}else if (hasHour(content) && hasMinute(content)){
 				
-				Date deadline=timeParser(date);
-				if (deadline!=null){
-					return findTimeLength(hh*60+mm,deadline);
-				}else {
-					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-				}
-				}catch (NumberFormatException e){
-					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				String[] para = content.trim().split("\\s+");
+				int len = para.length;
+				
+				if (len==4){
+					try{
+						int hh=Integer.parseInt(para[0]);
+						int mm=Integer.parseInt(para[2]);	
+							return findTimeLength(hh*60+mm,nextMonth);
+						}catch (NumberFormatException e){
+							throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+						}
+					
+				}else if (len>4){
+					String date=" ";
+					
+					try {
+					int hh=Integer.parseInt(para[0]);
+					int mm=Integer.parseInt(para[2]);
+					
+					for (int i=4;i<len;i++){
+						date=date+para[i]+" ";
+					}
+					
+					Date deadline=timeParser(date);
+					if (deadline!=null){
+						return findTimeLength(hh*60+mm,deadline);
+					}else {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+					}catch (NumberFormatException e){
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+					
 				}
 			}
-
-		} else {
+			
+		}else {
 
 			String[] para = content.trim().split(FREETIME_CONNECTOR);
 
@@ -700,10 +756,29 @@ public class ControllerClass implements Controller {
 				
 			}
 		}
-		
 		return new ArrayList<longPair>();
 	}
-
+	
+	private boolean hasHour(String content){
+		
+		if (content.toLowerCase().indexOf(FREETIME_HOUR1)!=-1 || content.toLowerCase().indexOf(FREETIME_HOUR2)!=-1){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	
+	private boolean hasMinute(String content){
+		if (content.toLowerCase().indexOf(FREETIME_MINUTES1)!=-1 ||
+				content.toLowerCase().indexOf(FREETIME_MINUTES2)!=-1 ||
+				content.toLowerCase().indexOf(FREETIME_MINUTES3)!=-1 ||
+				content.toLowerCase().indexOf(FREETIME_MINUTES4)!=-1){
+			return true;
+		}else {
+			return false;
+		}
+	}
 	/**
 	 * Parses user input to find the time interval where the user is free. If no
 	 * date time is recognized, return null.
@@ -803,9 +878,7 @@ public class ControllerClass implements Controller {
 		
 		
 		
-		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);
-		System.out.println("Enter findTimeLengh.Size is "+freeSlots.size()+"deadline is "+deadline+ "now is"+ new Date());
-		
+		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);	
 		ArrayList<longPair> result=new ArrayList<longPair>();
 		int numOfSlot=0;
 		
@@ -820,22 +893,6 @@ public class ControllerClass implements Controller {
 			
 		}		
 		return result;
-	}
-	// just for testing, can ignore
-	private void TestfreeIntervals() {
-
-		Date now = new Date();
-		Date endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000 * 7);
-
-		ArrayList<longPair> intervalFree = freeIntervals(now, endTime);
-
-		for (int i = 0; i < intervalFree.size(); i++) {
-			longPair inter = intervalFree.get(i);
-			Date start = new Date(inter.getFirst());
-			Date end = new Date(inter.getSecond());
-
-			System.out.println("[ " + start + "to " + end + " ]");
-		}
 	}
 
 	private ArrayList<longPair> freeIntervals(Date start, Date end) {
@@ -938,6 +995,15 @@ public class ControllerClass implements Controller {
 		}
 	}
 
+	/*
+	 * 
+	 */
+	
+	private void pending(){
+		setResultList(tasks.getFloatingTasks());
+	}
+	
+	
 	/**
 	 * Sets the result list of current overdue tasks.
 	 */

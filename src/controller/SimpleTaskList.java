@@ -14,11 +14,15 @@ import java.util.regex.Pattern;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
+import controller.Task.TaskType;
+
 /**
  * Class for task lists.
  */
 //@author
 public class SimpleTaskList implements TaskList {
+
+	public static final String SPACE="\\s+";
 
 	private List<Task> tasks;
 	private Integer numTaskOnPage;
@@ -383,6 +387,23 @@ public class SimpleTaskList implements TaskList {
 
 		return resultList;
 	}
+	
+	
+	public TaskList getFloatingTasks() {
+		int numOfTask = tasks.size();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task=tasks.get(i);
+			if (task.getType()==TaskType.FLOATING) {
+					Task withNum = task.clone();
+					withNum.setDesc((i + 1) + ". " + withNum.getDesc());
+					resultList.add(withNum);
+			}
+		}
+
+		return resultList;		
+	}
 
 	/**
 	 * Searches for tasks that consist of the keyword entered by user.
@@ -535,7 +556,7 @@ public class SimpleTaskList implements TaskList {
 			return searchDesc(content, listToSearch);
 		
 		} else {
-				String[] para = content.trim().split("\\s+");
+				String[] para = content.trim().split(SPACE);
 				if (para[0].equalsIgnoreCase("by")) {
 					return searchByDate(date, listToSearch);
 				} else {
@@ -706,7 +727,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private boolean isInside(String keyWord,String strToSearch) {
-		String[] para=keyWord.trim().split("\\s+");
+		String[] para=keyWord.trim().split(SPACE);
 		int keyLen=para.length;
 		
 		for (int i=0;i<keyLen;i++){
@@ -727,7 +748,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private boolean isSubstring(String keyWord, String strToSearch) {		
-		String[] para=strToSearch.trim().split("\\s+");
+		String[] para=strToSearch.trim().split(SPACE);
 		int strLen=para.length;
 		
 		for (int i=0;i<strLen;i++){
@@ -777,7 +798,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private boolean isExact(String keyWord,String strToSearch) {
-		String[] para=keyWord.trim().split("\\s+");
+		String[] para=keyWord.trim().split(SPACE);
 		int keyLen=para.length;
 		
 		for (int i=0;i<keyLen;i++){
@@ -799,7 +820,7 @@ public class SimpleTaskList implements TaskList {
 	//@author
 	private boolean isEqual(String keyWord, String strToSearch) {
 		
-		String[] para=strToSearch.trim().split("\\s+");
+		String[] para=strToSearch.trim().split(SPACE);
 		int strLen=para.length;
 		
 		for (int i=0;i<strLen;i++){
@@ -824,7 +845,7 @@ public class SimpleTaskList implements TaskList {
 		
 		TaskList resultList = new SimpleTaskList();
 		int numOfTask = listToSearch.size();
-		String[] str = key.trim().split("\\s+");
+		String[] str = key.trim().split(SPACE);
 		int keyLen = str.length;
 
 		ArrayList<Triple> list = new ArrayList<Triple>();
@@ -871,7 +892,7 @@ public class SimpleTaskList implements TaskList {
 	 */
 	//@author
 	private Pair searchScore(String keyword, String strToSearch) {
-		String[] key = keyword.trim().split("\\s+");
+		String[] key = keyword.trim().split(SPACE);
 		int strLen = key.length;
 		int searchScore = 0;
 		int numOfMatch = 0;
@@ -919,7 +940,7 @@ public class SimpleTaskList implements TaskList {
 	//@author
 	private int matchScore(String key, String strToSearch) {
 
-		String[] string = strToSearch.trim().split("\\s+");
+		String[] string = strToSearch.trim().split(SPACE);
 		int strLen = string.length;
 		int maxScore = 0;
 

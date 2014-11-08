@@ -171,6 +171,15 @@ public interface TaskList {
 	//@author
 	Integer getIndexTaskOnPage(Integer taskIndex);
 	
+	
+	/**
+	 * Gets a list of floating tasks.
+	 * 
+	 * @return	List of floating tasks.
+	 */
+	//@author
+	TaskList getFloatingTasks();
+	
 	/**
 	 * Gets a list of overdue tasks.
 	 * 
