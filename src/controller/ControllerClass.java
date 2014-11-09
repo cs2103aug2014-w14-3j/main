@@ -52,6 +52,21 @@ public class ControllerClass implements Controller {
 	public static final String CMD_CLEARARCHIVE = "clear";
 	public static final String CMD_PENDING = "pending";
 	public static final String CMD_EXIT = "exit";
+	
+	public static final String CMD_FORMAT_ADD = "Add a task: add \"[description]\" [times]";
+	public static final String CMD_FORMAT_DELETE = "Delete tasks: delete [task numbers..]";
+	public static final String CMD_FORMAT_EDIT = "Edit a task: edit desc/time/! [value] (! for priority)";
+	public static final String CMD_FORMAT_DISPLAY = "Go to main list: list/display";
+	public static final String CMD_FORMAT_UNDO = "Undo last operation: undo";
+	public static final String CMD_FORMAT_DONE = "Move tasks to archive: done [task numbers..]";
+	public static final String CMD_FORMAT_POSTPONE = "Postpone tasks: pp [task numbers..]";
+	public static final String CMD_FORMAT_ARCHIVE = "Go to archive list: archive";
+	public static final String CMD_FORMAT_OVERDUE = "Show overdue tasks: overdue";
+	public static final String CMD_FORMAT_CHANGEPAGE = "Change page: page up/down";
+	public static final String CMD_FORMAT_FREETIME = "Find free time: find [duration (e.g. 3 hours)]/[interval (e.g. 10am to 12am)]";
+	public static final String CMD_FORMAT_CLEARARCHIVE = "Clear archive: clear";
+	public static final String CMD_FORMAT_PENDING = "Show all floating tasks: pending";
+	public static final String CMD_FORMAT_EXIT = "Quit: exit";
 
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
@@ -87,6 +102,7 @@ public class ControllerClass implements Controller {
 	private static final String MESSAGE_FEEDBACK_ARCHIVE_CLEAR = "All tasks in archive are deleted.";
 	private static final String MESSAGE_FEEDBACK_FREETIME_INVALID = "Please specify time!";
 	private static final String MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD = "Please specify the period of time!";
+	private static final String MESSAGE_FEEDBACK_AUTOCOMPLETE = "Press Tab to enter \"%1$s\"";
 	private static final String EDIT_ATTRIBUTE_DESC = "desc";
 	private static final String EDIT_ATTRIBUTE_TIME = "time";
 	private static final String EDIT_ATTRIBUTE_PRIORITY = "!";
@@ -113,6 +129,7 @@ public class ControllerClass implements Controller {
 	};
 
 	public static final Map<String, CommandType> commandMap;
+	public static final Map<String, String> commandFormatMap;
 
 	static {
 		Map<String, CommandType> aMap = new HashMap<>();
@@ -132,6 +149,24 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_PENDING, CommandType.PENDING);
 		aMap.put(CMD_EXIT, CommandType.EXIT);
 		commandMap = Collections.unmodifiableMap(aMap);
+		
+		Map<String, String> bMap = new HashMap<>();
+		bMap.put(CMD_ADD, CMD_FORMAT_ADD);
+		bMap.put(CMD_DELETE, CMD_FORMAT_DELETE);
+		bMap.put(CMD_EDIT, CMD_FORMAT_EDIT);
+		bMap.put(CMD_POSTPONE, CMD_FORMAT_POSTPONE);
+		bMap.put(CMD_LIST1, CMD_FORMAT_DISPLAY);
+		bMap.put(CMD_LIST2, CMD_FORMAT_DISPLAY);
+		bMap.put(CMD_UNDO, CMD_FORMAT_UNDO);
+		bMap.put(CMD_ARCHIVE, CMD_FORMAT_ARCHIVE);
+		bMap.put(CMD_DONE, CMD_FORMAT_DONE);
+		bMap.put(CMD_PAGE, CMD_FORMAT_CHANGEPAGE);
+		bMap.put(CMD_OVERDUE, CMD_FORMAT_OVERDUE);
+		bMap.put(CMD_FREE, CMD_FORMAT_FREETIME);
+		bMap.put(CMD_CLEARARCHIVE, CMD_FORMAT_CLEARARCHIVE);
+		bMap.put(CMD_PENDING, CMD_FORMAT_PENDING);
+		bMap.put(CMD_EXIT, CMD_FORMAT_EXIT);
+		commandFormatMap = Collections.unmodifiableMap(bMap);
 	}
 
 	private static final int POSITION_OF_OPERATION = 0;
@@ -153,8 +188,9 @@ public class ControllerClass implements Controller {
 	private Storage storage;
 	private FixedSizeStack<TaskList> undoList;
 	private FixedSizeStack<TaskList> undoArchiveList;
+	private String suggestFeedback;
 
-	private String feedbackMessage = EMPTY_STRING;
+	private String feedbackMessage;
 
 	/**
 	 * Constructs the Controller Class object.
@@ -170,6 +206,9 @@ public class ControllerClass implements Controller {
 		setNumTaskOnPage(numTasksInSinglePage);
 		displayListType = DisplayList.MAIN;
 		resetRecentChange();
+		
+		feedbackMessage = EMPTY_STRING;
+		suggestFeedback = null;
 	}
 	
 	/**
@@ -200,6 +239,9 @@ public class ControllerClass implements Controller {
 	 */
 	// @author
 	public String getFeedback() {
+		if (suggestFeedback != null) {
+			return suggestFeedback;
+		}
 		return feedbackMessage;
 	}
 	
@@ -215,6 +257,27 @@ public class ControllerClass implements Controller {
 	 */
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
+	}
+	
+	/**
+	 * Sets suggest feedback message. 
+	 * If no suggest feedback exist. 
+	 * Last feedback from command execution will be shown.
+	 * 
+	 * @param feedback
+	 * 			Feedback message after suggest is executed.
+	 */
+	private void setSuggestFeedback(String feedback) {
+		suggestFeedback = feedback;
+	}
+	
+	/**
+	 * Clear suggest feedback message.  
+	 * Last feedback from command execution will be shown.
+	 * 
+	 */
+	private void clearSuggestFeedback() {
+		suggestFeedback = null;
 	}
 
 	/**
@@ -272,30 +335,74 @@ public class ControllerClass implements Controller {
 	 */
 	// @author
 	public String suggest(String content) {
-		List<String> suggestList = new ArrayList<String>();
 		String emptySuggest = "";
+		String suggest;
 		
 		if (content == null || content.isEmpty()) {
+			clearSuggestFeedback();
 			return emptySuggest;
 		}
 		
+		suggest = suggestCmd(content);
+		if (suggest != null) {
+			if (suggest.trim().equalsIgnoreCase(content.trim())) {
+				setSuggestFeedback(commandFormatMap.get(suggest.trim().toLowerCase()));
+				return emptySuggest;
+			}
+			setSuggestFeedback(String.format(MESSAGE_FEEDBACK_AUTOCOMPLETE, suggest));
+			return suggest;
+		}
+		
+		suggest = suggestKeyword(content);
+		if (suggest != null) {
+			if (suggest.trim().equalsIgnoreCase(content.trim())) {
+				clearSuggestFeedback();
+				return emptySuggest;
+			}
+			setSuggestFeedback(String.format(MESSAGE_FEEDBACK_AUTOCOMPLETE, suggest));
+			return suggest;
+		}
+		
+		clearSuggestFeedback();
+		return emptySuggest;
+	}
+	
+	/**
+	 * Suggest a command with prefix, return null if no such word
+	 * 
+	 * @param content
+	 * @return String 	smallest string with prefix content
+	 */
+	private String suggestCmd(String content) {
+		List<String> suggestList = new ArrayList<String>();
 		// suggest commands
 		for (String str : commandMap.keySet()) {
 			if (str.indexOf(content) == 0) {
 				suggestList.add(str);
 			}
 		}
-		
+			
 		//return smallest from commands
 		if (!suggestList.isEmpty()) {
 			Collections.sort(suggestList);
 			return suggestList.get(0);
 		}
-		
+			
+		return null;
+	}
+	
+	/**
+	 * Suggest a word with prefix, return null if no such word
+	 * 
+	 * @param content
+	 * @return String 	smallest string with prefix content
+	 */
+	private String suggestKeyword(String content) {
 		if (content.charAt(content.length() - 1) == ' ') {
-			return emptySuggest;
+			return null;
 		}
 		
+		List<String> suggestList = new ArrayList<String>();
 		// suggest words
 		String[] words = content.split(" ");
 		String key = words[words.length - 1];
@@ -308,7 +415,7 @@ public class ControllerClass implements Controller {
 			return suggestList.get(0);
 		}
 		
-		return emptySuggest;
+		return null;
 	}
 
 	/**
@@ -1847,7 +1954,7 @@ public class ControllerClass implements Controller {
 	 */
 	// @author
 	private CommandType matchCommandType(String operation) {
-		CommandType command = commandMap.get(operation.toLowerCase());
+		CommandType command = commandMap.get(operation.trim().toLowerCase());
 		if (command == null) {
 			command = CommandType.SEARCH;
 		}
