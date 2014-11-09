@@ -274,6 +274,11 @@ public class ControllerClass implements Controller {
 	 */
 	private void setSuggestFeedback(String feedback) {
 		suggestFeedback = feedback;
+		
+		//remove feedback of last operation
+		if (displayListType == DisplayList.MAIN) {
+			feedbackMessage = MESSAGE_FEEDBACK_MAIN;
+		} 
 	}
 	
 	/**
