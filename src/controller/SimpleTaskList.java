@@ -1037,4 +1037,25 @@ public class SimpleTaskList implements TaskList {
 		return editDistance[sourceStrLen][destStrLen];
 	}
 
+	/**
+	 * Suggest possible word based on key
+	 * 
+	 * @param key
+	 * @return list of words
+	 */
+	@Override
+	public List<String> suggestWord(final String key) {
+		List<String> wordList = new ArrayList<>();
+		tasks.forEach((task) -> {
+			String desc = task.getDesc();
+			String[] words = desc.split(" ");
+			for (int i = 0; i < words.length; i++) {
+				if (words[i].indexOf(key.trim()) == 0) {
+					wordList.add(words[i]);
+				}
+			}
+		});
+		return wordList;
+	}
+
 }

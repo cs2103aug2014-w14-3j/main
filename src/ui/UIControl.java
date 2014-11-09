@@ -44,23 +44,11 @@ public class UIControl extends BorderPane {
 	@FXML
 	private Text noti;
 	
-	private Popup suggest;
-	PopupList popupList;
-	
 	private double mouseX;
 	private double mouseY;
 	
 	public UIControl() {
 		displayCurTime();
-				
-		suggest = new Popup();
-		popupList = new PopupList();
-		suggest.getContent().add(popupList.getPane());
-		suggest.setAutoFix(false);
-		suggest.setAutoHide(true);
-		suggest.setConsumeAutoHidingEvents(false);
-		suggest.setHideOnEscape(true);
-		suggest.setAnchorLocation(AnchorLocation.CONTENT_TOP_LEFT);
 	}
 	
 	public void init() {
@@ -132,19 +120,32 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
-	public void setInputOnChange(ListGetter value) {
+	public void setInputOnChange(OnEvent value) {
+		//TODO
+		if (0 == 0)
+			return;
 		input.textProperty().addListener((observable, oldString, newString)->{
-			double posX = input.localToScene(0.0, 0.0).getX() 
-					+ input.getScene().getWindow().getX();
-			double posY = input.getScene().getWindow().getY()
-					+ input.localToScene(0.0, 0.0).getY()
-					+ input.getHeight();
-			
-			if (popupList.loadList(value.getList(newString))) {
-				suggest.show(input, posX, posY);
-			} else {
-				suggest.hide();
+			//ensure caret is at the end
+			if (newString.length() <= oldString.length()) {
+				return;
 			}
+			if (input.caretPositionProperty().get() != newString.length() - 1) {
+				return;
+			}
+			
+			String suggest = value.onEventExec(newString).trim();
+			
+			if (suggest.isEmpty()) {
+				return;
+			}
+			
+			String[] words = newString.split(" ");
+			String originWord = words[words.length - 1];
+			String append = suggest.substring(suggest.indexOf(originWord) 
+											  + originWord.length());
+			
+			setInputText(newString + append);
+			//input.selectRange(input.getText().length(), newString.length());
 			
 		});
 	}
@@ -153,7 +154,11 @@ public class UIControl extends BorderPane {
 		input.setText(str);
 		input.requestFocus();
 		try {
+			System.out.println(input.caretPositionProperty().get());
+			System.out.println(input.getText().length());
 			input.positionCaret(input.getText().length());
+			System.out.println(input.caretPositionProperty().get());
+			System.out.println(input.getText().length());
 		} catch (Exception e) {
 			//do nothing
 		}

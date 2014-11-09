@@ -51,7 +51,8 @@ public class ControllerClass implements Controller {
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE = "find";
 	public static final String CMD_CLEARARCHIVE = "clear";
-	public static final String CMD_PENDING="pending";
+	public static final String CMD_PENDING = "pending";
+	public static final String CMD_EXIT = "exit";
 
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
@@ -106,7 +107,7 @@ public class ControllerClass implements Controller {
 	private static final String LOGGING_PURPOSE_METHODNAME_DELETE = "executeDelete";
 
 	enum CommandType {
-		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE,PENDING
+		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE, PENDING, EXIT
 	};
 
 	enum DisplayList {
@@ -131,6 +132,7 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_FREE, CommandType.FREETIME);
 		aMap.put(CMD_CLEARARCHIVE, CommandType.CLEARARCHIVE);
 		aMap.put(CMD_PENDING, CommandType.PENDING);
+		aMap.put(CMD_EXIT, CommandType.EXIT);
 		commandMap = Collections.unmodifiableMap(aMap);
 	}
 
@@ -148,6 +150,7 @@ public class ControllerClass implements Controller {
 	private DisplayList displayListType;
 	private Integer recentChange;
 	private Integer currentPageNum;
+	private boolean onExit;
 
 	private Storage storage;
 	private FixedSizeStack<TaskList> undoList;
@@ -160,6 +163,7 @@ public class ControllerClass implements Controller {
 	 */
 	// @author
 	private ControllerClass() {
+		onExit = false;
 		storage = createStorageObject();
 		undoList = new FixedSizeStack<TaskList>(maxNumOfUndo);
 		undoArchiveList = new FixedSizeStack<TaskList>(maxNumOfUndo);
@@ -199,6 +203,10 @@ public class ControllerClass implements Controller {
 	// @author
 	public String getFeedback() {
 		return feedbackMessage;
+	}
+	
+	public boolean isExiting() {
+		return onExit;
 	}
 
 	/**
@@ -257,7 +265,7 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Generates a list of stringed commands and possible words found in
+	 * Generates the most possible stringed commands and possible words found in
 	 * description of tasks to suggest to user.
 	 * 
 	 * @param content
@@ -265,25 +273,44 @@ public class ControllerClass implements Controller {
 	 * @return List of suggested stringed commands and words.
 	 */
 	// @author
-	public List<String> suggest(String content) {
+	public String suggest(String content) {
 		List<String> suggestList = new ArrayList<String>();
-
+		String emptySuggest = "";
+		
 		if (content == null || content.isEmpty()) {
-			return suggestList;
+			return emptySuggest;
 		}
+		
 		// suggest commands
 		for (String str : commandMap.keySet()) {
 			if (str.indexOf(content) == 0) {
 				suggestList.add(str);
 			}
 		}
-	
-		// suggest search
-		TaskList resultList = tasks.searchDesc(content, tasks);
 		
-		suggestList.addAll(resultList.getStringList());
-
-		return suggestList;
+		//return smallest from commands
+		if (!suggestList.isEmpty()) {
+			Collections.sort(suggestList);
+			return suggestList.get(0);
+		}
+		
+		if (content.charAt(content.length() - 1) == ' ') {
+			return emptySuggest;
+		}
+		
+		// suggest words
+		String[] words = content.split(" ");
+		String key = words[words.length - 1];
+		suggestList.addAll(tasks.suggestWord(key));
+		suggestList.addAll(archiveTasks.suggestWord(key));
+		
+		//return smallest from results
+		if (!suggestList.isEmpty()) {
+			Collections.sort(suggestList);
+			return suggestList.get(0);
+		}
+		
+		return emptySuggest;
 	}
 
 	/**
@@ -523,9 +550,19 @@ public class ControllerClass implements Controller {
 			updateForUndo();
 			clearArchive();
 			break;
+		case EXIT:
+			onExit();
+			break;
 		default:
 			assert false: commandType;
 		}
+	}
+	
+	/**
+	 * Set the program to be on exiting
+	 */
+	private void onExit() {
+		onExit = true;
 	}
 
 	/**
