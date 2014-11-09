@@ -55,19 +55,19 @@ public class ControllerClass implements Controller {
 	public static final String CMD_PENDING = "pending";
 	public static final String CMD_EXIT = "exit";
 	
-	public static final String CMD_FORMAT_ADD = "Add a task: add \"[description]\" [times]";
-	public static final String CMD_FORMAT_DELETE = "Delete tasks: delete [task numbers..]";
-	public static final String CMD_FORMAT_EDIT = "Edit a task: edit desc/time/! [value] (! for priority)";
-	public static final String CMD_FORMAT_DISPLAY = "Go to main list: list/display";
-	public static final String CMD_FORMAT_UNDO = "Undo last operation: undo";
-	public static final String CMD_FORMAT_DONE = "Move tasks to archive: done [task numbers..]";
-	public static final String CMD_FORMAT_POSTPONE = "Postpone tasks: pp [task numbers..]";
-	public static final String CMD_FORMAT_ARCHIVE = "Go to archive list: archive";
-	public static final String CMD_FORMAT_OVERDUE = "Show overdue tasks: overdue";
-	public static final String CMD_FORMAT_CHANGEPAGE = "Change page: page up/down";
-	public static final String CMD_FORMAT_FREETIME = "Find free time: find [duration (e.g. 3 hours)]/[interval (e.g. 10am to 12am)]";
-	public static final String CMD_FORMAT_CLEARARCHIVE = "Clear archive: clear";
-	public static final String CMD_FORMAT_PENDING = "Show all floating tasks: pending";
+	public static final String CMD_FORMAT_ADD = "To add a task: add \"[description]\" [times]";
+	public static final String CMD_FORMAT_DELETE = "To delete tasks: delete [task numbers..]";
+	public static final String CMD_FORMAT_EDIT = "To edit a task: edit desc/time/! [value] (! for priority)";
+	public static final String CMD_FORMAT_DISPLAY = "To go to main list: list/main";
+	public static final String CMD_FORMAT_UNDO = "To undo last operation: undo";
+	public static final String CMD_FORMAT_DONE = "To move tasks to archive: done [task numbers..]";
+	public static final String CMD_FORMAT_POSTPONE = "To postpone tasks: pp [task numbers..]";
+	public static final String CMD_FORMAT_ARCHIVE = "To go to archive list: archive";
+	public static final String CMD_FORMAT_OVERDUE = "To how overdue tasks: overdue";
+	public static final String CMD_FORMAT_CHANGEPAGE = "To change page: page up/down or use page up/down on the keyboard";
+	public static final String CMD_FORMAT_FREETIME = "To find free time: find [duration (e.g. 3 hours)]/[interval (e.g. 10am to 12am)] +[deadline]";
+	public static final String CMD_FORMAT_CLEARARCHIVE = "To clear archive: clear";
+	public static final String CMD_FORMAT_PENDING = "To show all floating tasks: pending";
 	public static final String CMD_FORMAT_EXIT = "Quit: exit";
 
 	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
@@ -166,7 +166,8 @@ public class ControllerClass implements Controller {
 		bMap.put(CMD_DONE, CMD_FORMAT_DONE);
 		bMap.put(CMD_PAGE, CMD_FORMAT_CHANGEPAGE);
 		bMap.put(CMD_OVERDUE, CMD_FORMAT_OVERDUE);
-		bMap.put(CMD_FREE, CMD_FORMAT_FREETIME);
+		bMap.put(CMD_FREE1, CMD_FORMAT_FREETIME);
+		bMap.put(CMD_FREE2, CMD_FORMAT_FREETIME);
 		bMap.put(CMD_CLEARARCHIVE, CMD_FORMAT_CLEARARCHIVE);
 		bMap.put(CMD_PENDING, CMD_FORMAT_PENDING);
 		bMap.put(CMD_EXIT, CMD_FORMAT_EXIT);

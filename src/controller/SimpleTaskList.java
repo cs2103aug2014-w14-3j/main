@@ -895,7 +895,7 @@ public class SimpleTaskList implements TaskList {
 		
 		Collections.sort(list);
 		
-		for (int i = list.size() - 1; i >= 0; i--) {
+		for (int i = 0; i <list.size(); i++) {
 			Task task = list.get(i).getThird();
 			resultList.add(task);
 		}
