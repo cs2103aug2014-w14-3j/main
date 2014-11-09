@@ -818,6 +818,7 @@ public class ControllerClass implements Controller {
 
 		Calendar cal=Calendar.getInstance();//next 30 days
 		cal.add(Calendar.DATE, 30);
+		
 		Date nextMonth = cal.getTime();
 	
 		//case 1 :search for number of hours
@@ -848,8 +849,15 @@ public class ControllerClass implements Controller {
 					}
 					
 					Date deadline=timeParser(date);
-					
+				
 					if (deadline!=null){
+						Calendar cal1=Calendar.getInstance();
+						cal1.setTime(deadline);
+						cal1.set(Calendar.HOUR_OF_DAY,23);
+						cal1.set(Calendar.MINUTE,59);
+						cal1.set(Calendar.SECOND,59);
+						
+						deadline=cal1.getTime();
 						return findTimeLength(hh*60,deadline);
 					}else {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
@@ -886,6 +894,13 @@ public class ControllerClass implements Controller {
 					Date deadline=timeParser(date);
 					
 					if (deadline!=null){
+						Calendar cal1=Calendar.getInstance();
+						cal1.setTime(deadline);
+						cal1.set(Calendar.HOUR_OF_DAY,23);
+						cal1.set(Calendar.MINUTE,59);
+						cal1.set(Calendar.SECOND,59);
+						
+						deadline=cal1.getTime();
 						return findTimeLength(mm,deadline);
 					}else {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
@@ -924,6 +939,13 @@ public class ControllerClass implements Controller {
 					
 					Date deadline=timeParser(date);
 					if (deadline!=null){
+						Calendar cal1=Calendar.getInstance();
+						cal1.setTime(deadline);
+						cal1.set(Calendar.HOUR_OF_DAY,23);
+						cal1.set(Calendar.MINUTE,59);
+						cal1.set(Calendar.SECOND,59);
+						
+						deadline=cal1.getTime();
 						return findTimeLength(hh*60+mm,deadline);
 					}else {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
@@ -1939,7 +1961,7 @@ public class ControllerClass implements Controller {
 			// return processUserInputClassic(content);
 			desc = content + SPACE_STRING;
 			content = EMPTY_STRING;
-		}
+		} 
 
 		String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
 		Matcher matcher = Pattern.compile(regex).matcher(content);
