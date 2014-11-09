@@ -218,4 +218,12 @@ public interface TaskList {
 	 */
 	//@author Tran Cong Thien
 	TaskList searchDesc(String key, TaskList list);
+	
+	/**
+	 * Suggest possible word based on key
+	 * 
+	 * @param key
+	 * @return list of words
+	 */
+	List<String> suggestWord(String key);
 }

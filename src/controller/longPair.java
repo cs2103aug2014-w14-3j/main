@@ -3,7 +3,7 @@ package controller;
 /**
  * Class for pairs of type long.
  */
-//@author
+//@author A0112044B
 public class longPair implements Comparable<longPair>{
 	long first;
 	long second;

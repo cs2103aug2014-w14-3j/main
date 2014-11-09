@@ -10,14 +10,25 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author Luo Shaohuai
+ * This class is for log in ui
+ * 
+ * @author A0119381E
  *
  */
+//@author A0119381E
 public class Log {
+	PrintWriter logWriter;
+	
 	public Log() {
 		logWriter = null;
 	}
 	
+	/**
+	 * return if the log cannot work properly
+	 * 
+	 * @return if there is an error
+	 */
+	//@author A0119381E
 	public boolean hasError() {
 		if (logWriter == null) {
 			return true;
@@ -28,6 +39,12 @@ public class Log {
 		return false;
 	}
 	
+	/**
+	 * Log the text to file
+	 * 
+	 * @param logText
+	 */
+	//@author A0119381E
 	public void log(String logText) {
 		openFile();
 		if (hasError()) {
@@ -42,6 +59,10 @@ public class Log {
 		closeFile();
 	}
 	
+	/**
+	 * Open log file
+	 */
+	//@author A0119381E
 	private void openFile() {
 		try {
 			logWriter = new PrintWriter(new FileWriter(Config.logFile, true));
@@ -53,10 +74,12 @@ public class Log {
 		}	
 	}
 	
+	/**
+	 * Close log file
+	 */
+	//@author A0119381E
 	private void closeFile() {
 		logWriter.close();
 		logWriter = null;
 	}
-	
-	PrintWriter logWriter;
 }

@@ -14,8 +14,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
-import javafx.stage.Popup;
-import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -25,9 +23,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
 /**
- * @author Luo Shaohuai
- *
+ * This class is the controller of the main UI
+ * 
+ * @author A0119381E
  */
+//@author A0119381E
 public class UIControl extends BorderPane {	
 	@FXML
 	private Text time;
@@ -44,33 +44,43 @@ public class UIControl extends BorderPane {
 	@FXML
 	private Text noti;
 	
-	private Popup suggest;
-	PopupList popupList;
-	
 	private double mouseX;
 	private double mouseY;
 	
+	private String appendOnComplete;
+	
 	public UIControl() {
 		displayCurTime();
-				
-		suggest = new Popup();
-		popupList = new PopupList();
-		suggest.getContent().add(popupList.getPane());
-		suggest.setAutoFix(false);
-		suggest.setAutoHide(true);
-		suggest.setConsumeAutoHidingEvents(false);
-		suggest.setHideOnEscape(true);
-		suggest.setAnchorLocation(AnchorLocation.CONTENT_TOP_LEFT);
 	}
 	
+	/**
+	 * Initializer, 
+	 * must be called after set scene to stage 
+	 * and before all other operation
+	 */
+	//@author A0119381E
 	public void init() {
+		list.setFocusTraversable(false);
 		setDraggable(title);
 	}
 	
+	/**
+	 * Load the list to main list with selection cleared
+	 * 
+	 * @param displayBuf
+	 */
+	//@author A0119381E
 	public void loadList(List<String> displayBuf) {
-		loadList(displayBuf, 0);
+		loadList(displayBuf, -1);
 	}
 	
+	/**
+	 * Load the list to main list and set selection
+	 * 
+	 * @param strList
+	 * @param recentChange
+	 */
+	//@author A0119381E
 	public void loadList(List<String> strList, Integer recentChange) { 
 		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
 		list.setItems(observableList);
@@ -82,23 +92,32 @@ public class UIControl extends BorderPane {
 			return;
 		}
 		
-		if (recentChange < 0) {
-			recentChange = 0;
+		if (recentChange < 0 || recentChange >= strList.size()) {
+			list.getSelectionModel().clearSelection();
+		} else {
+			list.scrollTo(recentChange);
+			list.getSelectionModel().select(recentChange);
 		}
-		if (recentChange >= strList.size()) {
-			recentChange = strList.size() - 1;
-		}
-		
-		list.scrollTo(recentChange);
-		list.getSelectionModel().select(recentChange);
 		input.requestFocus();
 	}
 	
+	/**
+	 * SHow message to notification area
+	 * 
+	 * @param message
+	 */
+	//@author A0119381E
 	public void showNoti(String message) {
 		noti.setText(message);
 	}
 	
-	public void setInputOnEnter(OnEvent value) {
+	/**
+	 * Set the operation when command need to be executed
+	 * 
+	 * @param value
+	 */
+	//@author A0119381E
+	public void setOnExecCmd(OnEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				value.onEventExec(input.getText());
@@ -107,62 +126,82 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
-	public void setInputOnKeyUPDown(OnEvent value) {
+	/**
+	 * Set the operation when command history is needed 
+	 * 
+	 * @param value
+	 */
+	//@author A0119381E
+	public void setOnRequestHistory(OnEvent value) {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
 				input.setText(value.onEventExec("UP"));
-				try {
-					input.positionCaret(input.getText().length());
-				} catch (Exception e) {
-					//do nothing
-					//if input has no text, exception will be thrown
-				}
+				setInputCaretToEnd();
 				event.consume();
 			}
 			if (event.getCode() == KeyCode.DOWN) {
 				input.setText(value.onEventExec("DOWN"));
-				try {
-					input.positionCaret(input.getText().length());
-				} catch (Exception e) {
-					//do nothing
-					//if input has no text, exception will be thrown
-				}
+				setInputCaretToEnd();
+				event.consume();
+			}
+			if (event.getCode() == KeyCode.TAB) {
+				input.setText(input.getText() + appendOnComplete);
+				setInputCaretToEnd();
 				event.consume();
 			}
 		});
 	}
 	
-	public void setInputOnChange(ListGetter value) {
+	/**
+	 * Set the operation when suggest is needed
+	 * 
+	 * @param value
+	 */
+	//@author A0119381E
+	public void setInputOnChange(OnEvent value) {
 		input.textProperty().addListener((observable, oldString, newString)->{
-			double posX = input.localToScene(0.0, 0.0).getX() 
-					+ input.getScene().getWindow().getX();
-			double posY = input.getScene().getWindow().getY()
-					+ input.localToScene(0.0, 0.0).getY()
-					+ input.getHeight();
-			
-			if (popupList.loadList(value.getList(newString))) {
-				suggest.show(input, posX, posY);
-			} else {
-				suggest.hide();
+			//ensure caret is at the end
+			if (input.caretPositionProperty().get() < newString.length() - 1) {
+				return;
 			}
 			
+			String suggest = value.onEventExec(newString).trim();
+			
+			if (suggest.isEmpty()) {
+				return;
+			}
+			
+			String[] words = newString.split(" ");
+			String originWord = words[words.length - 1];
+			appendOnComplete = suggest.substring(suggest.indexOf(originWord) 
+									   + originWord.length());
 		});
 	}
 	
-	public void setInputText(String str) {
-		input.setText(str);
-		input.requestFocus();
-		try {
-			input.positionCaret(input.getText().length());
-		} catch (Exception e) {
-			//do nothing
-		}
-	}
-	
+	/**
+	 * Let input box get focus
+	 */
+	//@author A0119381E
 	public void setInputOnFocus() {
 		input.requestFocus();
 	}
 	
+	/**
+	 * Push caret of input box to the end position
+	 */
+	private void setInputCaretToEnd() {
+		try {
+			input.positionCaret(input.getText().length());
+		} catch (Exception e) {
+			//do nothing
+			//if input has no text, exception will be thrown
+		}
+	}
+	
+	/**
+	 * Display current time on title bar
+	 */
+	//@author A0119381E
 	private void displayCurTime() {
 		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.curTimeDateFormat);
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
@@ -172,6 +211,12 @@ public class UIControl extends BorderPane {
 		timeline.play();
 	}
 	
+	/**
+	 * Set the title bar to be draggable
+	 * 
+	 * @param node
+	 */
+	//@author A0119381E
 	private void setDraggable(Node node) {
 	    node.setOnMousePressed((event) -> {
 	    	mouseX = event.getSceneX();

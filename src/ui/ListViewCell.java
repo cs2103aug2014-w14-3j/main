@@ -6,9 +6,14 @@ package ui;
 import javafx.scene.control.ListCell;
 
 /**
- * @author Luo Shaohuai
+ * This class overriding ListCell to be displayed in the main list
+ * Will be called by system when an item need to be displayed
+ * Generating a ListItem (HBox) Node to the list
+ * 
+ * @author A0119381E
  *
  */
+//@author A0119381E
 class ListViewCell extends ListCell<String> {
 	@Override
 	public void updateItem(String str, boolean empty){

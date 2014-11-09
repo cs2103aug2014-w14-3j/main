@@ -17,9 +17,12 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 /**
- * @author Luo Shaohuai
+ * This class is the controller of and will generate a list item
+ * 
+ * @author A0119381E
  *
  */
+//@author A0119381E
 public class ListItem{
 	@FXML
 	private HBox box;
@@ -50,31 +53,64 @@ public class ListItem{
 		desc.setText("");
 	}
 	
+	/**
+	 * Get the Node representation of the list item
+	 * 
+	 * @return HBox
+	 */
+	//@author A0119381E
 	public HBox getHBox() {
 		return box;
 	}
 	
+	
+	/**
+	 * Set text to position of description
+	 * 
+	 * @param text
+	 */
+	//@author A0119381E
 	public void setDesc(String text) {
 		desc.setText(text);
 	}
 	
+	/**
+	 * Set if the item is shown as prioritized
+	 * 
+	 * @param priority
+	 */
+	//@author A0119381E
 	public void setPriority(boolean priority) {
 		this.prior.setVisible(priority);
 	}
 	
+	/**
+	 * Clear all text in time field
+	 */
+	//@author A0119381E
 	public void clearTime() {
 		time.getChildren().clear();
 		this.overdue.setVisible(false);
 	}
 	
+	/**
+	 * Set as no time
+	 */
+	//@author A0119381E
 	public void setTimes() {
 		clearTime();
-		Text floating = new Text("Floating");
-		floating.setStyle("-fx-fill: #777777;");
+		Text floating = new Text(Config.floating);
+		floating.setStyle(Config.minorTextStyle);
 		time.getChildren().add(floating);
 		this.overdue.setVisible(false);
 	}
 	
+	/**
+	 * Set with one time
+	 * 
+	 * @param timeInMilli
+	 */
+	//@author A0119381E
 	public void setTimes(Long timeInMilli) {
 		clearTime();
 		time.getChildren().add(timeToText(timeInMilli));
@@ -82,18 +118,32 @@ public class ListItem{
 		
 	}
 	
+	/**
+	 * Set with two times
+	 * 
+	 * @param timeStart
+	 * @param timeEnd
+	 */
+	//@author A0119381E
 	public void setTimes(Long timeStart, Long timeEnd) {
 		clearTime();
 		time.getChildren().add(timeToText(timeStart));
 		
 		Text to = new Text();
-		to.setText(" to ");
-		to.setStyle("-fx-fill: #777777");
+		to.setText(Config.timeSeparater);
+		to.setStyle(Config.minorTextStyle);
 		time.getChildren().add(to);
 		time.getChildren().add(timeToText(timeEnd));
 		this.overdue.setVisible(isOverdue(timeStart));
 	}
 	
+	/**
+	 * Convert time(epoch) to Text
+	 * 
+	 * @param timeInMilli
+	 * @return
+	 */
+	//@author A0119381E
 	private Text timeToText(Long timeInMilli) {
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), 
@@ -102,10 +152,17 @@ public class ListItem{
 		Text timeText = new Text();
 		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.taskDateFormat);
 		timeText.setText(format.format(timeobj));
-		timeText.setStyle("-fx-fill: #222222;");
+		timeText.setStyle(Config.timeStyle);
 		return timeText;
 	}
 	
+	/**
+	 * Check if overdue
+	 * 
+	 * @param timeInMilli
+	 * @return if the task is overdue
+	 */
+	//@author A0119381E
 	private boolean isOverdue(Long timeInMilli) {
 		LocalDateTime time = LocalDateTime.ofInstant(
 								new Date(timeInMilli).toInstant(), 
