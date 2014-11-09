@@ -102,7 +102,7 @@ public class UIControl extends BorderPane {
 	}
 	
 	/**
-	 * SHow message to notification area
+	 * Show message to notification area
 	 * 
 	 * @param message
 	 */

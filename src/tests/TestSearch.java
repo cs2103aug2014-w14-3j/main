@@ -9,6 +9,7 @@ import org.junit.Test;
 import controller.Controller;
 import controller.ControllerClass;
 
+//@author A0112044B
 public class TestSearch {
 
 	
