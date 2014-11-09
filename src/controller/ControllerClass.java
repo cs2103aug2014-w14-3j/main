@@ -51,7 +51,7 @@ public class ControllerClass implements Controller {
 	public static final String CMD_FREE1 = "find";
 	public static final String CMD_FREE2 = "search";
 	public static final String CMD_CLEARARCHIVE = "clear";
-	public static final String CMD_PENDING = "pending";
+	public static final String CMD_PENDING = "floating";
 	public static final String CMD_EXIT = "exit";
 
 	public static final String CMD_FORMAT_ADD = "To add a task: add \"[description]\" [times]";
@@ -283,6 +283,11 @@ public class ControllerClass implements Controller {
 	 */
 	private void setSuggestFeedback(String feedback) {
 		suggestFeedback = feedback;
+		
+		//remove feedback of last operation
+		if (displayListType == DisplayList.MAIN) {
+			feedbackMessage = MESSAGE_FEEDBACK_MAIN;
+		} 
 	}
 
 	/**
