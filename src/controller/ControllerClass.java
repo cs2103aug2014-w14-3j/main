@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import storage.Storage;
 import storage.StoragePlus;
@@ -465,7 +464,6 @@ public class ControllerClass implements Controller {
 	//@author
 	private void setDisplayList(DisplayList listType) {
 		this.displayListType = listType;
-		resetRecentChange();
 	}
 
 	/**
@@ -508,7 +506,7 @@ public class ControllerClass implements Controller {
 	//@author
 	private void resetRecentChange() {
 		currentPageNum = 1;
-		recentChange = 0;
+		recentChange = -1;
 	}
 
 	/**
@@ -1367,15 +1365,12 @@ public class ControllerClass implements Controller {
 					postponedTask.setType(TaskType.FLOATING);
 
 					if (i == taskNumbers.length - 1) {
-						if (displayListType == DisplayList.MAIN) {
-							setRecentChange(postponedTask, tasks);
-						} else {
-							setRecentChange(postponedTask, resultTasks);
-						}
+						setRecentChange(postponedTask, tasks);
 					}
 				}
 
 				tasks.sort();
+				setDisplayList(DisplayList.MAIN);
 
 				if (taskNumbers.length == 1) {
 					setFeedback(MESSAGE_FEEDBACK_POSTPONE);
@@ -1397,6 +1392,7 @@ public class ControllerClass implements Controller {
 		// getFileContent();
 		// setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
+		resetRecentChange();
 		setDisplayList(DisplayList.MAIN);
 		setFeedback(MESSAGE_FEEDBACK_MAINLIST);
 	}
@@ -1442,9 +1438,9 @@ public class ControllerClass implements Controller {
 			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		} else {
 			tasks.sort();
-			setDisplayList(displayListType);
 			Task taskEdited = proceedWithEdit(content);
 			setRecentChange(taskEdited, tasks);
+			setDisplayList(DisplayList.MAIN);
 		}
 	}
 
@@ -1696,7 +1692,7 @@ public class ControllerClass implements Controller {
 			
 			tasks.sort();
 			setFeedBackDelete(taskNumDescending);
-			clearRecentChange();
+			
 		} catch (NumberFormatException e) {
 			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
 					CMD_DELETE));
@@ -1716,6 +1712,8 @@ public class ControllerClass implements Controller {
 			setFeedback(taskNumDescending.size()
 					+ MESSAGE_FEEDBACK_DELETE_MULTIPLE);
 		}
+		resetRecentChange();
+		setDisplayList(DisplayList.MAIN);
 	}
 
 	/**
@@ -1947,8 +1945,8 @@ public class ControllerClass implements Controller {
 
 		setFeedback(MESSAGE_FEEDBACK_ADD);
 		tasks.sort();
-		setDisplayList(displayListType);
 		setRecentChange(task, tasks);
+		setDisplayList(DisplayList.MAIN);
 	}
 
 	/**
