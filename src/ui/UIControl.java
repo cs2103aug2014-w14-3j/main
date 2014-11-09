@@ -14,8 +14,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
-import javafx.stage.Popup;
-import javafx.stage.PopupWindow.AnchorLocation;
 import javafx.util.Duration;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -47,11 +45,14 @@ public class UIControl extends BorderPane {
 	private double mouseX;
 	private double mouseY;
 	
+	private String appendOnComplete;
+	
 	public UIControl() {
 		displayCurTime();
 	}
 	
 	public void init() {
+		list.setFocusTraversable(false);
 		setDraggable(title);
 	}
 	
@@ -86,7 +87,7 @@ public class UIControl extends BorderPane {
 		noti.setText(message);
 	}
 	
-	public void setInputOnEnter(OnEvent value) {
+	public void setOnExecCmd(OnEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				value.onEventExec(input.getText());
@@ -95,41 +96,30 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
-	public void setInputOnKeyUPDown(OnEvent value) {
+	public void setOnRequestHistory(OnEvent value) {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
 				input.setText(value.onEventExec("UP"));
-				try {
-					input.positionCaret(input.getText().length());
-				} catch (Exception e) {
-					//do nothing
-					//if input has no text, exception will be thrown
-				}
+				setInputCaretToEnd();
 				event.consume();
 			}
 			if (event.getCode() == KeyCode.DOWN) {
 				input.setText(value.onEventExec("DOWN"));
-				try {
-					input.positionCaret(input.getText().length());
-				} catch (Exception e) {
-					//do nothing
-					//if input has no text, exception will be thrown
-				}
+				setInputCaretToEnd();
+				event.consume();
+			}
+			if (event.getCode() == KeyCode.TAB) {
+				input.setText(input.getText() + appendOnComplete);
+				setInputCaretToEnd();
 				event.consume();
 			}
 		});
 	}
 	
 	public void setInputOnChange(OnEvent value) {
-		//TODO
-		if (0 == 0)
-			return;
 		input.textProperty().addListener((observable, oldString, newString)->{
 			//ensure caret is at the end
-			if (newString.length() <= oldString.length()) {
-				return;
-			}
-			if (input.caretPositionProperty().get() != newString.length() - 1) {
+			if (input.caretPositionProperty().get() < newString.length() - 1) {
 				return;
 			}
 			
@@ -141,31 +131,22 @@ public class UIControl extends BorderPane {
 			
 			String[] words = newString.split(" ");
 			String originWord = words[words.length - 1];
-			String append = suggest.substring(suggest.indexOf(originWord) 
-											  + originWord.length());
-			
-			setInputText(newString + append);
-			//input.selectRange(input.getText().length(), newString.length());
-			
+			appendOnComplete = suggest.substring(suggest.indexOf(originWord) 
+									   + originWord.length());
 		});
-	}
-	
-	public void setInputText(String str) {
-		input.setText(str);
-		input.requestFocus();
-		try {
-			System.out.println(input.caretPositionProperty().get());
-			System.out.println(input.getText().length());
-			input.positionCaret(input.getText().length());
-			System.out.println(input.caretPositionProperty().get());
-			System.out.println(input.getText().length());
-		} catch (Exception e) {
-			//do nothing
-		}
 	}
 	
 	public void setInputOnFocus() {
 		input.requestFocus();
+	}
+	
+	private void setInputCaretToEnd() {
+		try {
+			input.positionCaret(input.getText().length());
+		} catch (Exception e) {
+			//do nothing
+			//if input has no text, exception will be thrown
+		}
 	}
 	
 	private void displayCurTime() {

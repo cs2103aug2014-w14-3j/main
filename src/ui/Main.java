@@ -60,8 +60,8 @@ public class Main extends Application{
 		
 		Scene scene = new Scene(mainPane);
 		
-		mainControl.setInputOnEnter((command) -> onEnter(command));
-		mainControl.setInputOnKeyUPDown((direction) -> onUpDown(direction));
+		mainControl.setOnExecCmd((command) -> onEnter(command));
+		mainControl.setOnRequestHistory((direction) -> onUpDown(direction));
 		mainControl.setInputOnChange((str) -> onInputChange(str));
 		
 		execCmd("list");
@@ -88,7 +88,6 @@ public class Main extends Application{
 				return;
 			}
 			mainControl.loadList(displayBuf, recentChange);
-			//System.out.println("mark" + controller.getFeedback());
 			mainControl.showNoti(controller.getFeedback());
 		} catch (Exception e) {
 			if (Config.onDevelopment) {
@@ -125,7 +124,9 @@ public class Main extends Application{
 	}
 	
 	private String onInputChange(String newValue) {
-		return controller.suggest(newValue);
+		String suggest = controller.suggest(newValue);
+		mainControl.showNoti(controller.getFeedback());
+		return suggest;
 	}
 	
 	private void pushHistory(String command) {

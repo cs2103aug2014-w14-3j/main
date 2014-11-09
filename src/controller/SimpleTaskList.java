@@ -1051,7 +1051,9 @@ public class SimpleTaskList implements TaskList {
 			String[] words = desc.split(" ");
 			for (int i = 0; i < words.length; i++) {
 				if (words[i].indexOf(key.trim()) == 0) {
-					wordList.add(words[i]);
+					if (!words[i].trim().equalsIgnoreCase(key.trim())){
+						wordList.add(words[i]);
+					}
 				}
 			}
 		});
