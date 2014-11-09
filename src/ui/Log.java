@@ -12,10 +12,13 @@ import java.util.Date;
 /**
  * This class is for log in ui
  * 
- * @author Luo Shaohuai
+ * @author A0119381E
  *
  */
+//@author A0119381E
 public class Log {
+	PrintWriter logWriter;
+	
 	public Log() {
 		logWriter = null;
 	}
@@ -25,6 +28,7 @@ public class Log {
 	 * 
 	 * @return if there is an error
 	 */
+	//@author A0119381E
 	public boolean hasError() {
 		if (logWriter == null) {
 			return true;
@@ -40,6 +44,7 @@ public class Log {
 	 * 
 	 * @param logText
 	 */
+	//@author A0119381E
 	public void log(String logText) {
 		openFile();
 		if (hasError()) {
@@ -57,6 +62,7 @@ public class Log {
 	/**
 	 * Open log file
 	 */
+	//@author A0119381E
 	private void openFile() {
 		try {
 			logWriter = new PrintWriter(new FileWriter(Config.logFile, true));
@@ -71,10 +77,9 @@ public class Log {
 	/**
 	 * Close log file
 	 */
+	//@author A0119381E
 	private void closeFile() {
 		logWriter.close();
 		logWriter = null;
 	}
-	
-	PrintWriter logWriter;
 }

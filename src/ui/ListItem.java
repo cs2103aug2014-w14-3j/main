@@ -19,9 +19,10 @@ import javafx.scene.text.TextFlow;
 /**
  * This class is the controller of and will generate a list item
  * 
- * @author Luo Shaohuai
+ * @author A0119381E
  *
  */
+//@author A0119381E
 public class ListItem{
 	@FXML
 	private HBox box;
@@ -57,6 +58,7 @@ public class ListItem{
 	 * 
 	 * @return HBox
 	 */
+	//@author A0119381E
 	public HBox getHBox() {
 		return box;
 	}
@@ -67,6 +69,7 @@ public class ListItem{
 	 * 
 	 * @param text
 	 */
+	//@author A0119381E
 	public void setDesc(String text) {
 		desc.setText(text);
 	}
@@ -76,6 +79,7 @@ public class ListItem{
 	 * 
 	 * @param priority
 	 */
+	//@author A0119381E
 	public void setPriority(boolean priority) {
 		this.prior.setVisible(priority);
 	}
@@ -83,6 +87,7 @@ public class ListItem{
 	/**
 	 * Clear all text in time field
 	 */
+	//@author A0119381E
 	public void clearTime() {
 		time.getChildren().clear();
 		this.overdue.setVisible(false);
@@ -91,6 +96,7 @@ public class ListItem{
 	/**
 	 * Set as no time
 	 */
+	//@author A0119381E
 	public void setTimes() {
 		clearTime();
 		Text floating = new Text(Config.floating);
@@ -104,6 +110,7 @@ public class ListItem{
 	 * 
 	 * @param timeInMilli
 	 */
+	//@author A0119381E
 	public void setTimes(Long timeInMilli) {
 		clearTime();
 		time.getChildren().add(timeToText(timeInMilli));
@@ -117,6 +124,7 @@ public class ListItem{
 	 * @param timeStart
 	 * @param timeEnd
 	 */
+	//@author A0119381E
 	public void setTimes(Long timeStart, Long timeEnd) {
 		clearTime();
 		time.getChildren().add(timeToText(timeStart));
@@ -135,6 +143,7 @@ public class ListItem{
 	 * @param timeInMilli
 	 * @return
 	 */
+	//@author A0119381E
 	private Text timeToText(Long timeInMilli) {
 		Date time = new Date(timeInMilli);
 		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), 
@@ -153,6 +162,7 @@ public class ListItem{
 	 * @param timeInMilli
 	 * @return if the task is overdue
 	 */
+	//@author A0119381E
 	private boolean isOverdue(Long timeInMilli) {
 		LocalDateTime time = LocalDateTime.ofInstant(
 								new Date(timeInMilli).toInstant(), 

@@ -10,9 +10,10 @@ import javafx.scene.control.ListCell;
  * Will be called by system when an item need to be displayed
  * Generating a ListItem (HBox) Node to the list
  * 
- * @author Luo Shaohuai
+ * @author A0119381E
  *
  */
+//@author A0119381E
 class ListViewCell extends ListCell<String> {
 	@Override
 	public void updateItem(String str, boolean empty){

@@ -25,8 +25,9 @@ import javafx.fxml.FXML;
 /**
  * This class is the controller of the main UI
  * 
- * @author Luo Shaohuai
+ * @author A0119381E
  */
+//@author A0119381E
 public class UIControl extends BorderPane {	
 	@FXML
 	private Text time;
@@ -57,6 +58,7 @@ public class UIControl extends BorderPane {
 	 * must be called after set scene to stage 
 	 * and before all other operation
 	 */
+	//@author A0119381E
 	public void init() {
 		list.setFocusTraversable(false);
 		setDraggable(title);
@@ -67,6 +69,7 @@ public class UIControl extends BorderPane {
 	 * 
 	 * @param displayBuf
 	 */
+	//@author A0119381E
 	public void loadList(List<String> displayBuf) {
 		loadList(displayBuf, -1);
 	}
@@ -77,6 +80,7 @@ public class UIControl extends BorderPane {
 	 * @param strList
 	 * @param recentChange
 	 */
+	//@author A0119381E
 	public void loadList(List<String> strList, Integer recentChange) { 
 		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
 		list.setItems(observableList);
@@ -102,6 +106,7 @@ public class UIControl extends BorderPane {
 	 * 
 	 * @param message
 	 */
+	//@author A0119381E
 	public void showNoti(String message) {
 		noti.setText(message);
 	}
@@ -111,6 +116,7 @@ public class UIControl extends BorderPane {
 	 * 
 	 * @param value
 	 */
+	//@author A0119381E
 	public void setOnExecCmd(OnEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
@@ -125,6 +131,7 @@ public class UIControl extends BorderPane {
 	 * 
 	 * @param value
 	 */
+	//@author A0119381E
 	public void setOnRequestHistory(OnEvent value) {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
@@ -150,6 +157,7 @@ public class UIControl extends BorderPane {
 	 * 
 	 * @param value
 	 */
+	//@author A0119381E
 	public void setInputOnChange(OnEvent value) {
 		input.textProperty().addListener((observable, oldString, newString)->{
 			//ensure caret is at the end
@@ -173,6 +181,7 @@ public class UIControl extends BorderPane {
 	/**
 	 * Let input box get focus
 	 */
+	//@author A0119381E
 	public void setInputOnFocus() {
 		input.requestFocus();
 	}
@@ -192,6 +201,7 @@ public class UIControl extends BorderPane {
 	/**
 	 * Display current time on title bar
 	 */
+	//@author A0119381E
 	private void displayCurTime() {
 		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.curTimeDateFormat);
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
@@ -206,6 +216,7 @@ public class UIControl extends BorderPane {
 	 * 
 	 * @param node
 	 */
+	//@author A0119381E
 	private void setDraggable(Node node) {
 	    node.setOnMousePressed((event) -> {
 	    	mouseX = event.getSceneX();

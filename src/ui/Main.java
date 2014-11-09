@@ -22,8 +22,9 @@ import controller.ControllerClass;
 /**
  * Main class of the program
  * 
- * @author A0119381E
+ *@author A0119381E
  */
+//@author A0119381E
 public class Main extends Application{
 	
 	private UIControl mainControl;
@@ -50,6 +51,7 @@ public class Main extends Application{
 	 * GUI entry of the program (javafx)
 	 * To launch call static method launch(args)
 	 */
+	//@author A0119381E
 	@Override
 	public void start(Stage stage) { 
 		try {
@@ -76,6 +78,7 @@ public class Main extends Application{
 	 * @throws IOException	
 	 * 				when error loading the FXML file
 	 */
+	//@author A0119381E
 	private Scene loadScene() throws IOException {
 		FXMLLoader loader = new FXMLLoader();
 		Pane mainPane = (Pane) loader.load(getClass().getResourceAsStream(Config.main));
@@ -101,6 +104,7 @@ public class Main extends Application{
 	 * 
 	 * @param cmd
 	 */
+	//@author A0119381E
 	private void execCmd(String cmd) {
 		try {
 			log.log("Command: " + cmd);
@@ -136,6 +140,7 @@ public class Main extends Application{
 	 * @param command
 	 * @return command pass to this function
 	 */
+	//@author A0119381E
 	private String onEnter(String command) {
 		if (command.isEmpty()) {
 			return command;
@@ -152,6 +157,7 @@ public class Main extends Application{
 	 * @param direction
 	 * @return history command
 	 */
+	//@author A0119381E
 	private String onUpDown(String direction) {
 		if (historyPos > 0 && direction.trim().equalsIgnoreCase("UP")) {
 			historyPos--;
@@ -171,6 +177,7 @@ public class Main extends Application{
 	 * @param newValue
 	 * @return suggest word returned by controller
 	 */
+	//@author A0119381E
 	private String onInputChange(String newValue) {
 		String suggest = controller.suggest(newValue);
 		mainControl.showNoti(controller.getFeedback());
@@ -182,6 +189,7 @@ public class Main extends Application{
 	 * 
 	 * @param command
 	 */
+	//@author A0119381E
 	private void pushHistory(String command) {
 		commandHistory.add(command);
 		while (commandHistory.size() > Config.maxNumHistory) {
@@ -196,6 +204,7 @@ public class Main extends Application{
 	 * 
 	 * @param scene
 	 */
+	//@author A0119381E
 	private void setHotKeys(Scene scene) {
 		scene.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
 			if (event.getCode() == KeyCode.PAGE_DOWN || 
@@ -218,6 +227,7 @@ public class Main extends Application{
 	 * Any error will cause the program launch the GUI
 	 * @param args
 	 */
+	//@author A0119381E
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			try {

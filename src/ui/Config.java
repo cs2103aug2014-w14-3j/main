@@ -6,8 +6,9 @@ package ui;
 /**
  * This interface store static configurations
  * 
- * @author Luo Shaohuai
+ * @author A0119381E
  */
+//@author A0119381E
 public interface Config {
 	public static final boolean onDevelopment = true;
 	
