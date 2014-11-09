@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * This class is for log in ui
+ * 
  * @author Luo Shaohuai
  *
  */
@@ -18,6 +20,11 @@ public class Log {
 		logWriter = null;
 	}
 	
+	/**
+	 * return if the log cannot work properly
+	 * 
+	 * @return if there is an error
+	 */
 	public boolean hasError() {
 		if (logWriter == null) {
 			return true;
@@ -28,6 +35,11 @@ public class Log {
 		return false;
 	}
 	
+	/**
+	 * Log the text to file
+	 * 
+	 * @param logText
+	 */
 	public void log(String logText) {
 		openFile();
 		if (hasError()) {
@@ -42,6 +54,9 @@ public class Log {
 		closeFile();
 	}
 	
+	/**
+	 * Open log file
+	 */
 	private void openFile() {
 		try {
 			logWriter = new PrintWriter(new FileWriter(Config.logFile, true));
@@ -53,6 +68,9 @@ public class Log {
 		}	
 	}
 	
+	/**
+	 * Close log file
+	 */
 	private void closeFile() {
 		logWriter.close();
 		logWriter = null;

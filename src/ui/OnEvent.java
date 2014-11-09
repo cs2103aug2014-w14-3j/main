@@ -4,6 +4,8 @@
 package ui;
 
 /**
+ * This interface is for message transfer when events are fired
+ * 
  * @author Luo Shaohuai
  *
  */

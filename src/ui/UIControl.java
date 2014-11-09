@@ -23,8 +23,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
 /**
+ * This class is the controller of the main UI
+ * 
  * @author Luo Shaohuai
- *
  */
 public class UIControl extends BorderPane {	
 	@FXML
@@ -51,15 +52,31 @@ public class UIControl extends BorderPane {
 		displayCurTime();
 	}
 	
+	/**
+	 * Initializer, 
+	 * must be called after set scene to stage 
+	 * and before all other operation
+	 */
 	public void init() {
 		list.setFocusTraversable(false);
 		setDraggable(title);
 	}
 	
+	/**
+	 * Load the list to main list with selection cleared
+	 * 
+	 * @param displayBuf
+	 */
 	public void loadList(List<String> displayBuf) {
-		loadList(displayBuf, 0);
+		loadList(displayBuf, -1);
 	}
 	
+	/**
+	 * Load the list to main list and set selection
+	 * 
+	 * @param strList
+	 * @param recentChange
+	 */
 	public void loadList(List<String> strList, Integer recentChange) { 
 		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
 		list.setItems(observableList);
@@ -71,22 +88,29 @@ public class UIControl extends BorderPane {
 			return;
 		}
 		
-		if (recentChange < 0) {
-			recentChange = 0;
+		if (recentChange < 0 || recentChange >= strList.size()) {
+			list.getSelectionModel().clearSelection();
+		} else {
+			list.scrollTo(recentChange);
+			list.getSelectionModel().select(recentChange);
 		}
-		if (recentChange >= strList.size()) {
-			recentChange = strList.size() - 1;
-		}
-		
-		list.scrollTo(recentChange);
-		list.getSelectionModel().select(recentChange);
 		input.requestFocus();
 	}
 	
+	/**
+	 * SHow message to notification area
+	 * 
+	 * @param message
+	 */
 	public void showNoti(String message) {
 		noti.setText(message);
 	}
 	
+	/**
+	 * Set the operation when command need to be executed
+	 * 
+	 * @param value
+	 */
 	public void setOnExecCmd(OnEvent value) {
 		input.setOnKeyReleased((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
@@ -96,6 +120,11 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
+	/**
+	 * Set the operation when command history is needed 
+	 * 
+	 * @param value
+	 */
 	public void setOnRequestHistory(OnEvent value) {
 		input.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.UP) {
@@ -116,6 +145,11 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
+	/**
+	 * Set the operation when suggest is needed
+	 * 
+	 * @param value
+	 */
 	public void setInputOnChange(OnEvent value) {
 		input.textProperty().addListener((observable, oldString, newString)->{
 			//ensure caret is at the end
@@ -136,10 +170,16 @@ public class UIControl extends BorderPane {
 		});
 	}
 	
+	/**
+	 * Let input box get focus
+	 */
 	public void setInputOnFocus() {
 		input.requestFocus();
 	}
 	
+	/**
+	 * Push caret of input box to the end position
+	 */
 	private void setInputCaretToEnd() {
 		try {
 			input.positionCaret(input.getText().length());
@@ -149,6 +189,9 @@ public class UIControl extends BorderPane {
 		}
 	}
 	
+	/**
+	 * Display current time on title bar
+	 */
 	private void displayCurTime() {
 		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.curTimeDateFormat);
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
@@ -158,6 +201,11 @@ public class UIControl extends BorderPane {
 		timeline.play();
 	}
 	
+	/**
+	 * Set the title bar to be draggable
+	 * 
+	 * @param node
+	 */
 	private void setDraggable(Node node) {
 	    node.setOnMousePressed((event) -> {
 	    	mouseX = event.getSceneX();
