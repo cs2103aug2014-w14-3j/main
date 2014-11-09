@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.logging.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import storage.Storage;
 import storage.StoragePlus;
@@ -119,6 +120,7 @@ public class ControllerClass implements Controller {
 	private static final String FREETIME_MINUTES2 = "minute";
 	private static final String FREETIME_MINUTES3 = "mins";
 	private static final String FREETIME_MINUTES4 = "min";
+	private static final String LOGGING_PURPOSE_METHODNAME_DELETE = "executeDelete";
 
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE, PENDING, EXIT
@@ -1656,12 +1658,14 @@ public class ControllerClass implements Controller {
 	 */
 	// @author A0115194J
 	private void executeDelete(int taskNum) throws Exception {
+		logger.entering(getClass().getName(),LOGGING_PURPOSE_METHODNAME_DELETE);
 		try {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
 			throw new Exception(MESSAGE_FEEDBACK_OUTOFRANGE);
 		}
+		logger.exiting(getClass().getName(), LOGGING_PURPOSE_METHODNAME_DELETE );
 	}
 
 	/**
