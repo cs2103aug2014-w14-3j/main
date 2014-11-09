@@ -42,14 +42,15 @@ public class ControllerClass implements Controller {
 	public static final String CMD_DELETE = "delete";
 	public static final String CMD_EDIT = "edit";
 	public static final String CMD_LIST1 = "list";
-	public static final String CMD_LIST2 = "display";
+	public static final String CMD_LIST2 = "main";
 	public static final String CMD_UNDO = "undo";
 	public static final String CMD_DONE = "done";
 	public static final String CMD_POSTPONE = "pp";
 	public static final String CMD_ARCHIVE = "archive";
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
-	public static final String CMD_FREE = "find";
+	public static final String CMD_FREE1 = "find";
+	public static final String CMD_FREE2="search";
 	public static final String CMD_CLEARARCHIVE = "clear";
 	public static final String CMD_PENDING = "pending";
 	public static final String CMD_EXIT = "exit";
@@ -129,7 +130,8 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_DONE, CommandType.DONE);
 		aMap.put(CMD_PAGE, CommandType.CHANGEPAGE);
 		aMap.put(CMD_OVERDUE, CommandType.OVERDUE);
-		aMap.put(CMD_FREE, CommandType.FREETIME);
+		aMap.put(CMD_FREE1, CommandType.FREETIME);
+		aMap.put(CMD_FREE2, CommandType.FREETIME);
 		aMap.put(CMD_CLEARARCHIVE, CommandType.CLEARARCHIVE);
 		aMap.put(CMD_PENDING, CommandType.PENDING);
 		aMap.put(CMD_EXIT, CommandType.EXIT);
@@ -663,10 +665,14 @@ public class ControllerClass implements Controller {
 			result.add(str);
 		}
 		
-		/*
-		for (int i=0;i<result.size();i++)
-			System.out.println(result.get(i));
-			*/
+		if (result.size()==0){
+			setFeedback("No slot found!");
+		}else if (result.size()==1){
+			setFeedback(result.size()+" slot found!");
+		}else if (result.size()>=2){
+			setFeedback(result.size()+" slots found!");
+		}
+
 		
 		setFreeSlotList(result);
 	}
@@ -711,7 +717,7 @@ public class ControllerClass implements Controller {
 			//only hours
 			if (hasHour(content) && !hasMinute(content)){
 				
-				String[] para = content.trim().split("\\s+");
+				String[] para = content.trim().split(SPACE_STRING);
 				int len = para.length;
 				
 				
@@ -741,10 +747,13 @@ public class ControllerClass implements Controller {
 					}catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
+				}else if (len<2){
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
+				
 			//case 2: search for number of minutes	
 			}else if (!hasHour(content) && hasMinute(content)){
-				String[] para = content.trim().split("\\s+");
+				String[] para = content.trim().split(SPACE_STRING);
 				int len = para.length;
 				
 				
@@ -774,11 +783,13 @@ public class ControllerClass implements Controller {
 					}catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
+				}else if (len<2) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
 			//case 3: search for hours and minutes
 			}else if (hasHour(content) && hasMinute(content)){
 				
-				String[] para = content.trim().split("\\s+");
+				String[] para = content.trim().split(SPACE_STRING);
 				int len = para.length;
 				
 				if (len==4){
@@ -811,28 +822,57 @@ public class ControllerClass implements Controller {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
 					
+				}else if (len<4) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
 			}
 			
 		}else {
-
-			String[] para = content.trim().split(FREETIME_CONNECTOR);
-
-			if (para.length !=2) {
-				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
-			} else {
+			
+			
 				
-				//the default is today
-				Date date1 = timeParser(para[0]);
-				Date date2 = timeParser(para[1]);
-
+				List<Date> dates=timeParserPeriod(content);
+				if (dates.size()==2){
+					Date date1=dates.get(0);
+					Date date2=dates.get(1);
+				
 				if (date1 == null || date2 == null || date1.after(date2)) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
 				}else {
-					return findTimePeriod(date1,date2,nextMonth);
+					Date today=new Date();
+					//the time of today
+					if (compare(date1,today)==0 && compare(date2,today)==0){
+					
+						return findTimePeriod(date1,date2,nextMonth);
+					}else if (compare(date1,today)>0 && compare(date2,today)>0 && compare(date1,date2)==0){
+						
+						Calendar now=Calendar.getInstance();
+						Calendar cal1=Calendar.getInstance();
+						cal1.setTime(date1);
+						Calendar cal2=Calendar.getInstance();
+						cal2.setTime(date2);
+						
+						Date deadline=cal2.getTime();
+					
+						//if the day is over nextMonth, set it to nextMonth
+						if (compare(nextMonth,deadline)<0){
+							deadline=nextMonth;
+						}
+						cal1.set(Calendar.YEAR,now.get(Calendar.YEAR));
+						cal1.set(Calendar.MONTH,now.get(Calendar.MONTH));
+						cal1.set(Calendar.DATE,now.get(Calendar.DATE));
+						
+						cal2.set(Calendar.YEAR,now.get(Calendar.YEAR));
+						cal2.set(Calendar.MONTH,now.get(Calendar.MONTH));
+						cal2.set(Calendar.DATE,now.get(Calendar.DATE));
+						Date newDate1=cal1.getTime();
+						Date newDate2=cal2.getTime();
+						
+						return findTimePeriod(newDate1,newDate2,deadline);
+					}
 				}
-				
-			}
+				}
+		
 		}
 		return new ArrayList<longPair>();
 	}
@@ -884,6 +924,23 @@ public class ControllerClass implements Controller {
 	}
 
 	
+	private List<Date> timeParserPeriod(String input) {
+
+		Parser parser = new Parser();
+
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		if (dates.size() == 2) {
+			return dates;
+		} else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Compares the two Date objects by computing their difference.
 	 * If date1 is before date2, return a negative difference,
@@ -923,12 +980,18 @@ public class ControllerClass implements Controller {
 		longPair interval=new longPair(start.getTime(), end.getTime());
 		Date current=new Date();
 		int numOfDate=0;
-		while (compare(current,deadline)<=0 && numOfDate<10){
+		while (compare(current,deadline)<=0 && numOfDate<5){
 		
 			if (isFree(interval,freeSlots)){
 				result.add(interval);
 				numOfDate++;
 			}
+		
+			Calendar cal=Calendar.getInstance();
+			cal.setTime(current);
+			cal.add(Calendar.DATE,1);
+			current = cal.getTime();
+			//increase current to the next day
 			
 			long first=interval.getFirst();
 			long second=interval.getSecond();
