@@ -756,6 +756,8 @@ public class ControllerClass implements Controller {
 	}
 	
 	
+	
+	//@author A0112044B
 	private void findFreeTime(String content) throws Exception {
 		
 		ArrayList<longPair> freeSlots=findTime(content);
@@ -985,6 +987,8 @@ public class ControllerClass implements Controller {
 		return new ArrayList<longPair>();
 	}
 	
+	
+	//@author A0112044B
 	private boolean hasHour(String content){
 		
 		if (content.toLowerCase().indexOf(FREETIME_HOUR1)!=-1 || content.toLowerCase().indexOf(FREETIME_HOUR2)!=-1){
@@ -995,6 +999,7 @@ public class ControllerClass implements Controller {
 	}
 	
 	
+	//@author A0112044B
 	private boolean hasMinute(String content){
 		if (content.toLowerCase().indexOf(FREETIME_MINUTES1)!=-1 ||
 				content.toLowerCase().indexOf(FREETIME_MINUTES2)!=-1 ||
@@ -1013,7 +1018,7 @@ public class ControllerClass implements Controller {
 	 *            User input.
 	 * @return Date time when user is free.
 	 */
-	//@author
+	//@author A0112044B
 	private Date timeParser(String input) {
 
 		Parser parser = new Parser();
@@ -1031,7 +1036,7 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	
+	//@author A0112044B
 	private List<Date> timeParserPeriod(String input) {
 
 		Parser parser = new Parser();
@@ -1059,7 +1064,7 @@ public class ControllerClass implements Controller {
 	 * @param date2		Date object to be compared with.
 	 * @return			Difference between the two Date objects.
 	 */
-	//@author
+	//@author A0112044B
 	private int compare(Date date1, Date date2) {
 
 		Calendar cal1 = Calendar.getInstance();
@@ -1080,6 +1085,7 @@ public class ControllerClass implements Controller {
 	}
 	
 	
+	//@author A0112044B
 	private ArrayList<longPair> findTimePeriod (Date start,Date end, Date deadline ){
 		
 		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);
@@ -1111,6 +1117,8 @@ public class ControllerClass implements Controller {
 		
 	}
 	
+	
+	//@author A0112044B
 	private boolean isFree(longPair interval, ArrayList<longPair> list){
 		
 		for (int i=0;i<list.size();i++){
@@ -1123,6 +1131,7 @@ public class ControllerClass implements Controller {
 		return false;
 	}
 	
+	//@author A0112044B
 	private ArrayList<longPair> findTimeLength(int numOfMin, Date deadline){
 		
 		
@@ -1144,6 +1153,7 @@ public class ControllerClass implements Controller {
 		return result;
 	}
 
+	//@author A0112044B
 	private ArrayList<longPair> freeIntervals(Date start, Date end) {
 
 		ArrayList<longPair> occupiedIntervals = getOccupied(tasks);
@@ -1194,8 +1204,7 @@ public class ControllerClass implements Controller {
 
 	}
 
-	// Tran Cong Thien
-	// get the occupied slots of time
+	// @author
 	private ArrayList<longPair> getOccupied(TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 
@@ -1215,7 +1224,7 @@ public class ControllerClass implements Controller {
 
 	}
 
-	// if 2 intervals is overlapped
+	//@author A0112044B
 	private boolean hasOverLap(longPair pair1, longPair pair2) {
 
 		if (Math.max(pair1.getFirst(), pair2.getFirst()) < Math.min(
@@ -1232,7 +1241,7 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 *            User input
 	 */
-	//@author Tran Cong Thien
+	//@author A0112044B
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
@@ -1247,7 +1256,7 @@ public class ControllerClass implements Controller {
 	/*
 	 * 
 	 */
-	
+	//@author A0112044B
 	private void pending(){
 		setResultList(tasks.getFloatingTasks());
 	}
@@ -1256,7 +1265,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Sets the result list of current overdue tasks.
 	 */
-	//@author Tran Cong Thien
+	//@author A0112044B
 	private void overDue() {
 		setResultList(tasks.getOverdueTasks());
 	}
@@ -1264,7 +1273,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Updates the current lists with the previous changes.
 	 */
-	//@author Tran Cong Thien
+	//@author A0112044B
 	private void updateForUndo() {
 		updateUndoList();
 		updateUndoArchiveList();
@@ -1273,7 +1282,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Updates the current archive list with the previous changes.
 	 */
-	//@author Tran Cong Thien
+	//@author A0112044B
 	private void updateUndoArchiveList() {
 		undoArchiveList.push(archiveTasks.clone());
 	}
@@ -1281,7 +1290,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Pushes the current state into the undo list.
 	 */
-	//@author Tran Cong Thien
+	//@author A0112044B
 	private void updateUndoList() {
 		undoList.push(tasks.clone());
 	}
@@ -1289,7 +1298,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Replaces the current state with the previous states.
 	 */
-	//@author Tran Cong Thien
+	//@author A0112044B
 	private void undo() {
 		// if there are states to undo
 		if (!undoList.empty()) {

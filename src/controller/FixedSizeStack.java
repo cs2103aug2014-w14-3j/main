@@ -8,7 +8,7 @@ import java.util.LinkedList;
 /**
  * Stack class to keep track of the states in the software.
  */
-//@author
+//@author A0112044B
 public class FixedSizeStack<E> {
 	int maxSize;
 	Deque<E> stack;

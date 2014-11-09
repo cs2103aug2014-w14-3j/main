@@ -3,7 +3,7 @@ package controller;
 /**
  * Class for implementing a Triple of integers.
  */
-//@author
+//@author A0112044B
 public class Triple implements Comparable<Triple>{
 	int first;
 	int second;

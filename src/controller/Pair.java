@@ -3,7 +3,7 @@ package controller;
 /**
  * Class for pairs of integers.
  */
-//@author
+//@author A0112044B
 public class Pair {
 	int first;
 	int second;
