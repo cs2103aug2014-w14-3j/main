@@ -122,6 +122,7 @@ public class ControllerClass implements Controller {
 	private static final String FREETIME_MINUTES3 = "mins";
 	private static final String FREETIME_MINUTES4 = "min";
 	private static final String LOGGING_PURPOSE_METHODNAME_DELETE = "executeDelete";
+	private static final Integer IGNORE_RECENTCHANGE = -1;
 
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE, PENDING, EXIT
@@ -541,6 +542,13 @@ public class ControllerClass implements Controller {
 		currentPageNum = taskList.getIndexPageContainTask(recent);
 		recentChange = taskList.getIndexTaskOnPage(recent);
 	}
+	
+	/**
+	 * Set recent change as none
+	 */
+	private void clearRecentChange() {
+		recentChange = IGNORE_RECENTCHANGE;
+	}
 
 	/**
 	 * Parses user input by getting the command type of the user input and
@@ -752,7 +760,7 @@ public class ControllerClass implements Controller {
 		} catch (NumberFormatException e) {
 			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		}
-		tasks.sort();
+		clearRecentChange();
 	}
 	
 	
@@ -1688,7 +1696,7 @@ public class ControllerClass implements Controller {
 			
 			tasks.sort();
 			setFeedBackDelete(taskNumDescending);
-			
+			clearRecentChange();
 		} catch (NumberFormatException e) {
 			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
 					CMD_DELETE));
