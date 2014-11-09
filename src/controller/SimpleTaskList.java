@@ -19,7 +19,7 @@ import controller.Task.TaskType;
 /**
  * Class for task lists.
  */
-// @author
+//@author
 public class SimpleTaskList implements TaskList {
 
 	private static final String SPACE = "\\s+";
@@ -34,7 +34,7 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Constructs a SimpleTaskList object.
 	 */
-	// @author
+	//@author
 	public SimpleTaskList() {
 		tasks = new ArrayList<Task>();
 		numTaskOnPage = null;
@@ -46,7 +46,7 @@ public class SimpleTaskList implements TaskList {
 	 * @param strList
 	 *            List of strings.
 	 */
-	// @author
+	//@author
 	public SimpleTaskList(List<String> strList) {
 		this();
 		addAll(strList);
@@ -59,7 +59,7 @@ public class SimpleTaskList implements TaskList {
 	 * @param strList
 	 *            List of stringed tasks.
 	 */
-	// @author
+	//@author
 	@Override
 	public void addAll(List<String> strList) {
 		for (String str : strList) {
@@ -70,7 +70,7 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Clears the list.
 	 */
-	// @author
+	//@author
 	@Override
 	public void clear() {
 		tasks.clear();
@@ -83,7 +83,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task object.
 	 * @return true if Task object is successfully added into the task list.
 	 */
-	// @author
+	//@author
 	@Override
 	public boolean add(Task task) {
 		return tasks.add(task);
@@ -97,7 +97,7 @@ public class SimpleTaskList implements TaskList {
 	 * @param task
 	 *            Task object.
 	 */
-	// @author
+	//@author
 	@Override
 	public void add(int index, Task task) {
 		tasks.add(index, task);
@@ -111,7 +111,7 @@ public class SimpleTaskList implements TaskList {
 	 * @param task
 	 *            Task object.
 	 */
-	// @author
+	//@author
 	@Override
 	public void set(int pos, Task task) {
 		tasks.set(pos, task);
@@ -123,7 +123,7 @@ public class SimpleTaskList implements TaskList {
 	 * @param pos
 	 *            Specified position to remove the Task object.
 	 */
-	// @author
+	//@author
 	@Override
 	public void remove(int pos) {
 		tasks.remove(pos);
@@ -134,7 +134,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return True if the task list is empty.
 	 */
-	// @author
+	//@author
 	@Override
 	public boolean isEmpty() {
 		return tasks.isEmpty();
@@ -145,7 +145,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return Index of the task in the task list.
 	 */
-	// @author
+	//@author
 	@Override
 	public Integer indexOf(Task task) {
 		return tasks.indexOf(task);
@@ -158,7 +158,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Position of the task in the task list.
 	 * @return Task object at that position in the task list.
 	 */
-	// @author
+	//@author
 	@Override
 	public Task get(Integer pos) {
 		return tasks.get(pos);
@@ -169,7 +169,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of tasks.
 	 */
-	// @author
+	//@author
 	@Override
 	public TaskList clone() {
 		TaskList clone = new SimpleTaskList(getStringList());
@@ -182,7 +182,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	// @author
+	//@author
 	@Override
 	public List<String> getStringList() {
 		ArrayList<String> taskStrings = new ArrayList<String>();
@@ -198,7 +198,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of numbered stringed tasks.
 	 */
-	// @author
+	//@author
 	@Override
 	public List<String> getNumberedStringList() {
 		ArrayList<String> taskStrings = new ArrayList<String>();
@@ -213,7 +213,7 @@ public class SimpleTaskList implements TaskList {
 	 * Sorts the list of Task objects in the task list according to priority,
 	 * date, time and description.
 	 */
-	// @author A0115584A
+	//@author A0115584A
 	@Override
 	public void sort() {
 		Collections.sort(tasks, (task1, task2) -> {
@@ -247,7 +247,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return Number of tasks in the task list.
 	 */
-	// @author
+	//@author
 	@Override
 	public int size() {
 		return tasks.size();
@@ -256,7 +256,7 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Sets the number of tasks on a page.
 	 */
-	// @author
+	//@author
 	@Override
 	public void setNumTaskOnPage(Integer number) {
 		assert number > 0;
@@ -271,7 +271,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Page number of the task list.
 	 * @return List of stringed tasks on that page.
 	 */
-	// @author
+	//@author
 	@Override
 	public List<String> getPage(Integer pageNum) {
 		assert numTaskOnPage != null;
@@ -303,7 +303,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return Total number of pages.
 	 */
-	// @author
+	//@author
 	@Override
 	public Integer getTotalPageNum() {
 		assert numTaskOnPage != null;
@@ -320,7 +320,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Page number.
 	 * @return List of numbered stringed tasks in that page.
 	 */
-	// @author
+	//@author
 	@Override
 	public List<String> getNumberedPage(Integer pageNum) {
 		assert numTaskOnPage != null;
@@ -354,7 +354,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Position of the task in the task list.
 	 * @return Page number of page that contains this task.
 	 */
-	// @author
+	//@author
 	@Override
 	public Integer getIndexPageContainTask(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
@@ -371,7 +371,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Position of the task in the task list.
 	 * @return Task number of the task on a page.
 	 */
-	// @author
+	//@author
 	@Override
 	public Integer getIndexTaskOnPage(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
@@ -386,7 +386,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of overdue tasks.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	@Override
 	public TaskList getOverdueTasks() {
 		int numOfTask = tasks.size();
@@ -410,7 +410,7 @@ public class SimpleTaskList implements TaskList {
 	/*
 	 * search for the task with no dates
 	 */
-	// @author A0112044B
+	//@author A0112044B
 
 	public TaskList getFloatingTasks() {
 		int numOfTask = tasks.size();
@@ -435,7 +435,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Keyword entered by user.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	@Override
 	public TaskList search(String content) {
 		return processSearch(content);
@@ -448,7 +448,7 @@ public class SimpleTaskList implements TaskList {
 	 *            User input.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList processSearch(String content) {
 
 		content = content.trim();
@@ -490,7 +490,7 @@ public class SimpleTaskList implements TaskList {
 	 *            User input
 	 * @return Date object consisting of the date and time user has entered.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private Date timeParser(String input) {
 		Parser parser = new Parser();
 
@@ -570,7 +570,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList complexSearch(String desc, String content,
 			TaskList listToSearch) {
 		TaskList resultForTime = simpleSearch(content, listToSearch, false);
@@ -591,7 +591,7 @@ public class SimpleTaskList implements TaskList {
 	 *            True if keyword entered is the keyword for description.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList simpleSearch(String content, TaskList listToSearch,
 			boolean isDesc) {
 
@@ -621,7 +621,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	public TaskList searchOnDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
@@ -653,7 +653,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 		TaskList resultList = new SimpleTaskList();
@@ -688,7 +688,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Date object to be compared with.
 	 * @return Difference between the two Date objects.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private int compare(Date date1, Date date2) {
 
 		Calendar cal1 = Calendar.getInstance();
@@ -719,7 +719,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	public TaskList searchDesc(String keyWord, TaskList listToSearch) {
 
 		TaskList result = exactSearch(keyWord, listToSearch);
@@ -746,7 +746,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList insideSearch(String keyWord, TaskList listToSearch) {
 
 		TaskList result = new SimpleTaskList();
@@ -784,7 +784,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Stringed task to search from.
 	 * @return True if stringed task contains the keyword.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private boolean isInside(String keyWord, String strToSearch) {
 		String[] para = keyWord.trim().split(SPACE);
 		int keyLen = para.length;
@@ -808,7 +808,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Stringed task to search from.
 	 * @return True if the keyword is a substring.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private boolean isSubstring(String keyWord, String strToSearch) {
 
 		String[] para = strToSearch.trim().split(SPACE);
@@ -832,7 +832,7 @@ public class SimpleTaskList implements TaskList {
 	 *            List of tasks to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList exactSearch(String keyWord, TaskList listToSearch) {
 
 		TaskList result = new SimpleTaskList();
@@ -864,7 +864,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Stringed task to search from
 	 * @return True if there is an exact match.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private boolean isExact(String keyWord, String strToSearch) {
 		String[] para = keyWord.trim().split(SPACE);
 		int keyLen = para.length;
@@ -888,7 +888,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Stringed task to search from.
 	 * @return True if there is an exact match.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private boolean isEqual(String keyWord, String strToSearch) {
 
 		String[] para = strToSearch.trim().split(SPACE);
@@ -913,7 +913,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
 
 		TaskList resultList = new SimpleTaskList();
@@ -965,7 +965,7 @@ public class SimpleTaskList implements TaskList {
 	 * @return A pair of the search score and the number of matches the
 	 *         description has with the keyword.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private Pair searchScore(String keyword, String strToSearch) {
 		String[] key = keyword.trim().split(SPACE);
 		int strLen = key.length;
@@ -1013,7 +1013,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Description of task.
 	 * @return Score for match.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private int matchScore(String key, String strToSearch) {
 
 		String[] string = strToSearch.trim().split(SPACE);
@@ -1042,7 +1042,7 @@ public class SimpleTaskList implements TaskList {
 	 *            Description of task.
 	 * @return Score for match.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private int approximateMatchScore(String keyword, String string) {
 
 		int editDist = editDistance(string, keyword);
@@ -1063,7 +1063,7 @@ public class SimpleTaskList implements TaskList {
 	 * @param destString
 	 * @return Distance between the 2 strings.
 	 */
-	// @author A0112044B
+	//@author A0112044B
 	private int editDistance(String sourceString, String destString) {
 		int sourceStrLen = sourceString.length();
 		int destStrLen = destString.length();
