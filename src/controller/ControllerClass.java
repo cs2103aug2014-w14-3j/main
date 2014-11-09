@@ -34,7 +34,7 @@ import controller.Task.TaskType;
 /**
  * ControllerClass which implements the Controller interface.
  */
-//@author
+// @author
 public class ControllerClass implements Controller {
 
 	public static final String CMD_ADD = "add";
@@ -49,11 +49,11 @@ public class ControllerClass implements Controller {
 	public static final String CMD_OVERDUE = "overdue";
 	public static final String CMD_PAGE = "page";
 	public static final String CMD_FREE1 = "find";
-	public static final String CMD_FREE2="search";
+	public static final String CMD_FREE2 = "search";
 	public static final String CMD_CLEARARCHIVE = "clear";
 	public static final String CMD_PENDING = "pending";
 	public static final String CMD_EXIT = "exit";
-	
+
 	public static final String CMD_FORMAT_ADD = "To add a task: add \"[description]\" [times]";
 	public static final String CMD_FORMAT_DELETE = "To delete tasks: delete [task numbers..]";
 	public static final String CMD_FORMAT_EDIT = "To edit a task: edit desc/time/! [value] (! for priority)";
@@ -82,7 +82,7 @@ public class ControllerClass implements Controller {
 	private static final String MESSAGE_FEEDBACK_DONE_MULTIPLE = " tasks are marked as done successfully.";
 	private static final String MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT = "Invalid format. Please enter the task number!";
 	private static final String MESSAGE_FEEDBACK_INVALIDLIST = "%1$s can only be done on the main list or search list";
-	private static final String MESSAGE_FEEDBACK_UNDO_MAXIMUM ="Reached maximum number of undo!";
+	private static final String MESSAGE_FEEDBACK_UNDO_MAXIMUM = "Reached maximum number of undo!";
 	private static final String MESSAGE_FEEDBACK_UNDO = "Undo is successful";
 	private static final String MESSAGE_FEEDBACK_POSTPONE = "Task is postponed successfully.";
 	private static final String MESSAGE_FEEDBACK_POSTPONEMULTIPLE = " tasks are postponed successfully.";
@@ -104,6 +104,11 @@ public class ControllerClass implements Controller {
 	private static final String MESSAGE_FEEDBACK_FREETIME_INVALID = "Please specify time!";
 	private static final String MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD = "Please specify the period of time!";
 	private static final String MESSAGE_FEEDBACK_AUTOCOMPLETE = "Press Tab to enter \"%1$s\"";
+	private static final String MESSAGE_NO_SLOT_FOUND = "No slot found!";
+	private static final String MESSAGE_ONE_SLOT_FOUND = " slot found!";
+	private static final String MESSAGE_SLOTS_FOUND = " slots found!";
+	private static final String MESSAGE_ONE_SEARCH_RESULT = " search result.";
+	private static final String MESSAGE_SEARCH_RESULTS = " search results.";
 	private static final String EDIT_ATTRIBUTE_DESC = "desc";
 	private static final String EDIT_ATTRIBUTE_TIME = "time";
 	private static final String EDIT_ATTRIBUTE_PRIORITY = "!";
@@ -122,6 +127,10 @@ public class ControllerClass implements Controller {
 	private static final String FREETIME_MINUTES4 = "min";
 	private static final String LOGGING_PURPOSE_METHODNAME_DELETE = "executeDelete";
 	private static final Integer IGNORE_RECENTCHANGE = -1;
+	private static final int MAX_NUM_OF_RESULTS = 10;
+	private static final int MILISECOND_PER_DAY = 24 * 60 * 60 * 1000;
+	private static final int MINUTE_PER_HOUR = 60;
+	private static final int MILISECOND_PER_MINUTE = 1000 * 60;
 
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE, PENDING, EXIT
@@ -153,7 +162,7 @@ public class ControllerClass implements Controller {
 		aMap.put(CMD_PENDING, CommandType.PENDING);
 		aMap.put(CMD_EXIT, CommandType.EXIT);
 		commandMap = Collections.unmodifiableMap(aMap);
-		
+
 		Map<String, String> bMap = new HashMap<>();
 		bMap.put(CMD_ADD, CMD_FORMAT_ADD);
 		bMap.put(CMD_DELETE, CMD_FORMAT_DELETE);
@@ -178,7 +187,8 @@ public class ControllerClass implements Controller {
 	private static final int maxNumOfUndo = 40;
 	private static final int numTasksInSinglePage = 10;
 
-	private static final Logger logger = Logger.getLogger(ControllerClass.class.getName());
+	private static final Logger logger = Logger.getLogger(ControllerClass.class
+			.getName());
 	private static Controller theController = null;
 	private TaskList tasks;
 	private TaskList archiveTasks;
@@ -200,7 +210,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Constructs the Controller Class object.
 	 */
-	//@author
+	// @author
 	private ControllerClass() {
 		onExit = false;
 		storage = createStorageObject();
@@ -211,11 +221,11 @@ public class ControllerClass implements Controller {
 		setNumTaskOnPage(numTasksInSinglePage);
 		displayListType = DisplayList.MAIN;
 		resetRecentChange();
-		
+
 		feedbackMessage = EMPTY_STRING;
 		suggestFeedback = null;
 	}
-	
+
 	/**
 	 * Executes command entered by user. It first retrieves all existing tasks
 	 * stored in Storage, then proceeds on executing the command specified by
@@ -228,7 +238,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If command entered by user is invalid.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	public Integer execCmd(String command) throws Exception {
 		getFileContent();
 		setNumTaskOnPage(numTasksInSinglePage);
@@ -242,14 +252,14 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return Stringed feedback message.
 	 */
-	//@author
+	// @author
 	public String getFeedback() {
 		if (suggestFeedback != null) {
 			return suggestFeedback;
 		}
 		return feedbackMessage;
 	}
-	
+
 	public boolean isExiting() {
 		return onExit;
 	}
@@ -263,22 +273,21 @@ public class ControllerClass implements Controller {
 	private void setFeedback(String feedback) {
 		feedbackMessage = feedback;
 	}
-	
+
 	/**
-	 * Sets suggest feedback message. 
-	 * If no suggest feedback exist. 
-	 * Last feedback from command execution will be shown.
+	 * Sets suggest feedback message. If no suggest feedback exist. Last
+	 * feedback from command execution will be shown.
 	 * 
 	 * @param feedback
-	 * 			Feedback message after suggest is executed.
+	 *            Feedback message after suggest is executed.
 	 */
 	private void setSuggestFeedback(String feedback) {
 		suggestFeedback = feedback;
 	}
-	
+
 	/**
-	 * Clear suggest feedback message.  
-	 * Last feedback from command execution will be shown.
+	 * Clear suggest feedback message. Last feedback from command execution will
+	 * be shown.
 	 * 
 	 */
 	private void clearSuggestFeedback() {
@@ -292,7 +301,7 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	//@author
+	// @author
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
@@ -338,45 +347,48 @@ public class ControllerClass implements Controller {
 	 *            Input from user.
 	 * @return List of suggested stringed commands and words.
 	 */
-	//@author
+	// @author
 	public String suggest(String content) {
 		String emptySuggest = "";
 		String suggest;
-		
+
 		if (content == null || content.isEmpty()) {
 			clearSuggestFeedback();
 			return emptySuggest;
 		}
-		
+
 		suggest = suggestCmd(content);
 		if (suggest != null) {
 			if (suggest.trim().equalsIgnoreCase(content.trim())) {
-				setSuggestFeedback(commandFormatMap.get(suggest.trim().toLowerCase()));
+				setSuggestFeedback(commandFormatMap.get(suggest.trim()
+						.toLowerCase()));
 				return emptySuggest;
 			}
-			setSuggestFeedback(String.format(MESSAGE_FEEDBACK_AUTOCOMPLETE, suggest));
+			setSuggestFeedback(String.format(MESSAGE_FEEDBACK_AUTOCOMPLETE,
+					suggest));
 			return suggest;
 		}
-		
+
 		suggest = suggestKeyword(content);
 		if (suggest != null) {
 			if (suggest.trim().equalsIgnoreCase(content.trim())) {
 				clearSuggestFeedback();
 				return emptySuggest;
 			}
-			setSuggestFeedback(String.format(MESSAGE_FEEDBACK_AUTOCOMPLETE, suggest));
+			setSuggestFeedback(String.format(MESSAGE_FEEDBACK_AUTOCOMPLETE,
+					suggest));
 			return suggest;
 		}
-		
+
 		clearSuggestFeedback();
 		return emptySuggest;
 	}
-	
+
 	/**
 	 * Suggest a command with prefix, return null if no such word
 	 * 
 	 * @param content
-	 * @return String 	smallest string with prefix content
+	 * @return String smallest string with prefix content
 	 */
 	private String suggestCmd(String content) {
 		List<String> suggestList = new ArrayList<String>();
@@ -386,40 +398,40 @@ public class ControllerClass implements Controller {
 				suggestList.add(str);
 			}
 		}
-			
-		//return smallest from commands
+
+		// return smallest from commands
 		if (!suggestList.isEmpty()) {
 			Collections.sort(suggestList);
 			return suggestList.get(0);
 		}
-			
+
 		return null;
 	}
-	
+
 	/**
 	 * Suggest a word with prefix, return null if no such word
 	 * 
 	 * @param content
-	 * @return String 	smallest string with prefix content
+	 * @return String smallest string with prefix content
 	 */
 	private String suggestKeyword(String content) {
 		if (content.charAt(content.length() - 1) == ' ') {
 			return null;
 		}
-		
+
 		List<String> suggestList = new ArrayList<String>();
 		// suggest words
 		String[] words = content.split(" ");
 		String key = words[words.length - 1];
 		suggestList.addAll(tasks.suggestWord(key));
 		suggestList.addAll(archiveTasks.suggestWord(key));
-		
-		//return smallest from results
+
+		// return smallest from results
 		if (!suggestList.isEmpty()) {
 			Collections.sort(suggestList);
 			return suggestList.get(0);
 		}
-		
+
 		return null;
 	}
 
@@ -430,7 +442,7 @@ public class ControllerClass implements Controller {
 	 * @param number
 	 *            Number of tasks on a page (10).
 	 */
-	//@author
+	// @author
 	private void setNumTaskOnPage(Integer number) {
 		tasks.setNumTaskOnPage(number);
 		archiveTasks.setNumTaskOnPage(number);
@@ -439,7 +451,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Reads stored tasks in Storage into task list and archive list.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void getFileContent() {
 		tasks = new SimpleTaskList(storage.read());
 		archiveTasks = new SimpleTaskList(storage.readArchive());
@@ -450,7 +462,7 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return A Storage object.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private Storage createStorageObject() {
 		return new StoragePlus();
 	}
@@ -461,7 +473,7 @@ public class ControllerClass implements Controller {
 	 * @param listType
 	 *            Type of displayed list.
 	 */
-	//@author
+	// @author
 	private void setDisplayList(DisplayList listType) {
 		this.displayListType = listType;
 	}
@@ -472,21 +484,21 @@ public class ControllerClass implements Controller {
 	 * @param list
 	 *            A list of searched results.
 	 */
-	//@author
+	// @author
 	private void setResultList(TaskList list) {
 		this.resultTasks = list;
 		resultTasks.setNumTaskOnPage(numTasksInSinglePage);
 		resetRecentChange();
 		setDisplayList(DisplayList.SEARCH);
 	}
-	
+
 	/**
 	 * Sets the current displayed list to a list of searched results.
 	 * 
 	 * @param list
 	 *            A list of searched results.
 	 */
-	//@author
+	// @author
 	private void setFreeSlotList(List<String> list) {
 		if (list.size() <= 10) {
 			this.freeSlots = list;
@@ -494,7 +506,7 @@ public class ControllerClass implements Controller {
 			this.freeSlots = list.subList(0, numTasksInSinglePage - 2);
 			this.freeSlots.add(MESSAGE_TOMANYRESULT);
 		}
-		
+
 		resetRecentChange();
 		setDisplayList(DisplayList.FREESLOTS);
 	}
@@ -503,7 +515,7 @@ public class ControllerClass implements Controller {
 	 * Resets recent change to page 1 when changing to another displayed list
 	 * type.
 	 */
-	//@author
+	// @author
 	private void resetRecentChange() {
 		currentPageNum = 1;
 		recentChange = -1;
@@ -519,7 +531,7 @@ public class ControllerClass implements Controller {
 	 * @param taskList
 	 *            Current displayed list.
 	 */
-	//@author
+	// @author
 	private void setRecentChange(Task task, TaskList taskList) {
 		taskList.sort();
 		Integer index = taskList.indexOf(task);
@@ -535,12 +547,12 @@ public class ControllerClass implements Controller {
 	 * @param taskList
 	 *            Current displayed list.
 	 */
-	//@author
+	// @author
 	private void setRecentChange(Integer recent, TaskList taskList) {
 		currentPageNum = taskList.getIndexPageContainTask(recent);
 		recentChange = taskList.getIndexTaskOnPage(recent);
 	}
-	
+
 	/**
 	 * Set recent change as none
 	 */
@@ -557,7 +569,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If user enters an invalid command.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void parseCommand(String command) throws Exception {
 		String operation = getOperation(command);
 		CommandType commandType = matchCommandType(operation);
@@ -579,7 +591,7 @@ public class ControllerClass implements Controller {
 	 *             If user enters an invalid command.
 	 * 
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void processInputBasedOnComandType(String command,
 			String operation, CommandType commandType) throws Exception {
 		if (commandType == CommandType.SEARCH) {
@@ -597,7 +609,7 @@ public class ControllerClass implements Controller {
 	 *            User input.
 	 * @return Command type string specified by user.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private String getOperation(String command) {
 		String[] splitCommandIntoWords = command.split(SPACE_STRING);
 		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
@@ -614,7 +626,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If an invalid command is entered.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void processInput(CommandType commandType, String content)
 			throws Exception {
 		switch (commandType) {
@@ -670,10 +682,10 @@ public class ControllerClass implements Controller {
 			onExit();
 			break;
 		default:
-			assert false: commandType;
+			assert false : commandType;
 		}
 	}
-	
+
 	/**
 	 * Set the program to be on exiting
 	 */
@@ -688,7 +700,7 @@ public class ControllerClass implements Controller {
 	 *             If the user wishes to clear the list on other types of lists
 	 *             besides archive list.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void clearArchive() throws Exception {
 		if (displayListType == DisplayList.ARCHIVE) {
 			archiveTasks.clear();
@@ -701,7 +713,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Changes current displayed list to archive list.
 	 */
-	//@author
+	// @author
 	private void moveToArchive() {
 		setDisplayList(DisplayList.ARCHIVE);
 		setFeedback(MESSAGE_FEEDBACK_ARCHIVELIST);
@@ -717,7 +729,7 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 *             If task numbers entered are not numbers.
 	 */
-	//@author
+	// @author
 	private void markAsDone(String content) throws Exception {
 		String[] taskNumbers = content.trim().split("\\s+");
 		Arrays.sort(taskNumbers, new Comparator<String>() {
@@ -760,46 +772,47 @@ public class ControllerClass implements Controller {
 		}
 		clearRecentChange();
 	}
-	
-	
-	
-	//@author A0112044B
+
+	/**
+	 * Find free slots of time
+	 * 
+	 * @param content
+	 * @throws Exception
+	 */
+
+	// @author A0112044B
 	private void findFreeTime(String content) throws Exception {
-		
-		ArrayList<longPair> freeSlots=findTime(content);
-		
-		ArrayList<String> result=new ArrayList<String>();
-		
-		for (int i=0;i<freeSlots.size();i++){
-			longPair pair=freeSlots.get(i);
-			
-			String str = "[ " 
-						 + timeToText(pair.getFirst())
-						 + " to "
-						 + timeToText(pair.getSecond())
-						 + " ]";
+
+		ArrayList<longPair> freeSlots = findTime(content);
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		for (int i = 0; i < freeSlots.size(); i++) {
+			longPair pair = freeSlots.get(i);
+
+			String str = "[ " + timeToText(pair.getFirst()) + "    to   "
+					+ timeToText(pair.getSecond()) + " ]";
 			result.add(str);
 		}
-		
-		if (result.size()==0){
-			setFeedback("No slot found!");
-		}else if (result.size()==1){
-			setFeedback(result.size()+" slot found!");
-		}else if (result.size()>=2){
-			setFeedback(result.size()+" slots found!");
+
+		if (result.size() == 0) {
+			setFeedback(MESSAGE_NO_SLOT_FOUND);
+		} else if (result.size() == 1) {
+			setFeedback(result.size() + MESSAGE_ONE_SLOT_FOUND);
+		} else if (result.size() >= 2) {
+			setFeedback(result.size() + MESSAGE_SLOTS_FOUND);
 		}
 
-		
 		setFreeSlotList(result);
 	}
-	
+
 	private String timeToText(Long timeInMilli) {
 		Date time = new Date(timeInMilli);
-		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), 
-														ZoneId.systemDefault()
-														);
-		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.taskDateFormat);
-		
+		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(),
+				ZoneId.systemDefault());
+		DateTimeFormatter format = DateTimeFormatter
+				.ofPattern(Config.taskDateFormat);
+
 		return format.format(timeobj);
 	}
 
@@ -819,234 +832,256 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If user input is invalid.
 	 */
-	//@author: A0112044B
+	// @author: A0112044B
 	private ArrayList<longPair> findTime(String content) throws Exception {
 
-		Calendar cal=Calendar.getInstance();//next 30 days
+		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, 30);
-		
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+
 		Date nextMonth = cal.getTime();
-	
-		//case 1 :search for number of hours
-		
+
+		// case 1 :search for number of hours
+
 		if (content.indexOf(FREETIME_CONNECTOR) == -1) {
-			
-			//only hours
-			if (hasHour(content) && !hasMinute(content)){
-				
+
+			// only hours
+			if (hasHour(content) && !hasMinute(content)) {
+
 				String[] para = content.trim().split(SPACE_STRING);
 				int len = para.length;
-				
-				
-				if (len==2){
-					try{
+
+				if (len == 2) {
+					try {
 						int hh = Integer.parseInt(para[0]);
-						return findTimeLength(hh*60, nextMonth);
-					}catch (NumberFormatException e) {
+						return findTimeLength(hh * MINUTE_PER_HOUR, nextMonth);
+					} catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-				}else if (len>2){
-					String date=" ";
-					try{
-						int hh=Integer.parseInt(para[0]);
-					
-					for (int i=2;i<len;i++){
-						date=date+para[i]+" ";
-					}
-					
-					Date deadline=timeParser(date);
-				
-					if (deadline!=null){
-						Calendar cal1=Calendar.getInstance();
-						cal1.setTime(deadline);
-						cal1.set(Calendar.HOUR_OF_DAY,23);
-						cal1.set(Calendar.MINUTE,59);
-						cal1.set(Calendar.SECOND,59);
-						
-						deadline=cal1.getTime();
-						return findTimeLength(hh*60,deadline);
-					}else {
+				} else if (len > 2) {
+					String date = SPACE_STRING;
+					try {
+						int hh = Integer.parseInt(para[0]);
+
+						for (int i = 2; i < len; i++) {
+							date = date + para[i] + SPACE_STRING;
+						}
+
+						Date deadline = timeParser(date);
+
+						if (deadline != null) {
+							Calendar cal1 = Calendar.getInstance();
+							cal1.setTime(deadline);
+							cal1.set(Calendar.HOUR_OF_DAY, 23);
+							cal1.set(Calendar.MINUTE, 59);
+							cal1.set(Calendar.SECOND, 59);
+
+							deadline = cal1.getTime();
+							return findTimeLength(hh * MINUTE_PER_HOUR,
+									deadline);
+						} else {
+							throw new Exception(
+									MESSAGE_FEEDBACK_FREETIME_INVALID);
+						}
+					} catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-					}catch (NumberFormatException e) {
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					}
-				}else if (len<2){
+				} else if (len < 2) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
-				
-			//case 2: search for number of minutes	
-			}else if (!hasHour(content) && hasMinute(content)){
+
+				// case 2: search for number of minutes
+			} else if (!hasHour(content) && hasMinute(content)) {
 				String[] para = content.trim().split(SPACE_STRING);
 				int len = para.length;
-				
-				
-				if (len==2){
-					try{
+
+				if (len == 2) {
+					try {
 						int mm = Integer.parseInt(para[0]);
 						return findTimeLength(mm, nextMonth);
-					}catch (NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-				}else if (len>2){
-					String date=" ";
-					try{
-						int mm=Integer.parseInt(para[0]);
-					
-					for (int i=2;i<len;i++){
-						date=date+para[i]+" ";
-					}
-					
-					Date deadline=timeParser(date);
-					
-					if (deadline!=null){
-						Calendar cal1=Calendar.getInstance();
-						cal1.setTime(deadline);
-						cal1.set(Calendar.HOUR_OF_DAY,23);
-						cal1.set(Calendar.MINUTE,59);
-						cal1.set(Calendar.SECOND,59);
-						
-						deadline=cal1.getTime();
-						return findTimeLength(mm,deadline);
-					}else {
+				} else if (len > 2) {
+					String date = SPACE_STRING;
+					try {
+						int mm = Integer.parseInt(para[0]);
+
+						for (int i = 2; i < len; i++) {
+							date = date + para[i] + SPACE_STRING;
+						}
+
+						Date deadline = timeParser(date);
+
+						if (deadline != null) {
+							Calendar cal1 = Calendar.getInstance();
+							cal1.setTime(deadline);
+							cal1.set(Calendar.HOUR_OF_DAY, 23);
+							cal1.set(Calendar.MINUTE, 59);
+							cal1.set(Calendar.SECOND, 59);
+
+							deadline = cal1.getTime();
+							return findTimeLength(mm, deadline);
+						} else {
+							throw new Exception(
+									MESSAGE_FEEDBACK_FREETIME_INVALID);
+						}
+					} catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-					}catch (NumberFormatException e) {
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					}
-				}else if (len<2) {
+				} else if (len < 2) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
-			//case 3: search for hours and minutes
-			}else if (hasHour(content) && hasMinute(content)){
-				
+				// case 3: search for hours and minutes
+			} else if (hasHour(content) && hasMinute(content)) {
+
 				String[] para = content.trim().split(SPACE_STRING);
 				int len = para.length;
-				
-				if (len==4){
-					try{
-						int hh=Integer.parseInt(para[0]);
-						int mm=Integer.parseInt(para[2]);	
-							return findTimeLength(hh*60+mm,nextMonth);
-						}catch (NumberFormatException e){
-							throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-						}
-					
-				}else if (len>4){
-					String date=" ";
-					
+
+				if (len == 4) {
 					try {
-					int hh=Integer.parseInt(para[0]);
-					int mm=Integer.parseInt(para[2]);
-					
-					for (int i=4;i<len;i++){
-						date=date+para[i]+" ";
-					}
-					
-					Date deadline=timeParser(date);
-					if (deadline!=null){
-						Calendar cal1=Calendar.getInstance();
-						cal1.setTime(deadline);
-						cal1.set(Calendar.HOUR_OF_DAY,23);
-						cal1.set(Calendar.MINUTE,59);
-						cal1.set(Calendar.SECOND,59);
-						
-						deadline=cal1.getTime();
-						return findTimeLength(hh*60+mm,deadline);
-					}else {
+						int hh = Integer.parseInt(para[0]);
+						int mm = Integer.parseInt(para[2]);
+						return findTimeLength(hh * MINUTE_PER_HOUR + mm,
+								nextMonth);
+					} catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-					}catch (NumberFormatException e){
+
+				} else if (len > 4) {
+					String date = SPACE_STRING;
+
+					try {
+						int hh = Integer.parseInt(para[0]);
+						int mm = Integer.parseInt(para[2]);
+
+						for (int i = 4; i < len; i++) {
+							date = date + para[i] + SPACE_STRING;
+						}
+
+						Date deadline = timeParser(date);
+						if (deadline != null) {
+							Calendar cal1 = Calendar.getInstance();
+							cal1.setTime(deadline);
+							cal1.set(Calendar.HOUR_OF_DAY, 23);
+							cal1.set(Calendar.MINUTE, 59);
+							cal1.set(Calendar.SECOND, 59);
+
+							deadline = cal1.getTime();
+							return findTimeLength(hh * MINUTE_PER_HOUR + mm,
+									deadline);
+						} else {
+							throw new Exception(
+									MESSAGE_FEEDBACK_FREETIME_INVALID);
+						}
+					} catch (NumberFormatException e) {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
-					
-				}else if (len<4) {
+
+				} else if (len < 4) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
 			}
-			
-		}else {
-			
-			
-				
-				List<Date> dates=timeParserPeriod(content);
-				if (dates.size()==2){
-					Date date1=dates.get(0);
-					Date date2=dates.get(1);
-				
+
+		} else {
+
+			List<Date> dates = timeParserPeriod(content);
+			if (dates.size() == 2) {
+				Date date1 = dates.get(0);
+				Date date2 = dates.get(1);
+
 				if (date1 == null || date2 == null || date1.after(date2)) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
-				}else {
-					Date today=new Date();
-					//the time of today
-					if (compare(date1,today)==0 && compare(date2,today)==0){
-					
-						return findTimePeriod(date1,date2,nextMonth);
-					}else if (compare(date1,today)>0 && compare(date2,today)>0 && compare(date1,date2)==0){
-						
-						Calendar now=Calendar.getInstance();
-						Calendar cal1=Calendar.getInstance();
+				} else {
+					Date today = new Date();
+					// the time of today
+					if (compare(date1, today) == 0
+							&& compare(date2, today) == 0) {
+
+						return findTimePeriod(date1, date2, nextMonth);
+					} else if (compare(date1, today) > 0
+							&& compare(date2, today) > 0
+							&& compare(date1, date2) == 0) {
+
+						Calendar now = Calendar.getInstance();
+						Calendar cal1 = Calendar.getInstance();
 						cal1.setTime(date1);
-						Calendar cal2=Calendar.getInstance();
+						Calendar cal2 = Calendar.getInstance();
 						cal2.setTime(date2);
-						
-						Date deadline=cal2.getTime();
-					
-						//if the day is over nextMonth, set it to nextMonth
-						if (compare(nextMonth,deadline)<0){
-							deadline=nextMonth;
+
+						Date deadline = cal2.getTime();
+
+						// if the day is over nextMonth, set it to nextMonth
+						if (compare(nextMonth, deadline) < 0) {
+							deadline = nextMonth;
 						}
-						cal1.set(Calendar.YEAR,now.get(Calendar.YEAR));
-						cal1.set(Calendar.MONTH,now.get(Calendar.MONTH));
-						cal1.set(Calendar.DATE,now.get(Calendar.DATE));
-						
-						cal2.set(Calendar.YEAR,now.get(Calendar.YEAR));
-						cal2.set(Calendar.MONTH,now.get(Calendar.MONTH));
-						cal2.set(Calendar.DATE,now.get(Calendar.DATE));
-						Date newDate1=cal1.getTime();
-						Date newDate2=cal2.getTime();
-						
-						return findTimePeriod(newDate1,newDate2,deadline);
+						cal1.set(Calendar.YEAR, now.get(Calendar.YEAR));
+						cal1.set(Calendar.MONTH, now.get(Calendar.MONTH));
+						cal1.set(Calendar.DATE, now.get(Calendar.DATE));
+
+						cal2.set(Calendar.YEAR, now.get(Calendar.YEAR));
+						cal2.set(Calendar.MONTH, now.get(Calendar.MONTH));
+						cal2.set(Calendar.DATE, now.get(Calendar.DATE));
+						Date newDate1 = cal1.getTime();
+						Date newDate2 = cal2.getTime();
+
+						return findTimePeriod(newDate1, newDate2, deadline);
 					}
 				}
-				}
-		
+			}
+
 		}
 		return new ArrayList<longPair>();
 	}
-	
-	
-	//@author A0112044B
-	private boolean hasHour(String content){
-		
-		if (content.toLowerCase().indexOf(FREETIME_HOUR1)!=-1 || content.toLowerCase().indexOf(FREETIME_HOUR2)!=-1){
-			return true;
-		}else{
-			return false;
-		}
-	}
-	
-	
-	//@author A0112044B
-	private boolean hasMinute(String content){
-		if (content.toLowerCase().indexOf(FREETIME_MINUTES1)!=-1 ||
-				content.toLowerCase().indexOf(FREETIME_MINUTES2)!=-1 ||
-				content.toLowerCase().indexOf(FREETIME_MINUTES3)!=-1 ||
-				content.toLowerCase().indexOf(FREETIME_MINUTES4)!=-1){
-			return true;
-		}else {
-			return false;
-		}
-	}
+
 	/**
-	 * Parses user input to find the time interval where the user is free. If no
-	 * date time is recognized, return null.
+	 * check if the content has description for hour
+	 * 
+	 * @param content
+	 * @return
+	 */
+
+	// @author A0112044B
+	private boolean hasHour(String content) {
+
+		if (content.toLowerCase().indexOf(FREETIME_HOUR1) != -1
+				|| content.toLowerCase().indexOf(FREETIME_HOUR2) != -1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * check if the content has description for minute
+	 * 
+	 * @param content
+	 * @return
+	 */
+
+	// @author A0112044B
+	private boolean hasMinute(String content) {
+		if (content.toLowerCase().indexOf(FREETIME_MINUTES1) != -1
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES2) != -1
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES3) != -1
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES4) != -1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Parses user input to get a date. If no date time is recognized, return
+	 * null.
 	 * 
 	 * @param input
 	 *            User input.
 	 * @return Date time when user is free.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private Date timeParser(String input) {
 
 		Parser parser = new Parser();
@@ -1064,7 +1099,13 @@ public class ControllerClass implements Controller {
 		}
 	}
 
-	//@author A0112044B
+	/**
+	 * Time parser for a period of time
+	 * 
+	 * @param input
+	 * @return
+	 */
+	// @author A0112044B
 	private List<Date> timeParserPeriod(String input) {
 
 		Parser parser = new Parser();
@@ -1081,18 +1122,19 @@ public class ControllerClass implements Controller {
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Compares the two Date objects by computing their difference.
-	 * If date1 is before date2, return a negative difference,
-	 * If date1 is after date2, return a positive difference.
-	 * If they are the same, return 0.
+	 * Compares the two Date objects by computing their difference. If date1 is
+	 * before date2, return a negative difference, If date1 is after date2,
+	 * return a positive difference. If they are the same, return 0.
 	 * 
-	 * @param date1		Date object to be compared with.
-	 * @param date2		Date object to be compared with.
-	 * @return			Difference between the two Date objects.
+	 * @param date1
+	 *            Date object to be compared with.
+	 * @param date2
+	 *            Date object to be compared with.
+	 * @return Difference between the two Date objects.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private int compare(Date date1, Date date2) {
 
 		Calendar cal1 = Calendar.getInstance();
@@ -1111,77 +1153,110 @@ public class ControllerClass implements Controller {
 		}
 
 	}
-	
-	
-	//@author A0112044B
-	private ArrayList<longPair> findTimePeriod (Date start,Date end, Date deadline ){
-		
-		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);
-		ArrayList<longPair> result=new ArrayList<longPair>();
-		
-		longPair interval=new longPair(start.getTime(), end.getTime());
-		Date current=new Date();
-		int numOfDate=0;
-		while (compare(current,deadline)<=0 && numOfDate<5){
-		
-			if (isFree(interval,freeSlots)){
+
+	/**
+	 * find all free period until the deadline, return a list of
+	 * MAX_NUM_OF_RESULTS only
+	 * 
+	 * @param start
+	 * @param end
+	 * @param deadline
+	 * @return
+	 */
+
+	// @author A0112044B
+	private ArrayList<longPair> findTimePeriod(Date start, Date end,
+			Date deadline) {
+
+		ArrayList<longPair> freeSlots = freeIntervals(new Date(), deadline);
+		ArrayList<longPair> result = new ArrayList<longPair>();
+
+		longPair interval = new longPair(start.getTime(), end.getTime());
+		Date current = new Date();
+		int numOfDate = 0;
+		while (compare(current, deadline) <= 0
+				&& numOfDate < MAX_NUM_OF_RESULTS) {
+
+			if (isFree(interval, freeSlots)) {
 				result.add(interval);
 				numOfDate++;
 			}
-		
-			Calendar cal=Calendar.getInstance();
+
+			Calendar cal = Calendar.getInstance();
 			cal.setTime(current);
-			cal.add(Calendar.DATE,1);
+			cal.add(Calendar.DATE, 1);
 			current = cal.getTime();
-			//increase current to the next day
-			
-			long first=interval.getFirst();
-			long second=interval.getSecond();
-			interval=new longPair(first+24*60*60*1000, second+24*60*60*1000);
-		
+			// increase current to the next day
+
+			long first = interval.getFirst();
+			long second = interval.getSecond();
+			interval = new longPair(first + MILISECOND_PER_DAY, second
+					+ MILISECOND_PER_DAY);
+
 		}
-		
+
 		return result;
-		
+
 	}
-	
-	
-	//@author A0112044B
-	private boolean isFree(longPair interval, ArrayList<longPair> list){
-		
-		for (int i=0;i<list.size();i++){
-			longPair free=list.get(i);
-			if (interval.getFirst()>=free.getFirst() && interval.getSecond()<=free.getSecond()){
+
+	/**
+	 * check if an interval is free or not
+	 * 
+	 * @param interval
+	 * @param list
+	 * @return
+	 */
+
+	// @author A0112044B
+	private boolean isFree(longPair interval, ArrayList<longPair> list) {
+
+		for (int i = 0; i < list.size(); i++) {
+			longPair free = list.get(i);
+			if (interval.getFirst() >= free.getFirst()
+					&& interval.getSecond() <= free.getSecond()) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	//@author A0112044B
-	private ArrayList<longPair> findTimeLength(int numOfMin, Date deadline){
-		
-		
-		
-		ArrayList<longPair> freeSlots=freeIntervals(new Date(), deadline);	
-		ArrayList<longPair> result=new ArrayList<longPair>();
-		int numOfSlot=0;
-		
-		for (int i=0;i<freeSlots.size() && numOfSlot<10;i++){
-			longPair slot=freeSlots.get(i);
-			
-			long timeLen=(slot.getSecond()-slot.getFirst())/(1000*60);
-			if (timeLen>= numOfMin){
+
+	/**
+	 * find the interval of times that are free
+	 * 
+	 * @param numOfMin
+	 * @param deadline
+	 * @return
+	 */
+	// @author A0112044B
+	private ArrayList<longPair> findTimeLength(int numOfMin, Date deadline) {
+
+		ArrayList<longPair> freeSlots = freeIntervals(new Date(), deadline);
+		ArrayList<longPair> result = new ArrayList<longPair>();
+		int numOfSlot = 0;
+
+		for (int i = 0; i < freeSlots.size() && numOfSlot < MAX_NUM_OF_RESULTS; i++) {
+			longPair slot = freeSlots.get(i);
+
+			long timeLen = (slot.getSecond() - slot.getFirst())
+					/ (MILISECOND_PER_MINUTE);
+			if (timeLen >= numOfMin) {
 				result.add(slot);
 				numOfSlot++;
 			}
-			
-		}		
+
+		}
 		return result;
 	}
 
-	//@author A0112044B
+	/**
+	 * get the list of free intervals
+	 * 
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	// @author A0112044B
 	private ArrayList<longPair> freeIntervals(Date start, Date end) {
 
 		ArrayList<longPair> occupiedIntervals = getOccupied(tasks);
@@ -1190,7 +1265,7 @@ public class ControllerClass implements Controller {
 		// initialize
 		intervalFree.add(new longPair(start.getTime(), end.getTime()));
 
-		for (int i = 0; i < occupiedIntervals.size() && i < 10; i++) {
+		for (int i = 0; i < occupiedIntervals.size(); i++) {
 			longPair occu = occupiedIntervals.get(i);
 
 			for (int j = 0; j < intervalFree.size(); j++) {
@@ -1232,6 +1307,12 @@ public class ControllerClass implements Controller {
 
 	}
 
+	/**
+	 * get the list of occupied slots of time
+	 * 
+	 * @param listToSearch
+	 * @return
+	 */
 	// @author
 	private ArrayList<longPair> getOccupied(TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
@@ -1252,7 +1333,15 @@ public class ControllerClass implements Controller {
 
 	}
 
-	//@author A0112044B
+	/**
+	 * check if 2 intervals have overlap or not
+	 * 
+	 * @param pair1
+	 * @param pair2
+	 * @return
+	 */
+
+	// @author A0112044B
 	private boolean hasOverLap(longPair pair1, longPair pair2) {
 
 		if (Math.max(pair1.getFirst(), pair2.getFirst()) < Math.min(
@@ -1269,31 +1358,30 @@ public class ControllerClass implements Controller {
 	 * @param content
 	 *            User input
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private void search(String content) {
 		TaskList resultList = tasks.search(content);
 		setResultList(resultList);
 
 		if (resultList.size() == 0 || resultList.size() == 1) {
-			setFeedback(resultList.size() + " search result.");
+			setFeedback(resultList.size() + MESSAGE_ONE_SEARCH_RESULT);
 		} else {
-			setFeedback(resultList.size() + " search results.");
+			setFeedback(resultList.size() + MESSAGE_SEARCH_RESULTS);
 		}
 	}
 
 	/*
 	 * 
 	 */
-	//@author A0112044B
-	private void pending(){
+	// @author A0112044B
+	private void pending() {
 		setResultList(tasks.getFloatingTasks());
 	}
-	
-	
+
 	/**
 	 * Sets the result list of current overdue tasks.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private void overDue() {
 		setResultList(tasks.getOverdueTasks());
 	}
@@ -1301,7 +1389,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Updates the current lists with the previous changes.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private void updateForUndo() {
 		updateUndoList();
 		updateUndoArchiveList();
@@ -1310,7 +1398,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Updates the current archive list with the previous changes.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private void updateUndoArchiveList() {
 		undoArchiveList.push(archiveTasks.clone());
 	}
@@ -1318,7 +1406,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Pushes the current state into the undo list.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private void updateUndoList() {
 		undoList.push(tasks.clone());
 	}
@@ -1326,14 +1414,14 @@ public class ControllerClass implements Controller {
 	/**
 	 * Replaces the current state with the previous states.
 	 */
-	//@author A0112044B
+	// @author A0112044B
 	private void undo() {
 		// if there are states to undo
 		if (!undoList.empty()) {
 			tasks = undoList.pop();
 			archiveTasks = undoArchiveList.pop();
 			setFeedback(MESSAGE_FEEDBACK_UNDO);
-		}else {
+		} else {
 			setFeedback(MESSAGE_FEEDBACK_UNDO_MAXIMUM);
 		}
 	}
@@ -1348,7 +1436,7 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException If the task numbers entered by user are not
 	 * numbers.
 	 */
-	//@author A0115584A
+	// @author A0115584A
 	private void postpone(String content) throws Exception {
 		try {
 			if (displayListType == DisplayList.ARCHIVE) {
@@ -1387,7 +1475,7 @@ public class ControllerClass implements Controller {
 	/*
 	 * Displays the existing tasks to the user.
 	 */
-	//@author A0115584A
+	// @author A0115584A
 	private void displayMainList() {
 		// getFileContent();
 		// setNumTaskOnPage(numTasksInSinglePage);
@@ -1407,7 +1495,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If current displayed list is not on the main or search list.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void editTask(String content) throws Exception {
 
 		if ((displayListType == DisplayList.MAIN)
@@ -1429,7 +1517,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If user did not specify what to edit or when list is empty.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void validEdit(String content) throws Exception {
 		if (tasks.isEmpty()) {
 			throw new Exception(MESSAGE_FEEDBACK_INVALID_EMPTYLIST);
@@ -1456,14 +1544,14 @@ public class ControllerClass implements Controller {
 	 *             If the user did not enter task number or if in incorrect
 	 *             position.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private Task proceedWithEdit(String content) throws Exception {
 		try {
 			String[] words = content.split(SPACE_STRING);
 			int positionOfTask = Integer.parseInt(words[0]) - 1;
-			
+
 			checkValidParameters(words, positionOfTask);
-			
+
 			String attributeToChange = words[1];
 			Task taskToEdit = tasks.get(positionOfTask);
 
@@ -1472,7 +1560,7 @@ public class ControllerClass implements Controller {
 			} else {
 				editSingleTask(words, attributeToChange, taskToEdit);
 			}
-			
+
 			return taskToEdit;
 		} catch (NumberFormatException e) {
 			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
@@ -1481,20 +1569,25 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * Parses the command for a single task to be edited, be it description, time or priority.
+	 * Parses the command for a single task to be edited, be it description,
+	 * time or priority.
 	 * 
-	 * @param words				The words in the edit command.
-	 * @param attributeToChange	The attribute to change.
-	 * @param taskToEdit		The task to be edited.
-	 * @throws Exception		If the edit format is invalid.
+	 * @param words
+	 *            The words in the edit command.
+	 * @param attributeToChange
+	 *            The attribute to change.
+	 * @param taskToEdit
+	 *            The task to be edited.
+	 * @throws Exception
+	 *             If the edit format is invalid.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void editSingleTask(String[] words, String attributeToChange,
 			Task taskToEdit) throws Exception {
-		
+
 		String editDetails = EMPTY_STRING;
-		checkDetailsSpecified(words, attributeToChange); 
-		
+		checkDetailsSpecified(words, attributeToChange);
+
 		editDetails = concatenateEditDetails(words, editDetails);
 		editDetails = editDetails.trim();
 
@@ -1505,11 +1598,13 @@ public class ControllerClass implements Controller {
 	/**
 	 * Concatenates the details to be edited.
 	 * 
-	 * @param words			The words in the edit command.
-	 * @param editDetails	The details to be replaced with.	
-	 * @return 				The concatenated string of details.
+	 * @param words
+	 *            The words in the edit command.
+	 * @param editDetails
+	 *            The details to be replaced with.
+	 * @return The concatenated string of details.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private String concatenateEditDetails(String[] words, String editDetails) {
 		for (int i = 2; i < words.length; i++) {
 			editDetails += words[i] + SPACE_STRING;
@@ -1520,31 +1615,33 @@ public class ControllerClass implements Controller {
 	/**
 	 * Checks if the details to be replaced with are specified.
 	 * 
-	 * @param words					The words in the edit command.
-	 * @param attributeToChange		The attribute to change.
-	 * @throws Exception			If the details are not specified.
+	 * @param words
+	 *            The words in the edit command.
+	 * @param attributeToChange
+	 *            The attribute to change.
+	 * @throws Exception
+	 *             If the details are not specified.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void checkDetailsSpecified(String[] words, String attributeToChange)
 			throws Exception {
 		if ((!attributeToChange.equals("!")) && (words.length == 2)) {
-			throw new Exception(
-					MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
+			throw new Exception(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
 		}
 	}
-	
+
 	/**
 	 * Edits the priority of multiple tasks.
 	 * 
-	 * @param words		The words in the edit command.
+	 * @param words
+	 *            The words in the edit command.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void editMultiplePriority(String[] words) {
 		for (int i = 0; i < words.length - 1; i++) {
 			Task task = tasks.get(Integer.parseInt(words[i]) - 1);
 			editPriority(task);
-			setFeedback(words.length - 1
-					+ MESSAGE_FEEDBACK_EDIT_MULTIPLE);
+			setFeedback(words.length - 1 + MESSAGE_FEEDBACK_EDIT_MULTIPLE);
 			if (i == words.length - 2) {
 				setRecentChange(task, tasks);
 			}
@@ -1552,14 +1649,20 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * This method checks if the parameters in the edit command are valid by checking if the task number is within range or if the parameters are too few.
+	 * This method checks if the parameters in the edit command are valid by
+	 * checking if the task number is within range or if the parameters are too
+	 * few.
 	 * 
-	 * @param words				All the words in the edit command. 
-	 * @param positionOfTask	The position of task to be edited.
-	 * @throws Exception 		If the task position is out of range or the parameters are too few.
+	 * @param words
+	 *            All the words in the edit command.
+	 * @param positionOfTask
+	 *            The position of task to be edited.
+	 * @throws Exception
+	 *             If the task position is out of range or the parameters are
+	 *             too few.
 	 * 
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void checkValidParameters(String[] words, int positionOfTask)
 			throws Exception {
 		if (positionOfTask < 0 || positionOfTask >= tasks.size()
@@ -1580,7 +1683,7 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 *             If attribute to change is not a number.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private boolean isMultipleEditPriority(String attributeToChange) {
 		try {
 			Integer.parseInt(attributeToChange);
@@ -1602,7 +1705,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If user did not specify the attribute to be edited.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void editAttribute(Task taskToEdit, String attribute,
 			String editDetails) throws Exception {
 		if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_DESC)) {
@@ -1623,7 +1726,7 @@ public class ControllerClass implements Controller {
 	 * @param taskToEdit
 	 *            Task object to be edited.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void editPriority(Task taskToEdit) {
 		boolean priorityOfTask = taskToEdit.isPrioritized();
 		if (priorityOfTask) {
@@ -1641,7 +1744,7 @@ public class ControllerClass implements Controller {
 	 * @param desc
 	 *            description that user specifies.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void editDescription(Task taskToEdit, String desc) {
 		if (desc != null) {
 			taskToEdit.setDesc(desc);
@@ -1657,7 +1760,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If the current displayed list is the archive list.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void deleteTask(String content) throws Exception {
 
 		if ((displayListType == DisplayList.MAIN)
@@ -1679,7 +1782,7 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 *             If user enters invalid task numbers.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void proceedWithDelete(String content) throws Exception {
 		try {
 
@@ -1689,10 +1792,10 @@ public class ControllerClass implements Controller {
 			Collections.sort(taskNumDescending, Collections.reverseOrder());
 
 			deleteTasksDescendingOrder(taskNumDescending);
-			
+
 			tasks.sort();
 			setFeedBackDelete(taskNumDescending);
-			
+
 		} catch (NumberFormatException e) {
 			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
 					CMD_DELETE));
@@ -1700,11 +1803,13 @@ public class ControllerClass implements Controller {
 	}
 
 	/**
-	 * This method sets the appropriate feedback depending on how many tasks were deleted.
+	 * This method sets the appropriate feedback depending on how many tasks
+	 * were deleted.
 	 * 
-	 * @param taskNumDescending		The list of task numbers in descending order.
+	 * @param taskNumDescending
+	 *            The list of task numbers in descending order.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void setFeedBackDelete(List<Integer> taskNumDescending) {
 		if (taskNumDescending.size() == 1) {
 			setFeedback(MESSAGE_FEEDBACK_DELETE);
@@ -1719,10 +1824,12 @@ public class ControllerClass implements Controller {
 	/**
 	 * Deletes all the tasks in the list.
 	 * 
-	 * @param taskNumDescending		The list of task numbers in descending order.
-	 * @throws Exception			If any task number entered is out of range.
+	 * @param taskNumDescending
+	 *            The list of task numbers in descending order.
+	 * @throws Exception
+	 *             If any task number entered is out of range.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void deleteTasksDescendingOrder(List<Integer> taskNumDescending)
 			throws Exception {
 		for (int i = 0; i < taskNumDescending.size(); i++) {
@@ -1737,10 +1844,12 @@ public class ControllerClass implements Controller {
 	/**
 	 * This method adds task numbers to the list.
 	 * 
-	 * @param taskNumbers		The task numbers of tasks to be deleted.
-	 * @param taskNumDescending	The list of task numbers.
+	 * @param taskNumbers
+	 *            The task numbers of tasks to be deleted.
+	 * @param taskNumDescending
+	 *            The list of task numbers.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void addTaskNumbersToList(String[] taskNumbers,
 			List<Integer> taskNumDescending) {
 		for (int i = 0; i < taskNumbers.length; i++) {
@@ -1757,16 +1866,16 @@ public class ControllerClass implements Controller {
 	 * @throws IndexOutOfBoundsException
 	 *             If task number entered is out of range.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void executeDelete(int taskNum) throws Exception {
-		logger.entering(getClass().getName(),LOGGING_PURPOSE_METHODNAME_DELETE);
+		logger.entering(getClass().getName(), LOGGING_PURPOSE_METHODNAME_DELETE);
 		try {
 			int positionOfTask = taskNum - 1;
 			tasks.remove(positionOfTask);
 		} catch (IndexOutOfBoundsException e) {
 			throw new Exception(MESSAGE_FEEDBACK_OUTOFRANGE);
 		}
-		logger.exiting(getClass().getName(), LOGGING_PURPOSE_METHODNAME_DELETE );
+		logger.exiting(getClass().getName(), LOGGING_PURPOSE_METHODNAME_DELETE);
 	}
 
 	/**
@@ -1778,7 +1887,7 @@ public class ControllerClass implements Controller {
 	 *             If user keys in an invalid direction or if the page is the
 	 *             first or the last.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void changePage(String content) throws Exception {
 		String direction = content.trim();
 		changeCurrentPageNum(direction);
@@ -1794,7 +1903,7 @@ public class ControllerClass implements Controller {
 	 *             If user keys in an invalid direction or if the page is the
 	 *             first or the last.
 	 */
-	//@author
+	// @author
 	private void changeCurrentPageNum(String direction) throws Exception {
 		if (direction.equalsIgnoreCase(PAGE_DIRECTION_UP)) {
 			if (checkValidPageUp()) {
@@ -1827,7 +1936,7 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return true if it is possible to go to the next page.
 	 */
-	//@author
+	// @author
 	private boolean checkValidPageDown() {
 		Integer totalNumPages;
 		totalNumPages = getTotalNumOfPages(displayListType);
@@ -1844,7 +1953,7 @@ public class ControllerClass implements Controller {
 	 *            Type of list.
 	 * @return Total number of pages for a list.
 	 */
-	//@author
+	// @author
 	private int getTotalNumOfPages(DisplayList displayListType) {
 		int totalNumPages;
 
@@ -1873,7 +1982,7 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return true if it is possible to go to the previous page.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private boolean checkValidPageUp() {
 		if (currentPageNum <= 1) {
 			return false;
@@ -1884,7 +1993,7 @@ public class ControllerClass implements Controller {
 	/**
 	 * Updates the content stored.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private void updateStorage() {
 		storage.write(tasks.getStringList());
 		storage.writeArchive(archiveTasks.getStringList());
@@ -1901,7 +2010,7 @@ public class ControllerClass implements Controller {
 	 *             If there is nothing to delete or user did not specify what to
 	 *             delete.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private boolean isValidDelete(String content) throws Exception {
 		if (tasks.isEmpty()) {
 			throw new Exception(String.format(
@@ -1921,7 +2030,7 @@ public class ControllerClass implements Controller {
 	 * @return True if user did not enter anything after the command type and
 	 *         false if user did enter anything.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private boolean isEmptyCommand(String content) {
 		return content.trim().equals(EMPTY_STRING);
 	}
@@ -1934,7 +2043,7 @@ public class ControllerClass implements Controller {
 	 * @throws Exception
 	 *             If user did not specify what to add.
 	 */
-	//@author A0119381E
+	// @author A0119381E
 	private void addTask(String content) throws Exception {
 		if (isEmptyCommand(content)) {
 			throw new Exception(MESSAGE_FEEDBACK_ADD_SPECIFY);
@@ -1956,7 +2065,7 @@ public class ControllerClass implements Controller {
 	 *            User input.
 	 * @return Task object made from user input.
 	 */
-	//@author A0119381E
+	// @author A0119381E
 	private Task processUserInput(String content) {
 		String desc = EMPTY_STRING;
 		Integer singlePos = 0;
@@ -1967,7 +2076,7 @@ public class ControllerClass implements Controller {
 			// return processUserInputClassic(content);
 			desc = content + SPACE_STRING;
 			content = EMPTY_STRING;
-		} 
+		}
 
 		String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
 		Matcher matcher = Pattern.compile(regex).matcher(content);
@@ -2004,7 +2113,7 @@ public class ControllerClass implements Controller {
 	 *            Stringed time input from user.
 	 * @return true if time is added to Task object.
 	 */
-	//@author A0119281E
+	// @author A0119281E
 	private boolean processTime(Task task, String content) {
 		content = content.trim();
 		if (content.isEmpty()) {
@@ -2045,7 +2154,7 @@ public class ControllerClass implements Controller {
 	 *            Command type that user wants to execute.
 	 * @return Trimmed user input without the command type.
 	 */
-	//@author A0115194J
+	// @author A0115194J
 	private String removeCommandType(String command, String operation) {
 		return command.replaceFirst(operation, EMPTY_STRING).trim();
 	}
@@ -2057,7 +2166,7 @@ public class ControllerClass implements Controller {
 	 *            Command input by user.
 	 * @return CommandType
 	 */
-	//@author
+	// @author
 	private CommandType matchCommandType(String operation) {
 		CommandType command = commandMap.get(operation.trim().toLowerCase());
 		if (command == null) {
@@ -2072,7 +2181,7 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return An instance of the Controller object.
 	 */
-	//@author A0119381E
+	// @author A0119381E
 	public static Controller getInstance() {
 		if (theController == null) {
 			theController = new ControllerClass();
