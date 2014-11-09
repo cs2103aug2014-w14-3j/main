@@ -3,7 +3,7 @@ package controller;
 /**
  * Class for pairs of integers.
  */
-// @author A0112044B
+//@author A0112044B
 public class Pair {
 	int first;
 	int second;
@@ -16,7 +16,7 @@ public class Pair {
 	 * @param _second
 	 *            Second integer of the pair.
 	 */
-	// @author
+	//@author
 	public Pair(int _first, int _second) {
 		first = _first;
 		second = _second;
@@ -27,7 +27,7 @@ public class Pair {
 	 * 
 	 * @return First integer of the pair.
 	 */
-	// @author
+	//@author
 	public int getFirst() {
 		return first;
 	}
@@ -37,7 +37,7 @@ public class Pair {
 	 * 
 	 * @return Second integer of the pair.
 	 */
-	// @author
+	//@author
 	public int getSecond() {
 		return second;
 	}

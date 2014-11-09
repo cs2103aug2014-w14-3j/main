@@ -3,7 +3,7 @@ package controller;
 /**
  * Class for implementing a Triple of integers.
  */
-// @author A0112044B
+//@author A0112044B
 public class Triple implements Comparable<Triple> {
 	int first;
 	int second;
@@ -19,7 +19,7 @@ public class Triple implements Comparable<Triple> {
 	 * @param _third
 	 *            Third integer.
 	 */
-	// @author
+	//@author
 	public Triple(int _first, int _second, Task _third) {
 		first = _first;
 		second = _second;
@@ -31,7 +31,7 @@ public class Triple implements Comparable<Triple> {
 	 * 
 	 * @return First integer.
 	 */
-	// @author
+	//@author
 	public int getFirst() {
 		return first;
 	}
@@ -41,7 +41,7 @@ public class Triple implements Comparable<Triple> {
 	 * 
 	 * @return Second integer.
 	 */
-	// @author
+	//@author
 	public int getSecond() {
 		return second;
 	}
@@ -51,7 +51,7 @@ public class Triple implements Comparable<Triple> {
 	 * 
 	 * @return Third integer.
 	 */
-	// @author
+	//@author
 	public Task getThird() {
 		return third;
 	}
@@ -63,7 +63,7 @@ public class Triple implements Comparable<Triple> {
 	 *            Triple object containing three integers.
 	 * @return Difference between the first two integers.
 	 */
-	// @author
+	//@author
 	public int compareTo(Triple triple) {
 		if (this.getFirst() != triple.getFirst()) {
 			return this.getFirst() - triple.getFirst();
