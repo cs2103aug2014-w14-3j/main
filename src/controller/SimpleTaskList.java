@@ -182,7 +182,7 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	// @author
+	// @author A0115194J
 	@Override
 	public List<String> getStringList() {
 		ArrayList<String> taskStrings = new ArrayList<String>();
