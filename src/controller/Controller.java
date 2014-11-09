@@ -31,13 +31,13 @@ public interface Controller {
 	public List<String> getCurrentList();
 	
 	/**
-	 * Generates a list of stringed commands and words to suggest to user.
+	 * Generates the most possible stringed commands and words to suggest to user.
 	 * 
 	 * @param content	Input from user.
 	 * @return			List of suggested stringed commands and words.			
 	 */
 	//@author
-	public List<String> suggest(String content);
+	public String suggest(String content);
 	
 	/**
 	 * Gets feedback message after each operation.
@@ -46,4 +46,11 @@ public interface Controller {
 	 */
 	//@author A0115584A
 	public String getFeedback();
+	
+	/**
+	 * Return if the program is exiting
+	 * 
+	 * @return boolean
+	 */
+	public boolean isExiting();
 }

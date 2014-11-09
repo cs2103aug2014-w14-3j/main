@@ -72,16 +72,17 @@ public class Main extends Application{
 	
 	
 	private void execCmd(String cmd) {
-		if(cmd.trim().compareToIgnoreCase(Config.cmdExit) == 0) {
-			log.log("on exit");
-			Platform.exit();
-			System.exit(0);
-		}
-		
 		try {
 			log.log("Command: " + cmd);
 			
 			recentChange = controller.execCmd(cmd);
+			
+			if(controller.isExiting()) {
+				log.log("on exit");
+				Platform.exit();
+				System.exit(0);
+			}
+			
 			displayBuf = controller.getCurrentList();
 			if (displayBuf == null) {
 				return;
@@ -123,7 +124,7 @@ public class Main extends Application{
 		return null;
 	}
 	
-	private List<String> onInputChange(String newValue) {
+	private String onInputChange(String newValue) {
 		return controller.suggest(newValue);
 	}
 	
