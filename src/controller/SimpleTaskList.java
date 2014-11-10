@@ -393,7 +393,6 @@ public class SimpleTaskList implements TaskList {
 	 * search for the task with no dates
 	 */
 	//@author A0112044B
-
 	public TaskList getFloatingTasks() {
 		int numOfTask = tasks.size();
 		TaskList resultList = new SimpleTaskList();
