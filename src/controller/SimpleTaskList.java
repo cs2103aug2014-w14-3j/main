@@ -36,6 +36,9 @@ public class SimpleTaskList implements TaskList {
 	private static final int NOT_INDEX=-1;
 	private static final int MAX_MONTH=12;
 	private static final int MAX_DAY=31;
+	private static final double HALF=0.5;
+	private static final double UNIT=1.0;
+	
 
 	private List<Task> tasks;
 	private Integer numTaskOnPage;
@@ -446,7 +449,7 @@ public class SimpleTaskList implements TaskList {
 		int second = content.lastIndexOf(QUOTATION_MARK_CHAR);
 
 		if (first == NOT_INDEX || second == NOT_INDEX) {
-			assert first == -1 || second == -1;
+			assert first == NOT_INDEX || second == NOT_INDEX;
 			return simpleSearch(content, this, false);
 		} else {
 			if (second == content.length() - 1 && first == 0) {
@@ -1117,7 +1120,7 @@ public class SimpleTaskList implements TaskList {
 			}
 		}
 		// maxScore can not exceed 1000
-		assert maxScore <= 1000;
+		assert maxScore <= MAX_SCORE;
 		return maxScore;
 	}
 
@@ -1137,9 +1140,9 @@ public class SimpleTaskList implements TaskList {
 
 		int editDist = editDistance(string, keyword);
 		int lenOfStr = string.length();
-		if ((editDist / (lenOfStr * 1.0)) < 0.5)
+		if ((editDist / (lenOfStr * UNIT)) < HALF)
 			return MAX_SCORE
-					- (int) Math.floor(MAX_SCORE * editDist / (lenOfStr * 1.0));
+					- (int) Math.floor(MAX_SCORE * editDist / (lenOfStr * UNIT));
 		else
 			return 0;
 
