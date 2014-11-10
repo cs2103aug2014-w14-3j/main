@@ -1,0 +1,877 @@
+//@author: a0115194j
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\Controller.java
+	 */
+
+public interface Controller {
+	
+	/**
+	 * Executes command entered by user.
+	 * 
+	 * @param cmd	Input command from user.
+	 * @return		Task position of a page on the current list.
+	 * @throws		Exception 	If command entered by user is invalid.	
+	 */
+	public Integer execCmd(String cmd) throws Exception;
+	
+	/**
+	 * Gets the current list that user is viewing.
+	 * 
+	 * @return	List of stringed tasks.
+	 */
+	public List<String> getCurrentList();
+	
+	/**
+	 * Generates the most possible stringed commands and words to suggest to user.
+	 * 
+	 * @param content	Input from user.
+	 * @return			List of suggested stringed commands and words.			
+	 */
+	public String suggest(String content);
+	
+	/**
+	 * Gets feedback message after each operation.
+	 * 
+	 * @return	Stringed feedback message.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	public Integer execCmd(String command) throws Exception {
+		getFileContent();
+		setNumTaskOnPage(numTasksInSinglePage);
+		parseCommand(command);
+		updateStorage();
+		return recentChange;
+	}
+
+	/**
+	 * Gets feedback message after a command is executed.
+	 * 
+	 * @return Stringed feedback message.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void getFileContent() {
+		tasks = new SimpleTaskList(storage.read());
+		archiveTasks = new SimpleTaskList(storage.readArchive());
+	}
+
+	/**
+	 * Creates a Storage object.
+	 * 
+	 * @return A Storage object.
+	 */
+	private Storage createStorageObject() {
+		return new StoragePlus();
+	}
+
+	/**
+	 * Updates the current list type to be displayed to user.
+	 * 
+	 * @param listType
+	 *            Type of displayed list.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void parseCommand(String command) throws Exception {
+		String operation = getOperation(command);
+		CommandType commandType = matchCommandType(operation);
+		processInputBasedOnComandType(command, operation, commandType);
+	}
+
+	/**
+	 * Based on the command type, goes on to execute the user command. If
+	 * command type is search, takes a different approach from other command
+	 * types.
+	 * 
+	 * @param command
+	 *            User input.
+	 * @param operation
+	 *            The command type string.
+	 * @param commandType
+	 *            The command type.
+	 * @throws Exception
+	 *             If user enters an invalid command.
+	 * 
+	 */
+	private void processInputBasedOnComandType(String command,
+			String operation, CommandType commandType) throws Exception {
+		if (commandType == CommandType.SEARCH) {
+			processInput(commandType, command);
+		} else {
+			String content = removeCommandType(command, operation);
+			processInput(commandType, content);
+		}
+	}
+
+	/**
+	 * Gets the command type specified by user.
+	 * 
+	 * @param command
+	 *            User input.
+	 * @return Command type string specified by user.
+	 */
+	private String getOperation(String command) {
+		String[] splitCommandIntoWords = command.split(SPACE_STRING);
+		String operation = splitCommandIntoWords[POSITION_OF_OPERATION];
+		return operation;
+	}
+
+	/**
+	 * Chooses which course of action to take according to the command type.
+	 *
+	 * @param commandType
+	 *            Type of command.
+	 * @param content
+	 *            Content of user input besides the command specified.
+	 * @throws Exception
+	 *             If an invalid command is entered.
+	 */
+	private void processInput(CommandType commandType, String content)
+			throws Exception {
+		switch (commandType) {
+		case ADD:
+			updateForUndo();
+			addTask(content);
+			break;
+		case DELETE:
+			updateForUndo();
+			deleteTask(content);
+			break;
+		case EDIT:
+			updateForUndo();
+			editTask(content);
+			break;
+		case UNDO:
+			undo();
+			break;
+		case SEARCH:
+			search(content);
+			break;
+		case DISPLAY:
+			displayMainList();
+			break;
+		case ARCHIVE:
+			moveToArchive();
+			break;
+		case OVERDUE:
+			overDue();
+			break;
+		case PENDING:
+			pending();
+			break;
+		case POSTPONE:
+			updateForUndo();
+			postpone(content);
+			break;
+		case DONE:
+			updateForUndo();
+			markAsDone(content);
+			break;
+		case FREETIME:
+			findFreeTime(content);
+			break;
+		case CHANGEPAGE:
+			changePage(content);
+			break;
+		case CLEARARCHIVE:
+			updateForUndo();
+			clearArchive();
+			break;
+		case EXIT:
+			onExit();
+			break;
+		default:
+			assert false : commandType;
+		}
+	}
+
+	/**
+	 * Set the program to be on exiting
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void clearArchive() throws Exception {
+		if (displayListType == DisplayList.ARCHIVE) {
+			archiveTasks.clear();
+			setFeedback(MESSAGE_FEEDBACK_ARCHIVE_CLEAR);
+		} else {
+			setFeedback(MESSAGE_FEEDBACK_CLEAR);
+			throw new Exception(MESSAGE_FEEDBACK_CLEAR);
+		}
+	}
+
+	/**
+	 * Changes current displayed list to archive list.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void editTask(String content) throws Exception {
+
+		if ((displayListType == DisplayList.MAIN)
+				|| (displayListType == DisplayList.SEARCH)) {
+			validEdit(content);
+		} else {
+			setFeedback(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
+					CMD_EDIT));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
+					CMD_EDIT));
+		}
+
+	}
+
+	/**
+	 * Checks if the user has specified any task to edit and if specified,
+	 * proceeds with the edit.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @throws Exception
+	 *             If user did not specify what to edit or when list is empty.
+	 */
+	private void validEdit(String content) throws Exception {
+		if (tasks.isEmpty()) {
+			setFeedback(MESSAGE_FEEDBACK_INVALID_EMPTYLIST);
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_EMPTYLIST);
+		}
+		if (isEmptyCommand(content)) {
+			setFeedback(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+		} else {
+			tasks.sort();
+			Task taskEdited = proceedWithEdit(content);
+			setRecentChange(taskEdited, tasks);
+			setDisplayList(DisplayList.MAIN);
+		}
+	}
+
+	/**
+	 * Edits the task using the specified content.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @return Edited Task object.
+	 * @throws Exception
+	 *             If user input is in the incorrect edit format.
+	 * @throws NumberFormatException
+	 *             If the user did not enter task number or if in incorrect
+	 *             position.
+	 */
+	private Task proceedWithEdit(String content) throws Exception {
+		try {
+			String[] words = content.split(SPACE_STRING);
+			int positionOfTask = Integer.parseInt(words[0]) - 1;
+
+			checkValidParameters(words, positionOfTask);
+
+			String attributeToChange = words[1];
+			Task taskToEdit = tasks.get(positionOfTask);
+
+			if (isMultipleEditPriority(attributeToChange)) {
+				editMultiplePriority(words);
+			} else {
+				editSingleTask(words, attributeToChange, taskToEdit);
+			}
+
+			return taskToEdit;
+		} catch (NumberFormatException e) {
+			setFeedback(String.format(MESSAGE_FEEDBACK_INVALID,
+					CMD_EDIT));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
+					CMD_EDIT));
+		}
+	}
+
+	/**
+	 * Parses the command for a single task to be edited, be it description,
+	 * time or priority.
+	 * 
+	 * @param words
+	 *            The words in the edit command.
+	 * @param attributeToChange
+	 *            The attribute to change.
+	 * @param taskToEdit
+	 *            The task to be edited.
+	 * @throws Exception
+	 *             If the edit format is invalid.
+	 */
+	private void editSingleTask(String[] words, String attributeToChange,
+			Task taskToEdit) throws Exception {
+
+		String editDetails = EMPTY_STRING;
+		checkDetailsSpecified(words, attributeToChange);
+
+		editDetails = concatenateEditDetails(words, editDetails);
+		editDetails = editDetails.trim();
+
+		editAttribute(taskToEdit, attributeToChange, editDetails);
+		setFeedback(MESSAGE_FEEDBACK_EDIT);
+	}
+
+	/**
+	 * Concatenates the details to be edited.
+	 * 
+	 * @param words
+	 *            The words in the edit command.
+	 * @param editDetails
+	 *            The details to be replaced with.
+	 * @return The concatenated string of details.
+	 */
+	private String concatenateEditDetails(String[] words, String editDetails) {
+		for (int i = 2; i < words.length; i++) {
+			editDetails += words[i] + SPACE_STRING;
+		}
+		return editDetails;
+	}
+
+	/**
+	 * Checks if the details to be replaced with are specified.
+	 * 
+	 * @param words
+	 *            The words in the edit command.
+	 * @param attributeToChange
+	 *            The attribute to change.
+	 * @throws Exception
+	 *             If the details are not specified.
+	 */
+	private void checkDetailsSpecified(String[] words, String attributeToChange)
+			throws Exception {
+		if ((!attributeToChange.equals(EDIT_ATTRIBUTE_PRIORITY)) && (words.length == 2)) {
+			setFeedback(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
+			throw new Exception(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
+		}
+	}
+
+	/**
+	 * Edits the priority of multiple tasks.
+	 * 
+	 * @param words
+	 *            The words in the edit command.
+	 */
+	private void editMultiplePriority(String[] words) {
+		for (int i = 0; i < words.length - 1; i++) {
+			Task task = tasks.get(Integer.parseInt(words[i]) - 1);
+			editPriority(task);
+			setFeedback(words.length - 1 + MESSAGE_FEEDBACK_EDIT_MULTIPLE);
+			if (i == words.length - 2) {
+				setRecentChange(task, tasks);
+			}
+		}
+	}
+
+	/**
+	 * This method checks if the parameters in the edit command are valid by
+	 * checking if the task number is within range or if the parameters are too
+	 * few.
+	 * 
+	 * @param words
+	 *            All the words in the edit command.
+	 * @param positionOfTask
+	 *            The position of task to be edited.
+	 * @throws Exception
+	 *             If the task position is out of range or the parameters are
+	 *             too few.
+	 * 
+	 */
+	private void checkValidParameters(String[] words, int positionOfTask)
+			throws Exception {
+		if (positionOfTask < 0 || positionOfTask >= tasks.size()
+				|| words.length < 2) {
+			setFeedback(String.format(MESSAGE_FEEDBACK_INVALID,
+					CMD_EDIT));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
+					CMD_EDIT));
+		}
+	}
+
+	/**
+	 * Checks if the user wants to edit priority of multiple tasks.
+	 * 
+	 * @param attributeToChange
+	 *            Either task number if multiple tasks are to be prioritised or
+	 *            the attribute to change such as description or time or
+	 *            exclamation mark if single task is to be edited.
+	 * @return true if attribute to change is a number.
+	 * @throws NumberFormatException
+	 *             If attribute to change is not a number.
+	 */
+	private boolean isMultipleEditPriority(String attributeToChange) {
+		try {
+			Integer.parseInt(attributeToChange);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Matches the attribute to be edited and calls the relevant function.
+	 * 
+	 * @param taskToEdit
+	 *            Task object to be edited.
+	 * @param attribute
+	 *            Attribute to be edited.
+	 * @param editDetails
+	 *            Changes that user specifies.
+	 * @throws Exception
+	 *             If user did not specify the attribute to be edited.
+	 */
+	private void editAttribute(Task taskToEdit, String attribute,
+			String editDetails) throws Exception {
+		if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_DESC)) {
+			editDescription(taskToEdit, editDetails);
+		} else if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_TIME)) {
+			processTime(taskToEdit, editDetails);
+		} else if (attribute.equalsIgnoreCase(EDIT_ATTRIBUTE_PRIORITY)) {
+			editPriority(taskToEdit);
+		} else {
+			setFeedback(MESSAGE_FEEDBACK_EDIT_SPECIFY);
+			throw new Exception(MESSAGE_FEEDBACK_EDIT_SPECIFY);
+		}
+	}
+
+	/**
+	 * Edits the priority of a task by reversing the existing priority of the
+	 * task.
+	 * 
+	 * @param taskToEdit
+	 *            Task object to be edited.
+	 */
+	private void editPriority(Task taskToEdit) {
+		boolean priorityOfTask = taskToEdit.isPrioritized();
+		if (priorityOfTask) {
+			taskToEdit.setPriority(BOOLEAN_FALSE);
+		} else {
+			taskToEdit.setPriority(BOOLEAN_TRUE);
+		}
+	}
+
+	/**
+	 * Replaces the description of task with the given description.
+	 * 
+	 * @param taskToEdit
+	 *            Task object to be edited.
+	 * @param desc
+	 *            description that user specifies.
+	 */
+	private void editDescription(Task taskToEdit, String desc) {
+		if (desc != null) {
+			taskToEdit.setDesc(desc);
+		}
+	}
+
+	/**
+	 * Checks if the task numbers of tasks to be deleted are valid and if valid,
+	 * proceeds with deletion.
+	 * 
+	 * @param content
+	 *            Task numbers specified by user
+	 * @throws Exception
+	 *             If the current displayed list is the archive list.
+	 */
+	private void deleteTask(String content) throws Exception {
+
+		if ((displayListType == DisplayList.MAIN)
+				|| (displayListType == DisplayList.SEARCH)) {
+			if (isValidDelete(content)) {
+				proceedWithDelete(content);
+			}
+		} else {
+			setFeedback(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
+					CMD_DELETE));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
+					CMD_DELETE));
+		}
+	}
+
+	/**
+	 * Deletes task/tasks after knowing the task numbers are valid.
+	 * 
+	 * @param content
+	 *            Task numbers specified by user.
+	 * @throws NumberFormatException
+	 *             If user enters invalid task numbers.
+	 */
+	private void proceedWithDelete(String content) throws Exception {
+		try {
+
+			String[] taskNumbers = content.split(SPACE_STRING);
+			List<Integer> taskNumDescending = new ArrayList<Integer>();
+			addTaskNumbersToList(taskNumbers, taskNumDescending);
+			Collections.sort(taskNumDescending, Collections.reverseOrder());
+
+			deleteTasksDescendingOrder(taskNumDescending);
+
+			tasks.sort();
+			setFeedBackDelete(taskNumDescending);
+
+		} catch (NumberFormatException e) {
+			setFeedback(String.format(MESSAGE_FEEDBACK_INVALID,
+					CMD_DELETE));
+			throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
+					CMD_DELETE));
+		}
+	}
+
+	/**
+	 * This method sets the appropriate feedback depending on how many tasks
+	 * were deleted.
+	 * 
+	 * @param taskNumDescending
+	 *            The list of task numbers in descending order.
+	 */
+	private void setFeedBackDelete(List<Integer> taskNumDescending) {
+		if (taskNumDescending.size() == 1) {
+			setFeedback(MESSAGE_FEEDBACK_DELETE);
+		} else {
+			setFeedback(taskNumDescending.size()
+					+ MESSAGE_FEEDBACK_DELETE_MULTIPLE);
+		}
+		resetRecentChange();
+		setDisplayList(DisplayList.MAIN);
+	}
+
+	/**
+	 * Deletes all the tasks in the list.
+	 * 
+	 * @param taskNumDescending
+	 *            The list of task numbers in descending order.
+	 * @throws Exception
+	 *             If any task number entered is out of range.
+	 */
+	private void deleteTasksDescendingOrder(List<Integer> taskNumDescending)
+			throws Exception {
+		for (int i = 0; i < taskNumDescending.size(); i++) {
+			int taskNum = taskNumDescending.get(i);
+			executeDelete(taskNum);
+			if (i == taskNumDescending.size() - 1) {
+				setRecentChange(taskNumDescending.get(i) - 1, tasks);
+			}
+		}
+	}
+
+	/**
+	 * This method adds task numbers to the list.
+	 * 
+	 * @param taskNumbers
+	 *            The task numbers of tasks to be deleted.
+	 * @param taskNumDescending
+	 *            The list of task numbers.
+	 */
+	private void addTaskNumbersToList(String[] taskNumbers,
+			List<Integer> taskNumDescending) {
+		for (int i = 0; i < taskNumbers.length; i++) {
+			int taskNum = Integer.parseInt(taskNumbers[i]);
+			taskNumDescending.add(taskNum);
+		}
+	}
+
+	/**
+	 * Deletes the task with the specified number.
+	 * 
+	 * @param taskNum
+	 *            Task number.
+	 * @throws IndexOutOfBoundsException
+	 *             If task number entered is out of range.
+	 */
+	private void executeDelete(int taskNum) throws Exception {
+		logger.entering(getClass().getName(), LOGGING_PURPOSE_METHODNAME_DELETE);
+		try {
+			int positionOfTask = taskNum - 1;
+			tasks.remove(positionOfTask);
+		} catch (IndexOutOfBoundsException e) {
+			setFeedback(MESSAGE_FEEDBACK_OUTOFRANGE);
+			throw new Exception(MESSAGE_FEEDBACK_OUTOFRANGE);
+		}
+		logger.exiting(getClass().getName(), LOGGING_PURPOSE_METHODNAME_DELETE);
+	}
+
+	/**
+	 * Changes the attributes related to the changing of a page.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @throws Exception
+	 *             If user keys in an invalid direction or if the page is the
+	 *             first or the last.
+	 */
+	private void changePage(String content) throws Exception {
+		String direction = content.trim();
+		changeCurrentPageNum(direction);
+	}
+
+	/**
+	 * Checks if it is valid to change the current page number and if so,
+	 * changes the current page number.
+	 * 
+	 * @param direction
+	 *            Direction to change page.
+	 * @throws Exception
+	 *             If user keys in an invalid direction or if the page is the
+	 *             first or the last.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean checkValidPageUp() {
+		if (currentPageNum <= 1) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Updates the content stored.
+	 */
+	private void updateStorage() {
+		storage.write(tasks.getStringList());
+		storage.writeArchive(archiveTasks.getStringList());
+	}
+
+	/**
+	 * Checks if the list of tasks is empty or if the user has not specified the
+	 * task number to delete.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @return boolean true if delete is valid.
+	 * @throws Exception
+	 *             If there is nothing to delete or user did not specify what to
+	 *             delete.
+	 */
+	private boolean isValidDelete(String content) throws Exception {
+		if (tasks.isEmpty()) {
+			setFeedback(String.format(
+					MESSAGE_FEEDBACK_INVALID_EMPTYLIST, CMD_DELETE));
+			throw new Exception(String.format(
+					MESSAGE_FEEDBACK_INVALID_EMPTYLIST, CMD_DELETE));
+		} else if (isEmptyCommand(content)) {
+			setFeedback(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Checks if the user has entered anything after the command type.
+	 * 
+	 * @param content
+	 *            User input
+	 * @return True if user did not enter anything after the command type and
+	 *         false if user did enter anything.
+	 */
+	private boolean isEmptyCommand(String content) {
+		return content.trim().equals(EMPTY_STRING);
+	}
+
+	/**
+	 * Adds tasks
+	 * 
+	 * @param content
+	 *            User input.
+	 * @throws Exception
+	 *             If user did not specify what to add.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private String removeCommandType(String command, String operation) {
+		return command.replaceFirst(operation, EMPTY_STRING).trim();
+	}
+
+	/**
+	 * Matches the command type for each operation.
+	 * 
+	 * @param operation
+	 *            Command input by user.
+	 * @return CommandType
+	 */
+	private CommandType matchCommandType(String operation) {
+		CommandType command = commandMap.get(operation.trim().toLowerCase());
+		if (command == null) {
+			command = CommandType.SEARCH;
+		}
+
+		return command;
+	}
+
+	/**
+	 * Gets an instance of the Controller object.
+	 * 
+	 * @return An instance of the Controller object.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	@Override
+	public List<String> getStringList() {
+		ArrayList<String> taskStrings = new ArrayList<String>();
+		for (Task task : tasks) {
+			taskStrings.add(task.toString());
+		}
+
+		return taskStrings;
+	}
+
+	/**
+	 * Generates a numbered stringed list of tasks.
+	 * 
+	 * @return List of numbered stringed tasks.
+	 */
+	@Override
+	public List<String> getNumberedStringList() {
+		ArrayList<String> taskStrings = new ArrayList<String>();
+		for (int i = 0; i < size(); i++) {
+			taskStrings.add((i + 1) + SEPARATOR + tasks.get(i));
+		}
+
+		return taskStrings;
+	}
+
+	/**
+	 * Sorts the list of Task objects in the task list according to priority,
+	 * date, time and description.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\tests\controllerClassTestVishnu.java
+	 */
+
+public class controllerClassTestVishnu {
+	
+	Controller controller;
+	List<String> taskDisplayList;
+	
+	@Before
+	public void initialize() {
+		controller = ControllerClass.getInstance();
+	}
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
+	public String getDescription(String displayString) {
+		String[] splitDisplayString = displayString.split("%");
+		return splitDisplayString[0];
+	}
+	
+	@Test
+	//This is a boundary case for the positive values within the range of task numbers, of the partition.
+	public void testExecuteDeletePostiveValue() throws Exception {
+		controller.execCmd("add have lunch at school");
+		controller.execCmd("add meet friends for movie");
+		controller.execCmd("delete 1");
+		controller.execCmd("list");
+		taskDisplayList = controller.getCurrentList();
+		
+		assertEquals("meet friends for movie", getDescription(taskDisplayList.get(0)));
+		
+		controller.execCmd("delete 1");
+	}
+	
+	@Test
+	//This is a case around the boundary for the values outside the range of task numbers, of the partition.
+	public void testExecuteDeleteNegativeValue() throws Exception {
+		controller.execCmd("add have lunch at school");
+		controller.execCmd("add meet friends for movie");
+	
+		try {
+			controller.execCmd("delete -1");
+			fail("Should throw an Exception when negative numbers are given as input.");
+		} catch (Exception e) {
+			assertEquals("Task does not exist. Please enter task number within the range.", e.getMessage());
+			controller.execCmd("delete 2");
+			controller.execCmd("delete 1");
+		}
+	}
+	
+	@Test
+	public void testEditDescription() throws Exception {
+		controller.execCmd("add have lunch at school");
+		controller.execCmd("edit 1 desc have lunch at home");
+		controller.execCmd("list");
+		taskDisplayList = controller.getCurrentList();
+		
+		assertEquals("have lunch at home", getDescription(taskDisplayList.get(0)));
+		controller.execCmd("delete 1");
+	}
+	
+	
+}
+
+	// End of segment: C:\Users\user\git\main\src\tests\controllerClassTestVishnu.java
+
+
+
+
+
