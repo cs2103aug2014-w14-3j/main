@@ -1,0 +1,54 @@
+//@author: a0119281e
+
+
+
+	/**
+	 * origin: C:\Users\user\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean processTime(Task task, String content) {
+		content = content.trim();
+		if (content.isEmpty()) {
+			return false;
+		}
+
+		Parser parser = new Parser();
+		List<DateGroup> groups = parser.parse(content);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		Collections.sort(dates);
+
+		if (dates.size() < 1) {
+			return false;
+		} else if (dates.size() == 1) {
+			task.clearTimes();
+			task.setDeadline(dates.get(0));
+			task.setType(TaskType.DEADLINE);
+			return true;
+		} else {
+			task.clearTimes();
+			task.setStartTime(dates.get(0));
+			task.setEndTime(dates.get(dates.size() - 1));
+			task.setType(TaskType.TIMED);
+			return true;
+		}
+	}
+
+	/**
+	 * Removes the command type from the command string.
+	 * 
+	 * @param command
+	 *            User input.
+	 * @param operation
+	 *            Command type that user wants to execute.
+	 * @return Trimmed user input without the command type.
+	 */
+	// End of segment: C:\Users\user\git\main\src\controller\ControllerClass.java
+
+
+
+
+
