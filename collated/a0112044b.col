@@ -1,0 +1,2759 @@
+//@author: a0112044b
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+
+	private void markAsDone(String content) throws Exception {
+		String[] taskNumbers = content.trim().split(ONE_OR_MORE_SPACE);
+		Arrays.sort(taskNumbers, new Comparator<String>() {
+			public int compare(String first, String second) {
+				return Integer.valueOf(second)
+						.compareTo(Integer.valueOf(first));
+			}
+		});
+
+		try {
+			for (int i = 0; i < taskNumbers.length; i++) {
+				int taskID = Integer.parseInt(taskNumbers[i].trim()) - 1;
+
+				// move task from task List to archive list
+				if (taskID >= 0 && taskID < tasks.size()) {
+					Task task = tasks.get(taskID);
+					archiveTasks.add(0, task);
+					tasks.remove(taskID);
+				} else {
+					throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
+							CMD_DONE));
+				}
+			}
+
+			if (taskNumbers.length == 1) {
+				setFeedback(MESSAGE_FEEDBACK_DONE);
+			} else {
+				setFeedback(taskNumbers.length + MESSAGE_FEEDBACK_DONE_MULTIPLE);
+
+				if (taskNumbers.length == 1) {
+					setFeedback(MESSAGE_FEEDBACK_DONE);
+				} else {
+					setFeedback(taskNumbers.length
+							+ MESSAGE_FEEDBACK_DONE_MULTIPLE);
+
+				}
+			}
+		} catch (NumberFormatException e) {
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+		}
+		clearRecentChange();
+	}
+	
+	/**
+	 * Find free slots of time
+	 * 
+	 * @param content
+	 * @throws Exception
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void findFreeTime(String content) throws Exception {
+
+		ArrayList<longPair> freeSlots = findTime(content);
+
+		ArrayList<String> result = new ArrayList<String>();
+
+		for (int i = 0; i < freeSlots.size(); i++) {
+			longPair pair = freeSlots.get(i);
+
+			String str = OPENING + timeToText(pair.getFirst()) + CONNECTOR_TO
+					+ timeToText(pair.getSecond()) + CLOSING;
+			result.add(str);
+		}
+
+		if (result.size() == 0) {
+			setFeedback(MESSAGE_NO_SLOT_FOUND);
+		} else if (result.size() == 1) {
+			setFeedback(result.size() + MESSAGE_ONE_SLOT_FOUND);
+		} else if (result.size() >= 2) {
+			setFeedback(result.size() + MESSAGE_SLOTS_FOUND);
+		}
+
+		// the list size is at most MAX_NUM_OF_RESULTS
+		assert result.size() <= MAX_NUM_OF_RESULTS;
+		setFreeSlotList(result);
+	}
+
+	private String timeToText(Long timeInMilli) {
+		Date time = new Date(timeInMilli);
+		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(),
+				ZoneId.systemDefault());
+		DateTimeFormatter format = DateTimeFormatter
+				.ofPattern(Config.taskDateFormat);
+
+		return format.format(timeobj);
+	}
+
+	/**
+	 * Parses user input to find the time interval where the user is free.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @return Time with hours and minutes in a pair.
+	 * @throws NumberFormatException
+	 *             If user input is not a valid time.
+	 * @throws Exception
+	 *             If user input is invalid.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private ArrayList<longPair> findTime(String content) throws Exception {
+
+		if (hasHour(content) || hasMinute(content)) {
+			return findHour(content);
+		} else {
+			return findPeriod(content);
+		}
+
+		// return new ArrayList<longPair>();
+
+	}
+
+	/**
+	 * Find slots of a length of time
+	 * @param content
+	 * @return
+	 * @throws Exception
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private ArrayList<longPair> findHour(String content) throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, DAY_PER_MONTH);
+		Date nextMonth = cal.getTime();
+		nextMonth = setEndDate(nextMonth);
+
+		if ((hasHour(content) && !hasMinute(content))
+				|| (!hasHour(content) && hasMinute(content))) {
+			String[] para = content.trim().split(SPACE_STRING);
+			int len = para.length;
+			if (len == 2) {
+				try {
+
+					int number = Integer.parseInt(para[0]);
+					if (hasHour(content)) {
+						return findTimeLength(number * MINUTE_PER_HOUR,
+								new Date(), nextMonth);
+					} else {
+						return findTimeLength(number, new Date(), nextMonth);
+					}
+				} catch (NumberFormatException e) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+			} else if (len > 2) {
+				String date = SPACE_STRING;
+				try {
+					int number = Integer.parseInt(para[0]);
+
+					for (int i = 2; i < len; i++) {
+						date = date + para[i] + SPACE_STRING;
+					}
+
+					Date deadline = timeParser(date);
+
+					if (deadline != null) {
+
+						deadline = setEndDate(deadline);
+						if (hasHour(content)) {
+							return findTimeLength(number * MINUTE_PER_HOUR,
+									new Date(), deadline);
+						} else {
+							return findTimeLength(number, new Date(), deadline);
+						}
+					} else {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+
+				} catch (NumberFormatException e) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+			}
+		} else if (hasHour(content) && hasMinute(content)) {
+			String[] para = content.trim().split(SPACE_STRING);
+			int len = para.length;
+
+			if (len == 4) {
+				try {
+					int hh = Integer.parseInt(para[0]);
+					int mm = Integer.parseInt(para[2]);
+					return findTimeLength(hh * MINUTE_PER_HOUR + mm,
+							new Date(), nextMonth);
+				} catch (NumberFormatException e) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+			} else if (len > 4) {
+				String date = SPACE_STRING;
+				try {
+					int hh = Integer.parseInt(para[0]);
+					int mm = Integer.parseInt(para[2]);
+
+					for (int i = 4; i < len; i++) {
+						date = date + para[i] + SPACE_STRING;
+					}
+					Date deadline = timeParser(date);
+					if (deadline != null) {
+						deadline = setEndDate(deadline);
+						return findTimeLength(hh * MINUTE_PER_HOUR + mm,
+								new Date(), deadline);
+					} else {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+
+				} catch (NumberFormatException e) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+			}
+
+		}
+
+		return new ArrayList<longPair>();
+	}
+	/**
+	 * find the frees slot for a certain period of time
+	 * @param content
+	 * @return
+	 * @throws Exception
+	 */
+	
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private ArrayList<longPair> findPeriod(String content) throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, DAY_PER_MONTH);
+		Date nextMonth = cal.getTime();
+		nextMonth = setEndDate(nextMonth);
+
+		List<Date> dates = timeParserPeriod(content);
+		if (dates.size() == 2) {
+			Date date1 = dates.get(0);
+			Date date2 = dates.get(1);
+
+			if (date1 == null || date2 == null || date1.after(date2)) {
+				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
+			} else {
+				Date today = new Date();
+				// the time of today
+				if (compare(date1, today) == 0 && compare(date2, today) == 0) {
+
+					return findTimePeriod(date1, date2, nextMonth);
+				} else if (compare(date1, today) > 0
+						&& compare(date2, today) > 0
+						&& compare(date1, date2) == 0) {
+
+					Calendar now = Calendar.getInstance();
+					Calendar cal1 = Calendar.getInstance();
+					cal1.setTime(date1);
+					Calendar cal2 = Calendar.getInstance();
+					cal2.setTime(date2);
+					Date deadline = cal2.getTime();
+
+					cal1.set(Calendar.YEAR, now.get(Calendar.YEAR));
+					cal1.set(Calendar.MONTH, now.get(Calendar.MONTH));
+					cal1.set(Calendar.DATE, now.get(Calendar.DATE));
+
+					cal2.set(Calendar.YEAR, now.get(Calendar.YEAR));
+					cal2.set(Calendar.MONTH, now.get(Calendar.MONTH));
+					cal2.set(Calendar.DATE, now.get(Calendar.DATE));
+					Date newDate1 = cal1.getTime();
+					Date newDate2 = cal2.getTime();
+
+					return findTimePeriod(newDate1, newDate2, deadline);
+				}
+			}
+		}
+		return new ArrayList<longPair>();
+
+	}
+
+	
+	/**
+	 * set the time to 23.59.59 of a date
+	 * @param date
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private Date setEndDate(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, MAX_HOUR_OF_DAY);
+		cal.set(Calendar.MINUTE, MAX_MINUTE_OR_SECOND);
+		cal.set(Calendar.SECOND, MAX_MINUTE_OR_SECOND);
+		return cal.getTime();
+	}
+
+	/**
+	 * check if the content has description for hour
+	 * 
+	 * @param content
+	 * @return
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean hasHour(String content) {
+
+		if (content.toLowerCase().indexOf(FREETIME_HOUR1) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_HOUR2) != NOT_INDEX) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * check if the content has description for minute
+	 * 
+	 * @param content
+	 * @return
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean hasMinute(String content) {
+		if (content.toLowerCase().indexOf(FREETIME_MINUTES1) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES2) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES3) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES4) != NOT_INDEX) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Parses user input to get a date. If no date time is recognized, return
+	 * null.
+	 * 
+	 * @param input
+	 *            User input.
+	 * @return Date time when user is free.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private Date timeParser(String input) {
+
+		Parser parser = new Parser();
+
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		if (dates.size() == 1) {
+			assert dates.size() == 1;
+			return dates.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Time parser for a period of time
+	 * 
+	 * @param input
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private List<Date> timeParserPeriod(String input) {
+
+		Parser parser = new Parser();
+
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		if (dates.size() == 2) {
+			assert dates.size() == 2;
+			return dates;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Compares the two Date objects by computing their difference. If date1 is
+	 * before date2, return a negative difference, If date1 is after date2,
+	 * return a positive difference. If they are the same, return 0.
+	 * 
+	 * @param date1
+	 *            Date object to be compared with.
+	 * @param date2
+	 *            Date object to be compared with.
+	 * @return Difference between the two Date objects.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private int compare(Date date1, Date date2) {
+
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date1);
+
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+
+		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
+			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
+			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		} else {
+			return cal1.get(Calendar.DAY_OF_MONTH)
+					- cal2.get(Calendar.DAY_OF_MONTH);
+		}
+
+	}
+
+	/**
+	 * find all free period until the deadline, return a list of
+	 * MAX_NUM_OF_RESULTS only
+	 * 
+	 * @param start
+	 * @param end
+	 * @param deadline
+	 * @return
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private ArrayList<longPair> findTimePeriod(Date start, Date end,
+			Date deadline) {
+
+		deadline=setEndDate(deadline);
+		ArrayList<longPair> freeSlots = freeIntervals(new Date(), deadline);
+		ArrayList<longPair> result = new ArrayList<longPair>();
+		
+		longPair interval = new longPair(start.getTime(), end.getTime());
+		Date current = new Date();
+		int numOfDate = 0;
+		while (compare(current, deadline) <= 0
+				&& numOfDate < MAX_NUM_OF_RESULTS) {
+			assert numOfDate < MAX_NUM_OF_RESULTS;
+			if (isFree(interval, freeSlots)) {
+				result.add(interval);
+				numOfDate++;
+			}
+
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(current);
+			cal.add(Calendar.DATE, 1);
+			current = cal.getTime();
+			// increase current to the next day
+
+			long first = interval.getFirst();
+			long second = interval.getSecond();
+			interval = new longPair(first + MILISECOND_PER_DAY, second
+					+ MILISECOND_PER_DAY);
+		}
+
+		return result;
+
+	}
+
+	/**
+	 * check if an interval is free or not
+	 * 
+	 * @param interval
+	 * @param list
+	 * @return
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean isFree(longPair interval, ArrayList<longPair> list) {
+
+		for (int i = 0; i < list.size(); i++) {
+			longPair free = list.get(i);
+			if (interval.getFirst() >= free.getFirst()
+					&& interval.getSecond() <= free.getSecond()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * find the interval of times that are free
+	 * 
+	 * @param numOfMin
+	 * @param deadline
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private ArrayList<longPair> findTimeLength(int numOfMin, Date startTime,
+			Date deadline) {
+
+		ArrayList<longPair> freeSlots = freeIntervals(startTime, deadline);
+		ArrayList<longPair> result = new ArrayList<longPair>();
+		int numOfSlot = 0;
+
+		for (int i = 0; i < freeSlots.size() && numOfSlot < MAX_NUM_OF_RESULTS; i++) {
+			longPair slot = freeSlots.get(i);
+
+			long timeLen = (slot.getSecond() - slot.getFirst())
+					/ (MILISECOND_PER_MINUTE);
+			if (timeLen >= numOfMin) {
+				result.add(slot);
+				numOfSlot++;
+			}
+
+		}
+		return result;
+	}
+
+	/**
+	 * get the list of free intervals
+	 * 
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private ArrayList<longPair> freeIntervals(Date start, Date end) {
+
+		ArrayList<longPair> occupiedIntervals = getOccupied(tasks);
+		ArrayList<longPair> intervalFree = new ArrayList<longPair>();
+
+		// initialize
+		intervalFree.add(new longPair(start.getTime(), end.getTime()));
+
+		for (int i = 0; i < occupiedIntervals.size(); i++) {
+			longPair occu = occupiedIntervals.get(i);
+
+			for (int j = 0; j < intervalFree.size(); j++) {
+				longPair free = intervalFree.get(j);
+				if (hasOverLap(occu, free)) {
+					// case 1: occu > free, update
+					if (occu.getFirst() > free.getFirst()
+							&& occu.getSecond() > free.getSecond()) {
+						intervalFree.set(j,
+								new longPair(free.getFirst(), occu.getFirst()));
+					}// cas2 2: occu< free, update
+					else if (occu.getFirst() < free.getFirst()
+							&& occu.getSecond() < free.getSecond()) {
+						intervalFree
+								.set(j,
+										new longPair(occu.getSecond(), free
+												.getSecond()));
+					}// case 3:occu covers free, remove
+					else if (occu.getFirst() < free.getFirst()
+							&& occu.getSecond() > free.getSecond()) {
+						intervalFree.remove(j);
+						j--;
+					}// case 4: occu is covered by free, add 2 time slots
+					else if (occu.getFirst() > free.getFirst()
+							&& occu.getSecond() < free.getSecond()) {
+						intervalFree.set(j,
+								new longPair(free.getFirst(), occu.getFirst()));
+						intervalFree
+								.add(j+1,
+										new longPair(occu.getSecond(), free
+												.getSecond()));
+						j++;
+					}
+				}
+			}
+		
+			Collections.sort(intervalFree);
+		}
+		return intervalFree;
+
+	}
+
+	/**
+	 * get the list of occupied slots of time
+	 * 
+	 * @param listToSearch
+	 * @return
+	 */
+	private ArrayList<longPair> getOccupied(TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+
+		ArrayList<longPair> resultList = new ArrayList<longPair>();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+
+			if (task.getType() == TaskType.TIMED) {
+				resultList.add(new longPair(task.getStartTime().getTime(), task
+						.getEndTime().getTime()));
+			}
+		}
+		// sort in order first
+		Collections.sort(resultList);
+		return resultList;
+
+	}
+
+	/**
+	 * check if 2 intervals have overlap or not
+	 * 
+	 * @param pair1
+	 * @param pair2
+	 * @return
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean hasOverLap(longPair pair1, longPair pair2) {
+
+		if (Math.max(pair1.getFirst(), pair2.getFirst()) < Math.min(
+				pair1.getSecond(), pair2.getSecond())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Searches for tasks that consist of the keywords that the user enters.
+	 * 
+	 * @param content
+	 *            User input
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void search(String content) {
+		TaskList resultList = tasks.search(content);
+		setResultList(resultList);
+
+		if (resultList.size() == 0 || resultList.size() == 1) {
+			setFeedback(resultList.size() + MESSAGE_ONE_SEARCH_RESULT);
+		} else {
+			setFeedback(resultList.size() + MESSAGE_SEARCH_RESULTS);
+		}
+	}
+
+	/*
+	 * 
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void pending() {
+		setResultList(tasks.getFloatingTasks());
+	}
+
+	/**
+	 * Sets the result list of current overdue tasks.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void overDue() {
+		setResultList(tasks.getOverdueTasks());
+	}
+
+	/**
+	 * Updates the current lists with the previous changes.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void updateForUndo() {
+		updateUndoList();
+		updateUndoArchiveList();
+	}
+
+	/**
+	 * Updates the current archive list with the previous changes.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void updateUndoArchiveList() {
+		undoArchiveList.push(archiveTasks.clone());
+	}
+
+	/**
+	 * Pushes the current state into the undo list.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void updateUndoList() {
+		undoList.push(tasks.clone());
+	}
+
+	/**
+	 * Replaces the current state with the previous states.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void undo() {
+		// if there are states to undo
+		if (!undoList.empty()) {
+			tasks = undoList.pop();
+			archiveTasks = undoArchiveList.pop();
+			setFeedback(MESSAGE_FEEDBACK_UNDO);
+		} else {
+			setFeedback(MESSAGE_FEEDBACK_UNDO_MAXIMUM);
+		}
+	}
+
+	/*
+	 * Postpones the desired task.
+	 * 
+	 * @param content Task numbers entered by user.
+	 * 
+	 * @throws Exception If current displayed list is the archive list.
+	 * 
+	 * @throws NumberFormatException If the task numbers entered by user are not
+	 * numbers.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+public class FixedSizeStack<E> {
+	int maxSize;
+	Deque<E> stack;
+	
+	/**
+	 * Constructor for FixedSizeStack object.
+	 * 
+	 * @param _maxSize	Size of stack.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+
+	public FixedSizeStack(int _maxSize){
+		maxSize=_maxSize;
+		stack=new LinkedList<E>();
+		
+	}
+	
+	/**
+	 * Gets the size of stack.
+	 * 
+	 * @return	Size of stack.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+
+	public int size(){
+		return stack.size();
+	}
+	
+	/**
+	 * Gets the maximum size of ??
+	 * 
+	 * @return	Maximum size.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+
+	public int getMaxSize(){
+		return maxSize;
+	}
+	
+	/**
+	 * Checks if the stack is empty.
+	 * 
+	 * @return	true if stack is empty.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+
+	public boolean empty(){
+		if (stack.size()==0){
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Peeks the top item of the stack.
+	 * 
+	 * @return	First item of the stack.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+
+	public E peek(){
+		return stack.peekFirst();
+	}
+	
+	/**
+	 * Gets the top item of the stack.
+	 * 
+	 * @return	First item of the stack.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+	public E pop(){
+		return stack.removeFirst();
+	}
+	
+	/**
+	 * Inserts item into the stack.
+	 * 
+	 * @param item	Item to be inserted into the stack.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+	 */
+
+
+	public void push(E item){
+		if (stack.size()< maxSize){
+			stack.addFirst(item);
+		} else if (stack.size()==maxSize){
+			stack.removeLast();
+			stack.addFirst(item);
+		} 
+		
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\FixedSizeStack.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\longPair.java
+	 */
+
+public class longPair implements Comparable<longPair> {
+	long first;
+	long second;
+
+	/**
+	 * Constructs a pair of long numbers.
+	 * 
+	 * @param _first
+	 *            First number of the pair.
+	 * @param _second
+	 *            Second number of the pair.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\longPair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\longPair.java
+	 */
+
+
+	public longPair(long _first, long _second) {
+		first = _first;
+		second = _second;
+	}
+
+	/**
+	 * Gets the first long number of the pair.
+	 * 
+	 * @return First long number of the pair.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\longPair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\longPair.java
+	 */
+
+
+	public long getFirst() {
+		return first;
+	}
+
+	/**
+	 * Gets the second long number of the pair.
+	 * 
+	 * @return Second long number of the pair.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\longPair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\longPair.java
+	 */
+
+
+	public long getSecond() {
+		return second;
+	}
+
+	/**
+	 * Compares the two numbers in the pair.
+	 * 
+	 * @return Difference between the two numbers.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\longPair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\longPair.java
+	 */
+
+
+	public int compareTo(longPair num) {
+		return (int) (this.getFirst() - num.getFirst());
+	}
+
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\longPair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Pair.java
+	 */
+
+public class Pair {
+	int first;
+	int second;
+
+	/**
+	 * Constructs a pair of integers.
+	 * 
+	 * @param _first
+	 *            First integer of the pair.
+	 * @param _second
+	 *            Second integer of the pair.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\Pair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Pair.java
+	 */
+
+
+	public Pair(int _first, int _second) {
+		first = _first;
+		second = _second;
+	}
+
+	/**
+	 * Gets the first integer of the pair.
+	 * 
+	 * @return First integer of the pair.
+
+	 */ 
+	// End of segment: C:\Users\Thien\git\main\src\controller\Pair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Pair.java
+	 */
+
+
+	public int getFirst() {
+		return first;
+	}
+
+	/**
+	 * Gets the second integer of the pair.
+	 * 
+	 * @return Second integer of the pair.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\Pair.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	@Override
+	public TaskList getOverdueTasks() {
+		int numOfTask = tasks.size();
+		Date current = new Date();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = tasks.get(i);
+			if (task.getDeadline() != null) {
+				if (task.getDeadline().compareTo(current) <= 0) {
+					Task withNum = task.clone();
+					withNum.setDesc((i + 1) + SEPARATOR + withNum.getDesc());
+					resultList.add(withNum);
+				}
+			}
+		}
+
+		return resultList;
+	}
+
+	/*
+	 * search for the task with no dates
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	public TaskList getFloatingTasks() {
+		int numOfTask = tasks.size();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = tasks.get(i);
+			if (task.getType() == TaskType.FLOATING) {
+				Task withNum = task.clone();
+				withNum.setDesc((i + 1) + SEPARATOR + withNum.getDesc());
+				resultList.add(withNum);
+			}
+		}
+
+		return resultList;
+	}
+
+	/**
+	 * Searches for tasks that consist of the keyword entered by user.
+	 * 
+	 * @param content
+	 *            Keyword entered by user.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	@Override
+	public TaskList search(String content) {
+		return processSearch(content);
+	}
+
+	/**
+	 * Processes user input for search.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList processSearch(String content) {
+
+		content = content.trim();
+		int first = content.indexOf(QUOTATION_MARK_CHAR);
+		int second = content.lastIndexOf(QUOTATION_MARK_CHAR);
+
+		if (first == NOT_INDEX || second == NOT_INDEX) {
+			assert first == -1 || second == -1;
+			return simpleSearch(content, this, false);
+		} else {
+			if (second == content.length() - 1 && first == 0) {
+				String desc = content.replaceAll(QUOTATION_MARK_STRING, EMPTY_STRING);
+				return simpleSearch(desc, this, true);
+			} else {
+				String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+				Matcher matcher = Pattern.compile(regex).matcher(content);
+				String desc = new String();
+				String time = new String();
+
+				while (matcher.find()) {
+					desc += content.substring(matcher.start() + 1,
+							matcher.end() - 1)
+							+ SINGLE_SPACE;
+				}
+				if (desc.length() > 0) {
+					desc = desc.substring(0, desc.length() - 1);
+					time = content.replaceAll(regex, EMPTY_STRING);
+				}
+
+				// now content is time
+				return complexSearch(desc, time, this);
+			}
+		}
+	}
+	
+	private List<Date> timeParserPeriod(String input) {
+		Parser parser = new Parser();
+
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+		
+		if (dates.size()==2){
+			return dates;
+		}else {
+			return null;
+		}
+		
+	}
+	/**
+	 * Parses user input for date and time.
+	 * 
+	 * @param input
+	 *            User input
+	 * @return Date object consisting of the date and time user has entered.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private Date timeParser(String input) {
+		Parser parser = new Parser();
+
+		List<DateGroup> groups = parser.parse(input);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		if (dates.size() == 1) {
+
+
+			if (input.toLowerCase().indexOf(STRING_TODAY) == NOT_INDEX) {
+
+				Date now = new Date();
+				boolean hasDigit = false;
+				for (int i = 0; i < input.length(); i++) {
+					if (Character.isDigit(input.charAt(i))) {
+						hasDigit = true;
+					}
+				}
+
+				if (!hasDigit && compare(dates.get(0), now) == 0) {
+					return null;
+				}
+
+			}
+
+			if (input.length() == 1 || input.length() == 2) {
+				// can not get a date form these length
+				return null;
+			}
+
+			String newStr = new String();
+			for (int i = 0; i < input.length(); i++) {
+				if (input.charAt(i) == SLASH_CHAR
+						|| Character.isDigit(input.charAt(i))) {
+					newStr = newStr + input.charAt(i);
+				}
+			}
+
+			if (newStr.length() >= 4) {
+				if (newStr.indexOf(SLASH_STRING) == NOT_INDEX)
+					return null;
+			}
+
+			if (newStr.length() == 5) {
+				if (newStr.charAt(2) == SLASH_CHAR) {
+					try {
+						int mon = Integer.parseInt(newStr.substring(0, 2));
+						int date = Integer.parseInt(newStr.substring(3));
+
+						if (mon > MAX_MONTH || date > MAX_DAY)
+							return null;
+					} catch (NumberFormatException nfe) {
+						return null;
+					}
+
+				}
+			}
+
+			return dates.get(0);
+		} else {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Searches for date and description of tasks. If user input contains only
+	 * one date, it will search for date.
+	 * 
+	 * @param desc
+	 *            Description of tasks.
+	 * @param content
+	 *            Attributes to search for?
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList complexSearch(String desc, String content,
+			TaskList listToSearch) {
+		TaskList resultForTime = simpleSearch(content, listToSearch, false);
+		// search for time first
+
+		return simpleSearch(desc, resultForTime, true);
+
+	}
+
+	/**
+	 * Searches for tasks containing the keyword entered by user.
+	 * 
+	 * @param content
+	 *            Keyword entered by user.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @param isDesc
+	 *            True if keyword entered is the keyword for description.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList simpleSearch(String content, TaskList listToSearch,
+			boolean isDesc) {
+
+		if (isDesc == true) {	
+			return searchDesc(content, listToSearch);
+		} else {
+			if (isPeriod(content)){
+				List<Date> dates=timeParserPeriod(content);
+				Date start=dates.get(0);
+				Date end=dates.get(1);
+				return searchPeriod(start,end,listToSearch);
+			}else if (isDeadline(content)){
+				Date deadline=timeParser(content);
+				return searchByDate(deadline,listToSearch);
+			}else if (timeParser(content)!=null){
+				Date date=timeParser(content);
+				return searchOnDate(date,listToSearch);
+			}else {
+				return searchDesc(content,listToSearch);
+			}
+		
+		}
+	}
+
+	/**
+	 * Searches on the exact date of tasks.
+	 * 
+	 * @param deadline
+	 *            Date to search.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	public TaskList searchOnDate(Date deadline, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			if (task.getDeadline() != null) {
+				Task newTask = task.clone();
+				if (newTask.getDesc().indexOf(SEPARATOR) == NOT_INDEX) {
+					String newDesc = (i + 1) + SEPARATOR + newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
+
+				if (compare(task.getDeadline(), deadline) == 0) {
+					assert compare(task.getDeadline(), deadline) == 0;
+					resultList.add(newTask);
+				}
+			}
+		}
+
+		return resultList;
+	}
+
+	/**
+	 * Searches for tasks that have a deadline by the specified date.
+	 * 
+	 * @param deadline
+	 *            Deadline entered by user.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList searchByDate(Date deadline, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			if (task.getDeadline() != null) {
+				assert task.getDeadline() != null;
+				Task newTask = task.clone();
+				if (newTask.getDesc().indexOf(SEPARATOR) == NOT_INDEX) {
+					String newDesc = (i + 1) + SEPARATOR + newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
+
+				if (compare(task.getDeadline(), deadline) <= 0) {
+					resultList.add(newTask);
+					assert compare(task.getDeadline(), deadline) <= 0;
+				}
+			}
+		}
+
+		return resultList;
+	}
+
+	/**
+	 * Search in a period of time
+	 * @param start
+	 * @param end
+	 * @param listToSearch
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList searchPeriod(Date start, Date end, TaskList listToSearch) {
+		int numOfTask = listToSearch.size();
+		TaskList resultList = new SimpleTaskList();
+
+	
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			if (task.getDeadline() != null) {
+				assert task.getDeadline() != null;
+				Task newTask = task.clone();
+				if (newTask.getDesc().indexOf(SEPARATOR) == NOT_INDEX) {
+					String newDesc = (i + 1) + SEPARATOR + newTask.getDesc();
+					newTask.setDesc(newDesc);
+				}
+
+				if (task.getType() == TaskType.DEADLINE) {
+					if (compare(task.getDeadline(), end) <= 0
+							&& compare(task.getDeadline(), start) >= 0) {
+						resultList.add(newTask);
+					}
+				} else if (task.getType() == TaskType.TIMED) {
+					if (compare(task.getEndTime(), end) <= 0
+							&& compare(task.getStartTime(), start) >= 0) {
+						resultList.add(newTask);
+					}
+				}
+			}
+		}
+
+		return resultList;
+	}
+	
+	/**
+	 * check if the content is a period of time
+	 * @param content
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private boolean isPeriod(String content){
+			
+		List<Date> dates=timeParserPeriod(content);
+		return (dates!=null);
+		
+	}
+	
+	/**
+	 * check if the content is a deadline
+	 * @param content
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private boolean isDeadline(String content){
+		String[] para=content.trim().split(SPACE);
+		
+		if (para.length>=1){
+			 boolean hasBy=para[0].equalsIgnoreCase(STRING_BY);
+			 String newCont=content.replaceAll(STRING_BY,EMPTY_STRING);
+			 Date date=timeParser(newCont);
+			 return (date!=null) && hasBy;
+		}else {
+			return false;
+		}
+	}
+
+	/**
+	 * Compares the two Date objects by computing their difference. If date1 is
+	 * before date2, return a negative difference, If date1 is after date2,
+	 * return a positive difference. If they are the same, return 0.
+	 * 
+	 * @param date1
+	 *            Date object to be compared with.
+	 * @param date2
+	 *            Date object to be compared with.
+	 * @return Difference between the two Date objects.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private int compare(Date date1, Date date2) {
+
+		Calendar cal1 = Calendar.getInstance();
+		cal1.setTime(date1);
+
+		Calendar cal2 = Calendar.getInstance();
+		cal2.setTime(date2);
+
+		if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
+			return cal1.get(Calendar.YEAR) - cal2.get(Calendar.YEAR);
+		} else if (cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
+			return cal1.get(Calendar.MONTH) - cal2.get(Calendar.MONTH);
+		} else {
+			return cal1.get(Calendar.DAY_OF_MONTH)
+					- cal2.get(Calendar.DAY_OF_MONTH);
+		}
+
+	}
+
+	/**
+	 * Searches for the descriptions of tasks that contain the keyword. If the
+	 * keyword appears in the list of tasks, return the list of exact search.
+	 * Else, return the list of nearMatch search.
+	 * 
+	 * @param keyword
+	 *            Keyword entered by user.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	public TaskList searchDesc(String keyWord, TaskList listToSearch) {
+
+		TaskList result = exactSearch(keyWord, listToSearch);
+
+		if (result.size() == 0) {
+
+			TaskList resultList = insideSearch(keyWord, listToSearch);
+			if (resultList.size() == 0) {
+				return nearMatchSearch(keyWord, listToSearch);
+			} else {
+				return resultList;
+			}
+		} else {
+			return result;
+		}
+	}
+
+	/**
+	 * Generates a list of search results.
+	 * 
+	 * @param keyword
+	 *            Keyword entered by user.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList insideSearch(String keyWord, TaskList listToSearch) {
+
+		TaskList result = new SimpleTaskList();
+
+		int numOfTask = listToSearch.size();
+
+		// will not search for 1 character only
+		if (keyWord.length() >= 2) {
+
+			for (int i = 0; i < numOfTask; i++) {
+				Task task = listToSearch.get(i);
+				if (isInside(keyWord.toLowerCase(), task.getDesc()
+						.toLowerCase())) {
+					Task newTask = task.clone();
+
+					if (newTask.getDesc().indexOf(SEPARATOR) == NOT_INDEX) {
+						String newDesc = (i + 1) + SEPARATOR
+								+ newTask.getDesc();
+						newTask.setDesc(newDesc);
+						result.add(newTask);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Checks if keyword entered by user is inside the stringed task.
+	 * 
+	 * @param keyWord
+	 *            Keyword entered by user.
+	 * @param strToSearch
+	 *            Stringed task to search from.
+	 * @return True if stringed task contains the keyword.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private boolean isInside(String keyWord, String strToSearch) {
+		String[] para = keyWord.trim().split(SPACE);
+		int keyLen = para.length;
+
+		for (int i = 0; i < keyLen; i++) {
+			if (!isSubstring(para[i], strToSearch)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if keyword entered by user is a substring of the description of
+	 * the stringed task.
+	 * 
+	 * @param keyWord
+	 *            Keyword entered by user.
+	 * @param strToSearch
+	 *            Stringed task to search from.
+	 * @return True if the keyword is a substring.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private boolean isSubstring(String keyWord, String strToSearch) {
+
+		String[] para = strToSearch.trim().split(SPACE);
+		int strLen = para.length;
+
+		for (int i = 0; i < strLen; i++) {
+			if (para[i].indexOf(keyWord) != NOT_INDEX) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Searches for tasks that contain the exact keyword entered by user.
+	 * 
+	 * @param keyWord
+	 *            Keyword entered by user.
+	 * @param listToSearch
+	 *            List of tasks to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList exactSearch(String keyWord, TaskList listToSearch) {
+
+		TaskList result = new SimpleTaskList();
+		int numOfTask = listToSearch.size();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			if (isExact(keyWord.toLowerCase(), task.getDesc().toLowerCase())) {
+				Task newTask = task.clone();
+
+				if (newTask.getDesc().indexOf(SEPARATOR) == NOT_INDEX) {
+					String newDesc = (i + 1) + SEPARATOR + newTask.getDesc();
+					newTask.setDesc(newDesc);
+					result.add(newTask);
+				}
+			}
+		}
+
+		return result;
+
+	}
+
+	/**
+	 * Checks if keyword entered by user matches exactly with the description of
+	 * the stringed task.
+	 * 
+	 * @param keyWord
+	 *            Keyword entered by user.
+	 * @param strToSearch
+	 *            Stringed task to search from
+	 * @return True if there is an exact match.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private boolean isExact(String keyWord, String strToSearch) {
+		String[] para = keyWord.trim().split(SPACE);
+		int keyLen = para.length;
+
+		for (int i = 0; i < keyLen; i++) {
+			if (!isEqual(para[i], strToSearch)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if keyword entered by user is exactly the same as the description
+	 * of the stringed task.
+	 * 
+	 * @param keyWord
+	 *            Keyword entered by user.
+	 * @param strToSearch
+	 *            Stringed task to search from.
+	 * @return True if there is an exact match.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private boolean isEqual(String keyWord, String strToSearch) {
+
+		String[] para = strToSearch.trim().split(SPACE);
+		int strLen = para.length;
+
+		for (int i = 0; i < strLen; i++) {
+			if (keyWord.equalsIgnoreCase(para[i])) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Searches for tasks which contain words similar to the keyword entered by
+	 * user.
+	 * 
+	 * @param key
+	 *            Keyword entered by user.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private TaskList nearMatchSearch(String key, TaskList listToSearch) {
+
+		TaskList resultList = new SimpleTaskList();
+		int numOfTask = listToSearch.size();
+		String[] str = key.trim().split(SPACE);
+		int keyLen = str.length;
+
+		ArrayList<Triple> list = new ArrayList<Triple>();
+
+		for (int i = 0; i < numOfTask; i++) {
+			Task task = listToSearch.get(i);
+			Pair result = searchScore(key.toLowerCase(), task.getDesc().trim()
+					.toLowerCase());
+			if (result.getFirst() > keyLen / 2) {
+				if (result.getSecond() >= (MAX_SCORE / 2) * keyLen) {
+					assert result.getSecond() <= MAX_SCORE * keyLen;
+					// the total score can not exceed MAX_SCORE*keyLen
+					Task newTask = task.clone();
+					if (newTask.getDesc().indexOf(SEPARATOR) == NOT_INDEX) {
+						String newDesc = (i + 1) + SEPARATOR
+								+ newTask.getDesc();
+						newTask.setDesc(newDesc);
+					}
+					list.add(new Triple(result.getFirst(), result.getSecond(),
+							newTask));
+				}
+			}
+		}
+
+		if (list.size() == 0) {
+			return new SimpleTaskList();
+		}
+
+		Collections.sort(list);
+
+		for (int i = 0; i < list.size(); i++) {
+			Task task = list.get(i).getThird();
+			resultList.add(task);
+		}
+
+		return resultList;
+	}
+
+	/**
+	 * Generates the score for each search result.
+	 * 
+	 * @param keyword
+	 *            Keyword entered by user.
+	 * @param strToSearch
+	 *            Description of task to search from.
+	 * @return A pair of the search score and the number of matches the
+	 *         description has with the keyword.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private Pair searchScore(String keyword, String strToSearch) {
+		String[] key = keyword.trim().split(SPACE);
+		int strLen = key.length;
+		int searchScore = 0;
+		int numOfMatch = 0;
+
+		boolean[] isMatched = new boolean[strLen];
+		int[] matchScore = new int[strLen];
+
+		for (int i = 0; i < strLen; i++) {
+			isMatched[i] = false;
+			matchScore[i] = 0;
+		}
+
+		for (int i = 0; i < strLen; i++) {
+			if (matchScore(key[i], strToSearch) > 0) {
+				if (isMatched[i] == false) {
+					isMatched[i] = true;
+					matchScore[i] = matchScore(key[i], strToSearch);
+				} else {
+					if (matchScore(key[i], strToSearch) > matchScore[i]) {
+						matchScore[i] = matchScore(key[i], strToSearch);
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < strLen; i++) {
+			if (isMatched[i] == true) {
+				numOfMatch++;
+			}
+			searchScore += matchScore[i];
+		}
+		assert numOfMatch <= strLen;
+		return new Pair(numOfMatch, searchScore);
+	}
+
+	/**
+	 * Generates the score for the matching of keyword with the description of
+	 * task.
+	 * 
+	 * @param key
+	 *            Keyword entered by user.
+	 * @param strToSearch
+	 *            Description of task.
+	 * @return Score for match.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private int matchScore(String key, String strToSearch) {
+
+		String[] string = strToSearch.trim().split(SPACE);
+		int strLen = string.length;
+		int maxScore = 0;
+
+		for (int i = 0; i < strLen; i++) {
+			int score = approximateMatchScore(key, string[i]);
+
+			if (maxScore < score) {
+				maxScore = score;
+			}
+		}
+		// maxScore can not exceed 1000
+		assert maxScore <= 1000;
+		return maxScore;
+	}
+
+	/**
+	 * Generates the approximate match score. If the
+	 * editDistance/lengthOfKeyWord is <0.2, the 2 strings are considered
+	 * approximately matched.
+	 * 
+	 * @param keyword
+	 *            Keyword entered by user.
+	 * @param string
+	 *            Description of task.
+	 * @return Score for match.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private int approximateMatchScore(String keyword, String string) {
+
+		int editDist = editDistance(string, keyword);
+		int lenOfStr = string.length();
+		if ((editDist / (lenOfStr * 1.0)) < 0.5)
+			return MAX_SCORE
+					- (int) Math.floor(MAX_SCORE * editDist / (lenOfStr * 1.0));
+		else
+			return 0;
+
+	}
+
+	/**
+	 * Gets the edit distance score between the 2 strings for nearMatch search.
+	 * The lower, the better
+	 * 
+	 * @param sourceString
+	 * @param destString
+	 * @return Distance between the 2 strings.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	private int editDistance(String sourceString, String destString) {
+		int sourceStrLen = sourceString.length();
+		int destStrLen = destString.length();
+
+		// sourceString in for vertical axis
+		// destString in the horizontal axis
+		int[][] editDistance = new int[sourceStrLen + 1][destStrLen + 1];
+
+		for (int i = 1; i <= sourceStrLen; i++) {
+			editDistance[i][0] = i;
+		}
+
+		for (int j = 1; j <= destStrLen; j++) {
+			editDistance[0][j] = j;
+		}
+
+		for (int j = 1; j <= destStrLen; j++) {
+			for (int i = 1; i <= sourceStrLen; i++) {
+
+				if (sourceString.charAt(i - 1) == destString.charAt(j - 1)) {
+					editDistance[i][j] = editDistance[i - 1][j - 1];
+				} else {
+					editDistance[i][j] = Math.min(editDistance[i - 1][j] + 1,
+							Math.min(editDistance[i][j - 1] + 1,
+									editDistance[i - 1][j - 1] + 1));
+				}
+			}
+		}
+
+		return editDistance[sourceStrLen][destStrLen];
+	}
+
+	/**
+	 * Suggest possible word based on key
+	 * 
+	 * @param key
+	 * @return list of words
+	 */
+	@Override
+	public List<String> suggestWord(final String key) {
+		List<String> wordList = new ArrayList<>();
+		tasks.forEach((task) -> {
+			String desc = task.getDesc();
+			String[] words = desc.split(" ");
+			for (int i = 0; i < words.length; i++) {
+				if (words[i].indexOf(key.trim()) == 0) {
+					if (!words[i].trim().equalsIgnoreCase(key.trim())) {
+						wordList.add(words[i]);
+					}
+				}
+			}
+		});
+		return wordList;
+	}
+
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Triple.java
+	 */
+
+public class Triple implements Comparable<Triple> {
+	int first;
+	int second;
+	Task third;
+
+	/**
+	 * Constructs a triple of integers.
+	 * 
+	 * @param _first
+	 *            First integer;.
+	 * @param _second
+	 *            Second integer.
+	 * @param _third
+	 *            Third integer.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\Triple.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Triple.java
+	 */
+
+
+	public Triple(int _first, int _second, Task _third) {
+		first = _first;
+		second = _second;
+		third = _third;
+	}
+
+	/**
+	 * Gets the first integer.
+	 * 
+	 * @return First integer.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\Triple.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Triple.java
+	 */
+
+
+	public int getFirst() {
+		return first;
+	}
+
+	/**
+	 * Gets the second integer.
+	 * 
+	 * @return Second integer.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\Triple.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Triple.java
+	 */
+
+
+	public int getSecond() {
+		return second;
+	}
+
+	/**
+	 * Gets the third integer.
+	 * 
+	 * @return Third integer.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\Triple.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Triple.java
+	 */
+
+
+	public Task getThird() {
+		return third;
+	}
+
+	/**
+	 * Compares all three integers.
+	 * 
+	 * @param triple
+	 *            Triple object containing three integers.
+	 * @return Difference between the first two integers.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\Triple.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Triple.java
+	 */
+
+
+	public int compareTo(Triple triple) {
+		if (this.getFirst() != triple.getFirst()) {
+			return this.getFirst() - triple.getFirst();
+		} else {
+			return this.getSecond() - triple.getSecond();
+		}
+	}
+
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\Triple.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\storage\Storage.java
+	 */
+
+public interface Storage {
+
+	/**
+	 * Reads from the storage and returns a stringed task list for the main list.
+	 * 
+	 * @return	List of stringed tasks.
+	 */
+	List<String> read();
+	
+	/**
+	 * Reads from the storage and returns a stringed task list for the archive list.
+	 * 
+	 * @return List of stringed tasks.
+	 */
+	List<String> readArchive();
+
+	/**
+	 * Writes main list into storage.
+	 * Before writing to the list, move the content of current list to the backup.
+	 * 
+	 * @param list	List of stringed tasks.
+	 */
+	void write(List<String> list);
+	
+	/**
+	 * Writes archive list into storage.
+	 * 
+	 * @param archiveList	List of completed stringed tasks.
+	 */
+	void writeArchive(List<String> archiveList);
+}
+
+
+	// End of segment: C:\Users\Thien\git\main\src\storage\Storage.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\storage\StoragePlus.java
+	 */
+
+public class StoragePlus implements Storage {
+	
+	// Name of the file to store the list
+	private final static String fileName = "ToDoList.txt";
+
+	// Name of the back-up file
+	private final static String backUpFile = "ToDoList.backup";
+	
+	private final static String archiveFile="Archive.txt";
+	
+	private static final Logger logger = Logger.getLogger(StoragePlus.class
+			.getName());
+	private static final String READ="read";
+	private static final String WRITE="write";
+	private static final String READ_ARCHIVE="readArchive";
+	private static final String WRITE_ARCHIVE="writeArchive";
+	/**
+	 * Reads from the storage and returns a stringed task list for the main list.
+	 * 
+	 * @return	List of stringed tasks.
+	 */
+	public List<String> read() {
+
+		List<String> toDoList = new ArrayList<String>();
+
+		logger.entering(getClass().getName(),READ);
+		try {
+			Scanner scanner = new Scanner(new File(fileName));
+
+			while (scanner.hasNextLine()) {
+
+				String task = scanner.nextLine();
+				toDoList.add(task);
+			}
+
+			scanner.close();
+		}
+
+		// File not found
+		catch (FileNotFoundException e) {
+			// do nothing
+			// the method will return the empty arrayList
+		}
+		logger.exiting(getClass().getName(), READ);
+		return toDoList;
+	}
+	
+	/**
+	 * Reads from the storage and returns a stringed task list for the archive list.
+	 * 
+	 * @return List of stringed tasks.
+	 */
+	public List<String> readArchive(){
+		
+		List<String> archiveList=new ArrayList<String>();
+		
+		logger.entering(getClass().getName(),READ_ARCHIVE);
+		try{
+			Scanner scanner=new Scanner(new File(archiveFile));
+			
+			while(scanner.hasNextLine()){
+				String task=scanner.nextLine();
+				archiveList.add(task);
+			}
+			
+			scanner.close();
+			}
+		
+		//File not found
+		catch (FileNotFoundException e){
+			
+		}
+		logger.exiting(getClass().getName(), READ_ARCHIVE);
+		return archiveList;
+	}
+
+	/**
+	 * Writes main list into storage.
+	 * Before writing to the list, move the content of current list to the backup.
+	 * 
+	 * @param list	List of stringed tasks.
+	 */
+	public void write(List<String> list) {
+
+		File backUp = new File(backUpFile);
+		File file = new File(fileName);
+
+		// create the backup file
+		// if backUp file does not exist, just rename current file to backUp
+		// before writing
+		// else delete the backUp file and rename current file
+		if (!file.exists()) {
+			logger.entering(getClass().getName(),WRITE);
+			try {
+				PrintWriter printWriter = new PrintWriter(file);
+
+				for (int i = 0; i < list.size(); i++) {
+					printWriter.println(list.get(i));
+				}
+				printWriter.close();
+			} catch (FileNotFoundException e) {
+				// Exception
+				e.printStackTrace();
+
+			}
+			logger.exiting(getClass().getName(), WRITE);
+		} else {
+			if (!backUp.exists()) {
+				file.renameTo(backUp);
+			} else {
+				backUp.delete();
+				file.renameTo(backUp);
+			}
+
+			// write the list to the file
+			logger.entering(getClass().getName(),WRITE);
+			try {
+				PrintWriter printWriter = new PrintWriter(file);
+
+				for (int i = 0; i < list.size(); i++) {
+					printWriter.println(list.get(i));
+				}
+				printWriter.close();
+			} catch (FileNotFoundException e) {
+				// Exception
+				e.printStackTrace();
+			}
+			logger.exiting(getClass().getName(), WRITE);
+		}
+	}
+	
+	
+	/**
+	 * Writes archive list into storage.
+	 * 
+	 * @param archiveList	List of completed stringed tasks.
+	 */
+	public void writeArchive(List<String> archiveList){
+		
+		File archive=new File(archiveFile);
+		
+		logger.entering(getClass().getName(),WRITE_ARCHIVE);
+		try {
+			PrintWriter printWriter = new PrintWriter(archive);
+
+			for (int i = 0; i < archiveList.size(); i++) {
+				printWriter.println(archiveList.get(i));
+			}
+			printWriter.close();
+		} catch (FileNotFoundException e) {
+			// Exception
+			e.printStackTrace();
+		}
+		logger.exiting(getClass().getName(), WRITE_ARCHIVE);
+		
+	}
+}
+	// End of segment: C:\Users\Thien\git\main\src\storage\StoragePlus.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\tests\TestSearch.java
+	 */
+
+public class TestSearch {
+
+	
+
+	public String getDesc(String task) {
+		String[] para=task.split("%");
+		return para[0];
+	}
+	
+	@Test
+	//Test exactSearch: the keyword will appear exactly in one of the description of the tasks
+	//return the task list
+	public void tesExactSearch() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+		//search for "go home"
+		controller.execCmd("go home");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"10. go home");
+	}	
+	
+	
+	@Test
+	//Test exactSearch
+	//the keyword is typed wrongly and the software will give the list of the tasks which are nearly matched
+	public void testNearMatchSearch() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+		//search for "eat lunch" but user types it as "ate lunchh";
+		controller.execCmd("lunchh");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"17. go to school and eat lunch");
+	}	
+	
+	
+	
+	@Test
+	//Test search on a day
+	public void testSearchDate() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+		
+		controller.execCmd("today");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"2. finish the code");
+	}	
+	
+	
+	
+	
+	@Test
+	//Test search by a day
+
+	public void testSearchByDate() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+	
+		controller.execCmd("by tomorrow");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"1. do the homework");
+	}	
+	
+	
+	
+	@Test
+	//Test search a period
+
+	public void testSearchPeriod() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+	
+		controller.execCmd("tomorrow to nov 15");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"6. deadline for MA2213 lab");
+	}
+	
+	
+	
+	@Test
+	//Test search a period
+
+	public void testDescAndDate() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+	
+		controller.execCmd("\"go\" nov 15");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"**No search result**");
+	}
+	
+	
+	
+	
+	
+	
+	
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\tests\TestSearch.java
+
+
+
+
+
