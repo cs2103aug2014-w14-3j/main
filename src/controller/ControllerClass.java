@@ -69,7 +69,7 @@ public class ControllerClass implements Controller {
 	public static final String CMD_FORMAT_PENDING = "To show all floating tasks: pending";
 	public static final String CMD_FORMAT_EXIT = "Quit: exit";
 
-	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s list**";
+	private static final String MESSAGE_EMPTYLIST = "**No task in the %1$s**";
 	private static final String MESSAGE_EMPTYSEARCHRESULT = "**No search result**";
 	private static final String MESSAGE_TOMANYRESULT = "**Please be more specific to get more results**";
 	private static final String MESSAGE_FEEDBACK_MAIN = "Main List.";
