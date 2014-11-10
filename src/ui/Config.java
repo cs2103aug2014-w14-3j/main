@@ -10,7 +10,7 @@ package ui;
  */
 //@author A0119381E
 public interface Config {
-	public static final boolean onDevelopment = true;
+	public static final boolean onDevelopment = false;
 	
 	
 	//log
