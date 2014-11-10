@@ -2009,8 +2009,10 @@ public class ControllerClass implements Controller {
 			break;
 		case SEARCH:
 			totalNumPages = resultTasks.getTotalPageNum();
+			break;
 		case FREESLOTS:
 			totalNumPages = 1;
+			break;
 		default:
 			totalNumPages = 0;
 			break;
