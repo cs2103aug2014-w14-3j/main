@@ -146,6 +146,7 @@ public class UIControl extends BorderPane {
 			}
 			if (event.getCode() == KeyCode.TAB) {
 				input.setText(input.getText() + appendOnComplete);
+				appendOnComplete = "";
 				setInputCaretToEnd();
 				event.consume();
 			}

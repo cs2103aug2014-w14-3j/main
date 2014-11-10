@@ -34,7 +34,7 @@ import controller.Task.TaskType;
 /**
  * ControllerClass which implements the Controller interface.
  */
-//@author
+//@author A0115194J
 public class ControllerClass implements Controller {
 
 	public static final String CMD_ADD = "add";
@@ -399,7 +399,7 @@ public class ControllerClass implements Controller {
 		List<String> suggestList = new ArrayList<String>();
 		// suggest commands
 		for (String str : commandMap.keySet()) {
-			if (str.indexOf(content) == 0) {
+			if (str.indexOf(content.trim()) == 0) {
 				suggestList.add(str);
 			}
 		}
