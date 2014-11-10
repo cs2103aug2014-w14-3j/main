@@ -252,7 +252,7 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Sets the number of tasks on a page.
 	 */
-	//@author A0115194J
+	//@author
 	@Override
 	public void setNumTaskOnPage(Integer number) {
 		assert number > 0;
