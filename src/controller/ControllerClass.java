@@ -2103,7 +2103,7 @@ public class ControllerClass implements Controller {
 	 *            Stringed time input from user.
 	 * @return true if time is added to Task object.
 	 */
-	//@author A0119281E
+	//@author A0119381E
 	private boolean processTime(Task task, String content) {
 		content = content.trim();
 		if (content.isEmpty()) {
