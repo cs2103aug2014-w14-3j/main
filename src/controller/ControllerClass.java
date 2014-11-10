@@ -34,7 +34,7 @@ import controller.Task.TaskType;
 /**
  * ControllerClass which implements the Controller interface.
  */
-//@author A0115194J
+//@author
 public class ControllerClass implements Controller {
 
 	public static final String CMD_ADD = "add";
