@@ -6,12 +6,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Logger;
+
+
 
 /**
  * Storage class to create a Storage object for storing tasks.
  */
 //@author A0112044B
 public class StoragePlus implements Storage {
+	
 	// Name of the file to store the list
 	private final static String fileName = "ToDoList.txt";
 
@@ -19,7 +23,13 @@ public class StoragePlus implements Storage {
 	private final static String backUpFile = "ToDoList.backup";
 	
 	private final static String archiveFile="Archive.txt";
-
+	
+	private static final Logger logger = Logger.getLogger(StoragePlus.class
+			.getName());
+	private static final String READ="read";
+	private static final String WRITE="write";
+	private static final String READ_ARCHIVE="readArchive";
+	private static final String WRITE_ARCHIVE="writeArchive";
 	/**
 	 * Reads from the storage and returns a stringed task list for the main list.
 	 * 
@@ -29,6 +39,7 @@ public class StoragePlus implements Storage {
 
 		List<String> toDoList = new ArrayList<String>();
 
+		logger.entering(getClass().getName(),READ);
 		try {
 			Scanner scanner = new Scanner(new File(fileName));
 
@@ -46,6 +57,7 @@ public class StoragePlus implements Storage {
 			// do nothing
 			// the method will return the empty arrayList
 		}
+		logger.exiting(getClass().getName(), READ);
 		return toDoList;
 	}
 	
@@ -58,6 +70,7 @@ public class StoragePlus implements Storage {
 		
 		List<String> archiveList=new ArrayList<String>();
 		
+		logger.entering(getClass().getName(),READ_ARCHIVE);
 		try{
 			Scanner scanner=new Scanner(new File(archiveFile));
 			
@@ -73,7 +86,7 @@ public class StoragePlus implements Storage {
 		catch (FileNotFoundException e){
 			
 		}
-		
+		logger.exiting(getClass().getName(), READ_ARCHIVE);
 		return archiveList;
 	}
 
@@ -93,6 +106,7 @@ public class StoragePlus implements Storage {
 		// before writing
 		// else delete the backUp file and rename current file
 		if (!file.exists()) {
+			logger.entering(getClass().getName(),WRITE);
 			try {
 				PrintWriter printWriter = new PrintWriter(file);
 
@@ -105,6 +119,7 @@ public class StoragePlus implements Storage {
 				e.printStackTrace();
 
 			}
+			logger.exiting(getClass().getName(), WRITE);
 		} else {
 			if (!backUp.exists()) {
 				file.renameTo(backUp);
@@ -114,6 +129,7 @@ public class StoragePlus implements Storage {
 			}
 
 			// write the list to the file
+			logger.entering(getClass().getName(),WRITE);
 			try {
 				PrintWriter printWriter = new PrintWriter(file);
 
@@ -125,6 +141,7 @@ public class StoragePlus implements Storage {
 				// Exception
 				e.printStackTrace();
 			}
+			logger.exiting(getClass().getName(), WRITE);
 		}
 	}
 	
@@ -138,6 +155,7 @@ public class StoragePlus implements Storage {
 		
 		File archive=new File(archiveFile);
 		
+		logger.entering(getClass().getName(),WRITE_ARCHIVE);
 		try {
 			PrintWriter printWriter = new PrintWriter(archive);
 
@@ -149,6 +167,7 @@ public class StoragePlus implements Storage {
 			// Exception
 			e.printStackTrace();
 		}
+		logger.exiting(getClass().getName(), WRITE_ARCHIVE);
 		
 	}
 }
