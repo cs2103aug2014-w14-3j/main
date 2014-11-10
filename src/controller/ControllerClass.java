@@ -12,9 +12,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.logging.Logger;
 
 import storage.Storage;
 import storage.StoragePlus;
@@ -126,6 +126,7 @@ public class ControllerClass implements Controller {
 	private static final String FREETIME_MINUTES3 = "mins";
 	private static final String FREETIME_MINUTES4 = "min";
 	private static final String LOGGING_PURPOSE_METHODNAME_DELETE = "executeDelete";
+	private static final String LOGGING_PURPOSE_METHODNAME_POSTPONE = "postpone";
 	private static final Integer IGNORE_RECENTCHANGE = -1;
 	private static final int MAX_NUM_OF_RESULTS = 10;
 	private static final int MILISECOND_PER_DAY = 24 * 60 * 60 * 1000;
@@ -1447,7 +1448,7 @@ public class ControllerClass implements Controller {
 	 */
 	//@author A0115584A
 	private void postpone(String content) throws Exception {
-		logger.entering(getClass().getName(), "postpone");
+		logger.entering(getClass().getName(), LOGGING_PURPOSE_METHODNAME_POSTPONE);
 		try {
 			if (displayListType == DisplayList.ARCHIVE) {
 				setFeedback(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
@@ -1485,7 +1486,7 @@ public class ControllerClass implements Controller {
 			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		}
 		
-		logger.exiting(getClass().getName(), "postpone");
+		logger.exiting(getClass().getName(), LOGGING_PURPOSE_METHODNAME_POSTPONE);
 	}
 
 	/*
