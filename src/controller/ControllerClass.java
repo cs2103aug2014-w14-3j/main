@@ -118,7 +118,10 @@ public class ControllerClass implements Controller {
 	private static final String PAGE_DIRECTION_DOWN = "down";
 	private static final String EMPTY_STRING = "";
 	private static final String SPACE_STRING = " ";
-	private static final String FREETIME_CONNECTOR = "to";
+	private static final String ONE_OR_MORE_SPACE="\\s+";
+	private static final String OPENING="[ ";
+	private static final String CLOSING=" ]";
+	private static final String CONNECTOR_TO="  to  ";
 	private static final String FREETIME_HOUR1 = "hours";
 	private static final String FREETIME_HOUR2 = "hour";
 	private static final String FREETIME_MINUTES1 = "minutes";
@@ -131,6 +134,10 @@ public class ControllerClass implements Controller {
 	private static final int MILISECOND_PER_DAY = 24 * 60 * 60 * 1000;
 	private static final int MINUTE_PER_HOUR = 60;
 	private static final int MILISECOND_PER_MINUTE = 1000 * 60;
+	private static final int DAY_PER_MONTH = 30;
+	private static final int MAX_HOUR_OF_DAY = 23;
+	private static final int MAX_MINUTE_OR_SECOND = 59;
+	private static final int NOT_INDEX = -1;
 
 	enum CommandType {
 		ADD, DELETE, EDIT, POSTPONE, DISPLAY, UNDO, ARCHIVE, SEARCH, DONE, CHANGEPAGE, OVERDUE, FREETIME, CLEARARCHIVE, PENDING, EXIT
@@ -714,6 +721,7 @@ public class ControllerClass implements Controller {
 		setFeedback(MESSAGE_FEEDBACK_ARCHIVELIST);
 	}
 
+
 	/**
 	 * Marks tasks as done.
 	 * 
@@ -724,8 +732,10 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 *             If task numbers entered are not numbers.
 	 */
+	//@author A0112044B
+
 	private void markAsDone(String content) throws Exception {
-		String[] taskNumbers = content.trim().split("\\s+");
+		String[] taskNumbers = content.trim().split(ONE_OR_MORE_SPACE);
 		Arrays.sort(taskNumbers, new Comparator<String>() {
 			public int compare(String first, String second) {
 				return Integer.valueOf(second)
@@ -743,10 +753,8 @@ public class ControllerClass implements Controller {
 					archiveTasks.add(0, task);
 					tasks.remove(taskID);
 				} else {
-					setFeedback(String.format(MESSAGE_FEEDBACK_INVALID,
-							"done"));
 					throw new Exception(String.format(MESSAGE_FEEDBACK_INVALID,
-							"done"));
+							CMD_DONE));
 				}
 			}
 
@@ -764,12 +772,11 @@ public class ControllerClass implements Controller {
 				}
 			}
 		} catch (NumberFormatException e) {
-			setFeedback(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
 		}
 		clearRecentChange();
 	}
-
+	
 	/**
 	 * Find free slots of time
 	 * 
@@ -787,8 +794,8 @@ public class ControllerClass implements Controller {
 		for (int i = 0; i < freeSlots.size(); i++) {
 			longPair pair = freeSlots.get(i);
 
-			String str = "[ " + timeToText(pair.getFirst()) + "    to   "
-					+ timeToText(pair.getSecond()) + " ]";
+			String str = OPENING + timeToText(pair.getFirst()) + CONNECTOR_TO
+					+ timeToText(pair.getSecond()) + CLOSING;
 			result.add(str);
 		}
 
@@ -800,6 +807,8 @@ public class ControllerClass implements Controller {
 			setFeedback(result.size() + MESSAGE_SLOTS_FOUND);
 		}
 
+		// the list size is at most MAX_NUM_OF_RESULTS
+		assert result.size() <= MAX_NUM_OF_RESULTS;
 		setFreeSlotList(result);
 	}
 
@@ -813,11 +822,6 @@ public class ControllerClass implements Controller {
 		return format.format(timeobj);
 	}
 
-	// format of find
-	// **Find for a time to time period to be free.Ex: find 10pm to 1pm by date
-	// **Find intervals of free time that in the schedule.Ex: find 3 hours 30
-	// mins by date(before a date) or
-	// find 3 hours 30 mins on date (check on that date)
 	/**
 	 * Parses user input to find the time interval where the user is free.
 	 * 
@@ -832,218 +836,184 @@ public class ControllerClass implements Controller {
 	//@author: A0112044B
 	private ArrayList<longPair> findTime(String content) throws Exception {
 
+		if (hasHour(content) || hasMinute(content)) {
+			return findHour(content);
+		} else {
+			return findPeriod(content);
+		}
+
+		// return new ArrayList<longPair>();
+
+	}
+
+	/**
+	 * Find slots of a length of time
+	 * @param content
+	 * @return
+	 * @throws Exception
+	 */
+	//@author A0112044B
+	private ArrayList<longPair> findHour(String content) throws Exception {
 		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, 30);
-		cal.set(Calendar.HOUR_OF_DAY, 23);
-		cal.set(Calendar.MINUTE, 59);
-		cal.set(Calendar.SECOND, 59);
-
+		cal.add(Calendar.DATE, DAY_PER_MONTH);
 		Date nextMonth = cal.getTime();
+		nextMonth = setEndDate(nextMonth);
 
-		// case 1 :search for number of hours
+		if ((hasHour(content) && !hasMinute(content))
+				|| (!hasHour(content) && hasMinute(content))) {
+			String[] para = content.trim().split(SPACE_STRING);
+			int len = para.length;
+			if (len == 2) {
+				try {
 
-		if (content.indexOf(FREETIME_CONNECTOR) == -1) {
-
-			// only hours
-			if (hasHour(content) && !hasMinute(content)) {
-
-				String[] para = content.trim().split(SPACE_STRING);
-				int len = para.length;
-
-				if (len == 2) {
-					try {
-						int hh = Integer.parseInt(para[0]);
-						return findTimeLength(hh * MINUTE_PER_HOUR, nextMonth);
-					} catch (NumberFormatException e) {
-						setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					int number = Integer.parseInt(para[0]);
+					if (hasHour(content)) {
+						return findTimeLength(number * MINUTE_PER_HOUR,
+								new Date(), nextMonth);
+					} else {
+						return findTimeLength(number, new Date(), nextMonth);
 					}
-				} else if (len > 2) {
-					String date = SPACE_STRING;
-					try {
-						int hh = Integer.parseInt(para[0]);
-
-						for (int i = 2; i < len; i++) {
-							date = date + para[i] + SPACE_STRING;
-						}
-
-						Date deadline = timeParser(date);
-
-						if (deadline != null) {
-							Calendar cal1 = Calendar.getInstance();
-							cal1.setTime(deadline);
-							cal1.set(Calendar.HOUR_OF_DAY, 23);
-							cal1.set(Calendar.MINUTE, 59);
-							cal1.set(Calendar.SECOND, 59);
-
-							deadline = cal1.getTime();
-							return findTimeLength(hh * MINUTE_PER_HOUR,
-									deadline);
-						} else {
-							setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-							throw new Exception(
-									MESSAGE_FEEDBACK_FREETIME_INVALID);
-						}
-					} catch (NumberFormatException e) {
-						setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					}
-				} else if (len < 2) {
-					setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				} catch (NumberFormatException e) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
+			} else if (len > 2) {
+				String date = SPACE_STRING;
+				try {
+					int number = Integer.parseInt(para[0]);
 
-				// case 2: search for number of minutes
-			} else if (!hasHour(content) && hasMinute(content)) {
-				String[] para = content.trim().split(SPACE_STRING);
-				int len = para.length;
-
-				if (len == 2) {
-					try {
-						int mm = Integer.parseInt(para[0]);
-						return findTimeLength(mm, nextMonth);
-					} catch (NumberFormatException e) {
-						setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					for (int i = 2; i < len; i++) {
+						date = date + para[i] + SPACE_STRING;
 					}
-				} else if (len > 2) {
-					String date = SPACE_STRING;
-					try {
-						int mm = Integer.parseInt(para[0]);
 
-						for (int i = 2; i < len; i++) {
-							date = date + para[i] + SPACE_STRING;
-						}
+					Date deadline = timeParser(date);
 
-						Date deadline = timeParser(date);
+					if (deadline != null) {
 
-						if (deadline != null) {
-							Calendar cal1 = Calendar.getInstance();
-							cal1.setTime(deadline);
-							cal1.set(Calendar.HOUR_OF_DAY, 23);
-							cal1.set(Calendar.MINUTE, 59);
-							cal1.set(Calendar.SECOND, 59);
-
-							deadline = cal1.getTime();
-							return findTimeLength(mm, deadline);
+						deadline = setEndDate(deadline);
+						if (hasHour(content)) {
+							return findTimeLength(number * MINUTE_PER_HOUR,
+									new Date(), deadline);
 						} else {
-							setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-							throw new Exception(
-									MESSAGE_FEEDBACK_FREETIME_INVALID);
+							return findTimeLength(number, new Date(), deadline);
 						}
-					} catch (NumberFormatException e) {
-						setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					}
-				} else if (len < 2) {
-					setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-				}
-				// case 3: search for hours and minutes
-			} else if (hasHour(content) && hasMinute(content)) {
-
-				String[] para = content.trim().split(SPACE_STRING);
-				int len = para.length;
-
-				if (len == 4) {
-					try {
-						int hh = Integer.parseInt(para[0]);
-						int mm = Integer.parseInt(para[2]);
-						return findTimeLength(hh * MINUTE_PER_HOUR + mm,
-								nextMonth);
-					} catch (NumberFormatException e) {
-						setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					} else {
 						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 					}
 
-				} else if (len > 4) {
-					String date = SPACE_STRING;
-
-					try {
-						int hh = Integer.parseInt(para[0]);
-						int mm = Integer.parseInt(para[2]);
-
-						for (int i = 4; i < len; i++) {
-							date = date + para[i] + SPACE_STRING;
-						}
-
-						Date deadline = timeParser(date);
-						if (deadline != null) {
-							Calendar cal1 = Calendar.getInstance();
-							cal1.setTime(deadline);
-							cal1.set(Calendar.HOUR_OF_DAY, 23);
-							cal1.set(Calendar.MINUTE, 59);
-							cal1.set(Calendar.SECOND, 59);
-
-							deadline = cal1.getTime();
-							return findTimeLength(hh * MINUTE_PER_HOUR + mm,
-									deadline);
-						} else {
-							setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-							throw new Exception(
-									MESSAGE_FEEDBACK_FREETIME_INVALID);
-						}
-					} catch (NumberFormatException e) {
-						setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					}
-
-				} else if (len < 4) {
-					setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				} catch (NumberFormatException e) {
 					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
 			}
+		} else if (hasHour(content) && hasMinute(content)) {
+			String[] para = content.trim().split(SPACE_STRING);
+			int len = para.length;
 
-		} else {
+			if (len == 4) {
+				try {
+					int hh = Integer.parseInt(para[0]);
+					int mm = Integer.parseInt(para[2]);
+					return findTimeLength(hh * MINUTE_PER_HOUR + mm,
+							new Date(), nextMonth);
+				} catch (NumberFormatException e) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+				}
+			} else if (len > 4) {
+				String date = SPACE_STRING;
+				try {
+					int hh = Integer.parseInt(para[0]);
+					int mm = Integer.parseInt(para[2]);
 
-			List<Date> dates = timeParserPeriod(content);
-			if (dates.size() == 2) {
-				Date date1 = dates.get(0);
-				Date date2 = dates.get(1);
-
-				if (date1 == null || date2 == null || date1.after(date2)) {
-					setFeedback(MESSAGE_FEEDBACK_FREETIME_INVALID);
-					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
-				} else {
-					Date today = new Date();
-					// the time of today
-					if (compare(date1, today) == 0
-							&& compare(date2, today) == 0) {
-
-						return findTimePeriod(date1, date2, nextMonth);
-					} else if (compare(date1, today) > 0
-							&& compare(date2, today) > 0
-							&& compare(date1, date2) == 0) {
-
-						Calendar now = Calendar.getInstance();
-						Calendar cal1 = Calendar.getInstance();
-						cal1.setTime(date1);
-						Calendar cal2 = Calendar.getInstance();
-						cal2.setTime(date2);
-
-						Date deadline = cal2.getTime();
-
-						// if the day is over nextMonth, set it to nextMonth
-						if (compare(nextMonth, deadline) < 0) {
-							deadline = nextMonth;
-						}
-						cal1.set(Calendar.YEAR, now.get(Calendar.YEAR));
-						cal1.set(Calendar.MONTH, now.get(Calendar.MONTH));
-						cal1.set(Calendar.DATE, now.get(Calendar.DATE));
-
-						cal2.set(Calendar.YEAR, now.get(Calendar.YEAR));
-						cal2.set(Calendar.MONTH, now.get(Calendar.MONTH));
-						cal2.set(Calendar.DATE, now.get(Calendar.DATE));
-						Date newDate1 = cal1.getTime();
-						Date newDate2 = cal2.getTime();
-
-						return findTimePeriod(newDate1, newDate2, deadline);
+					for (int i = 4; i < len; i++) {
+						date = date + para[i] + SPACE_STRING;
 					}
+					Date deadline = timeParser(date);
+					if (deadline != null) {
+						deadline = setEndDate(deadline);
+						return findTimeLength(hh * MINUTE_PER_HOUR + mm,
+								new Date(), deadline);
+					} else {
+						throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
+					}
+
+				} catch (NumberFormatException e) {
+					throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALID);
 				}
 			}
 
 		}
+
 		return new ArrayList<longPair>();
+	}
+	/**
+	 * find the frees slot for a certain period of time
+	 * @param content
+	 * @return
+	 * @throws Exception
+	 */
+	
+	//@author A0112044B
+	private ArrayList<longPair> findPeriod(String content) throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DATE, DAY_PER_MONTH);
+		Date nextMonth = cal.getTime();
+		nextMonth = setEndDate(nextMonth);
+
+		List<Date> dates = timeParserPeriod(content);
+		if (dates.size() == 2) {
+			Date date1 = dates.get(0);
+			Date date2 = dates.get(1);
+
+			if (date1 == null || date2 == null || date1.after(date2)) {
+				throw new Exception(MESSAGE_FEEDBACK_FREETIME_INVALIDPERIOD);
+			} else {
+				Date today = new Date();
+				// the time of today
+				if (compare(date1, today) == 0 && compare(date2, today) == 0) {
+
+					return findTimePeriod(date1, date2, nextMonth);
+				} else if (compare(date1, today) > 0
+						&& compare(date2, today) > 0
+						&& compare(date1, date2) == 0) {
+
+					Calendar now = Calendar.getInstance();
+					Calendar cal1 = Calendar.getInstance();
+					cal1.setTime(date1);
+					Calendar cal2 = Calendar.getInstance();
+					cal2.setTime(date2);
+					Date deadline = cal2.getTime();
+
+					cal1.set(Calendar.YEAR, now.get(Calendar.YEAR));
+					cal1.set(Calendar.MONTH, now.get(Calendar.MONTH));
+					cal1.set(Calendar.DATE, now.get(Calendar.DATE));
+
+					cal2.set(Calendar.YEAR, now.get(Calendar.YEAR));
+					cal2.set(Calendar.MONTH, now.get(Calendar.MONTH));
+					cal2.set(Calendar.DATE, now.get(Calendar.DATE));
+					Date newDate1 = cal1.getTime();
+					Date newDate2 = cal2.getTime();
+
+					return findTimePeriod(newDate1, newDate2, deadline);
+				}
+			}
+		}
+		return new ArrayList<longPair>();
+
+	}
+
+	
+	/**
+	 * set the time to 23.59.59 of a date
+	 * @param date
+	 * @return
+	 */
+	//@author A0112044B
+	private Date setEndDate(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, MAX_HOUR_OF_DAY);
+		cal.set(Calendar.MINUTE, MAX_MINUTE_OR_SECOND);
+		cal.set(Calendar.SECOND, MAX_MINUTE_OR_SECOND);
+		return cal.getTime();
 	}
 
 	/**
@@ -1056,8 +1026,8 @@ public class ControllerClass implements Controller {
 	//@author A0112044B
 	private boolean hasHour(String content) {
 
-		if (content.toLowerCase().indexOf(FREETIME_HOUR1) != -1
-				|| content.toLowerCase().indexOf(FREETIME_HOUR2) != -1) {
+		if (content.toLowerCase().indexOf(FREETIME_HOUR1) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_HOUR2) != NOT_INDEX) {
 			return true;
 		} else {
 			return false;
@@ -1073,10 +1043,10 @@ public class ControllerClass implements Controller {
 
 	//@author A0112044B
 	private boolean hasMinute(String content) {
-		if (content.toLowerCase().indexOf(FREETIME_MINUTES1) != -1
-				|| content.toLowerCase().indexOf(FREETIME_MINUTES2) != -1
-				|| content.toLowerCase().indexOf(FREETIME_MINUTES3) != -1
-				|| content.toLowerCase().indexOf(FREETIME_MINUTES4) != -1) {
+		if (content.toLowerCase().indexOf(FREETIME_MINUTES1) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES2) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES3) != NOT_INDEX
+				|| content.toLowerCase().indexOf(FREETIME_MINUTES4) != NOT_INDEX) {
 			return true;
 		} else {
 			return false;
@@ -1103,6 +1073,7 @@ public class ControllerClass implements Controller {
 		}
 
 		if (dates.size() == 1) {
+			assert dates.size() == 1;
 			return dates.get(0);
 		} else {
 			return null;
@@ -1127,6 +1098,7 @@ public class ControllerClass implements Controller {
 		}
 
 		if (dates.size() == 2) {
+			assert dates.size() == 2;
 			return dates;
 		} else {
 			return null;
@@ -1186,7 +1158,7 @@ public class ControllerClass implements Controller {
 		int numOfDate = 0;
 		while (compare(current, deadline) <= 0
 				&& numOfDate < MAX_NUM_OF_RESULTS) {
-
+			assert numOfDate < MAX_NUM_OF_RESULTS;
 			if (isFree(interval, freeSlots)) {
 				result.add(interval);
 				numOfDate++;
@@ -1202,7 +1174,6 @@ public class ControllerClass implements Controller {
 			long second = interval.getSecond();
 			interval = new longPair(first + MILISECOND_PER_DAY, second
 					+ MILISECOND_PER_DAY);
-
 		}
 
 		return result;
@@ -1239,9 +1210,10 @@ public class ControllerClass implements Controller {
 	 * @return
 	 */
 	//@author A0112044B
-	private ArrayList<longPair> findTimeLength(int numOfMin, Date deadline) {
+	private ArrayList<longPair> findTimeLength(int numOfMin, Date startTime,
+			Date deadline) {
 
-		ArrayList<longPair> freeSlots = freeIntervals(new Date(), deadline);
+		ArrayList<longPair> freeSlots = freeIntervals(startTime, deadline);
 		ArrayList<longPair> result = new ArrayList<longPair>();
 		int numOfSlot = 0;
 

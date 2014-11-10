@@ -45,24 +45,73 @@ public class TestSearch {
 		
 		list = controller.getCurrentList();
 	
-		assertEquals(getDesc(list.get(0)),"16. go to school and eat lunch");
+		assertEquals(getDesc(list.get(0)),"17. go to school and eat lunch");
 	}	
 	
 	
 	
 	@Test
-	//Test exactSearch
-	//the keyword is typed wrongly and the software will give the list of the tasks which are nearly matched
+	//Test search on a day
 	public void testSearchDate() throws Exception{
 		Controller controller=ControllerClass.getInstance();
 		List<String> list;
-		//search for "eat lunch" but user types it as "ate lunchh";
+		
 		controller.execCmd("today");
 		
 		list = controller.getCurrentList();
 	
-		assertEquals(getDesc(list.get(0)),"16. go to school and eat lunch");
+		assertEquals(getDesc(list.get(0)),"2. finish the code");
 	}	
+	
+	
+	
+	
+	@Test
+	//Test search by a day
+
+	public void testSearchByDate() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+	
+		controller.execCmd("by tomorrow");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"1. do the homework");
+	}	
+	
+	
+	
+	@Test
+	//Test search a period
+
+	public void testSearchPeriod() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+	
+		controller.execCmd("tomorrow to nov 15");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"6. deadline for MA2213 lab");
+	}
+	
+	
+	
+	@Test
+	//Test search a period
+
+	public void testDescAndDate() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+	
+		controller.execCmd("\"go\" nov 15");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"**No search result**");
+	}
+	
 	
 	
 	
