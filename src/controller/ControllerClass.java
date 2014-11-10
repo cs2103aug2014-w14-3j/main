@@ -1150,9 +1150,10 @@ public class ControllerClass implements Controller {
 	private ArrayList<longPair> findTimePeriod(Date start, Date end,
 			Date deadline) {
 
+		deadline=setEndDate(deadline);
 		ArrayList<longPair> freeSlots = freeIntervals(new Date(), deadline);
 		ArrayList<longPair> result = new ArrayList<longPair>();
-
+		
 		longPair interval = new longPair(start.getTime(), end.getTime());
 		Date current = new Date();
 		int numOfDate = 0;
@@ -1276,13 +1277,14 @@ public class ControllerClass implements Controller {
 						intervalFree.set(j,
 								new longPair(free.getFirst(), occu.getFirst()));
 						intervalFree
-								.add(j,
+								.add(j+1,
 										new longPair(occu.getSecond(), free
 												.getSecond()));
 						j++;
 					}
 				}
 			}
+		
 			Collections.sort(intervalFree);
 		}
 		return intervalFree;
