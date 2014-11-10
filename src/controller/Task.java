@@ -130,6 +130,5 @@ public interface Task {
 	 * 
 	 * @return	Task object.
 	 */
-	//@author
 	public Task clone();
 }

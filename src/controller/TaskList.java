@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * Interface for SimpleTaskList class.
  */
-//@author
+//@author A0119381E
 public interface TaskList {
 
 	/**
@@ -16,7 +16,6 @@ public interface TaskList {
 	 *            Task object.
 	 * @return true if Task object is successfully added into the task list.
 	 */
-	//@author
 	boolean add(Task task);
 
 	/**
@@ -27,7 +26,6 @@ public interface TaskList {
 	 * @param task
 	 *            Task object.
 	 */
-	//@author
 	void add(int index, Task task);
 
 	/**
@@ -37,7 +35,6 @@ public interface TaskList {
 	 * @param strList
 	 *            List of stringed tasks.
 	 */
-	//@author
 	void addAll(List<String> strList);
 
 	/**
@@ -48,7 +45,6 @@ public interface TaskList {
 	 * @param task
 	 *            Task object.
 	 */
-	//@author
 	void set(int pos, Task task);
 
 	/**
@@ -57,14 +53,12 @@ public interface TaskList {
 	 * @param pos
 	 *            Specified position to remove the Task object.
 	 */
-	//@author
 	void remove(int pos);
 
 	/**
 	 * Sorts the list of Task objects in the task list according to priority,
 	 * date, time and description.
 	 */
-	//@author
 	void sort();
 
 	/**
@@ -72,7 +66,6 @@ public interface TaskList {
 	 * 
 	 * @return True if the task list is empty.
 	 */
-	//@author
 	boolean isEmpty();
 
 	/**
@@ -80,7 +73,6 @@ public interface TaskList {
 	 * 
 	 * @return Index of the task in the task list.
 	 */
-	//@author
 	Integer indexOf(Task task);
 
 	/**
@@ -90,7 +82,6 @@ public interface TaskList {
 	 *            Position of the task in the task list.
 	 * @return Task object at that position in the task list.
 	 */
-	//@author
 	Task get(Integer pos);
 
 	/**
@@ -98,7 +89,6 @@ public interface TaskList {
 	 * 
 	 * @return Number of tasks in the task list.
 	 */
-	//@author
 	int size();
 
 	/**
@@ -106,7 +96,6 @@ public interface TaskList {
 	 * 
 	 * @return List of tasks.
 	 */
-	//@author
 	TaskList clone();
 
 	/**
@@ -114,7 +103,6 @@ public interface TaskList {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	//@author
 	List<String> getStringList();
 
 	/**
@@ -122,19 +110,16 @@ public interface TaskList {
 	 * 
 	 * @return List of numbered stringed tasks.
 	 */
-	//@author
 	List<String> getNumberedStringList();
 
 	/**
 	 * Clears the list.
 	 */
-	//@author
 	void clear();
 
 	/**
 	 * Sets the number of tasks on a page.
 	 */
-	//@author
 	void setNumTaskOnPage(Integer number);
 
 	/**
@@ -144,7 +129,6 @@ public interface TaskList {
 	 *            Page number of the task list.
 	 * @return List of stringed tasks on that page.
 	 */
-	//@author
 	List<String> getPage(Integer pageNum);
 
 	/**
@@ -154,7 +138,6 @@ public interface TaskList {
 	 *            Page number.
 	 * @return List of numbered stringed tasks in that page.
 	 */
-	//@author
 	List<String> getNumberedPage(Integer pageNum);
 
 	/**
@@ -162,7 +145,6 @@ public interface TaskList {
 	 * 
 	 * @return Total number of pages.
 	 */
-	//@author
 	Integer getTotalPageNum();
 
 	/**
@@ -172,7 +154,6 @@ public interface TaskList {
 	 *            Position of the task in the task list.
 	 * @return Page number of page that contains this task.
 	 */
-	//@author
 	Integer getIndexPageContainTask(Integer taskIndex);
 
 	/**
@@ -182,7 +163,6 @@ public interface TaskList {
 	 *            Position of the task in the task list.
 	 * @return Task number of the task on a page.
 	 */
-	//@author
 	Integer getIndexTaskOnPage(Integer taskIndex);
 
 	/**
@@ -190,7 +170,6 @@ public interface TaskList {
 	 * 
 	 * @return List of floating tasks.
 	 */
-	//@author
 	TaskList getFloatingTasks();
 
 	/**
@@ -198,7 +177,6 @@ public interface TaskList {
 	 * 
 	 * @return List of overdue tasks.
 	 */
-	//@author
 	TaskList getOverdueTasks();
 
 	/**
@@ -208,7 +186,6 @@ public interface TaskList {
 	 *            Keyword entered by user.
 	 * @return List of search results.
 	 */
-	//@author
 	TaskList search(String content);
 
 	/**
@@ -220,7 +197,6 @@ public interface TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	//@author
 	TaskList searchOnDate(Date date, TaskList list);
 
 	/**
@@ -234,7 +210,6 @@ public interface TaskList {
 	 *            Task list to search from.
 	 * @return List of search results.
 	 */
-	//@author 
 	TaskList searchDesc(String key, TaskList list);
 
 	/**

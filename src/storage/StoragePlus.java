@@ -10,7 +10,7 @@ import java.util.Scanner;
 /**
  * Storage class to create a Storage object for storing tasks.
  */
-//@author
+//@author A0112044B
 public class StoragePlus implements Storage {
 	// Name of the file to store the list
 	private final static String fileName = "ToDoList.txt";
@@ -25,7 +25,6 @@ public class StoragePlus implements Storage {
 	 * 
 	 * @return	List of stringed tasks.
 	 */
-	//@author
 	public List<String> read() {
 
 		List<String> toDoList = new ArrayList<String>();
@@ -55,7 +54,6 @@ public class StoragePlus implements Storage {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	//@author
 	public List<String> readArchive(){
 		
 		List<String> archiveList=new ArrayList<String>();
@@ -85,7 +83,6 @@ public class StoragePlus implements Storage {
 	 * 
 	 * @param list	List of stringed tasks.
 	 */
-	//@author
 	public void write(List<String> list) {
 
 		File backUp = new File(backUpFile);
@@ -137,7 +134,6 @@ public class StoragePlus implements Storage {
 	 * 
 	 * @param archiveList	List of completed stringed tasks.
 	 */
-	//@author
 	public void writeArchive(List<String> archiveList){
 		
 		File archive=new File(archiveFile);

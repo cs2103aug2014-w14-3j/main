@@ -18,6 +18,7 @@ import ui.ListItem;
  * @author Luo Shaohuai
  *
  */
+//@author A0119381E
 public class ListItemTest{
 	private ListItem list;
 	

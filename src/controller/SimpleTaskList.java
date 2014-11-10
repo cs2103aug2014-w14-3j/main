@@ -19,7 +19,7 @@ import controller.Task.TaskType;
 /**
  * Class for task lists.
  */
-//@author
+//@author A0119381E
 public class SimpleTaskList implements TaskList {
 
 	private static final String SPACE = "\\s+";
@@ -34,7 +34,6 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Constructs a SimpleTaskList object.
 	 */
-	//@author
 	public SimpleTaskList() {
 		tasks = new ArrayList<Task>();
 		numTaskOnPage = null;
@@ -46,7 +45,6 @@ public class SimpleTaskList implements TaskList {
 	 * @param strList
 	 *            List of strings.
 	 */
-	//@author
 	public SimpleTaskList(List<String> strList) {
 		this();
 		addAll(strList);
@@ -59,7 +57,6 @@ public class SimpleTaskList implements TaskList {
 	 * @param strList
 	 *            List of stringed tasks.
 	 */
-	//@author
 	@Override
 	public void addAll(List<String> strList) {
 		for (String str : strList) {
@@ -70,7 +67,6 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Clears the list.
 	 */
-	//@author
 	@Override
 	public void clear() {
 		tasks.clear();
@@ -83,7 +79,6 @@ public class SimpleTaskList implements TaskList {
 	 *            Task object.
 	 * @return true if Task object is successfully added into the task list.
 	 */
-	//@author
 	@Override
 	public boolean add(Task task) {
 		return tasks.add(task);
@@ -97,7 +92,6 @@ public class SimpleTaskList implements TaskList {
 	 * @param task
 	 *            Task object.
 	 */
-	//@author
 	@Override
 	public void add(int index, Task task) {
 		tasks.add(index, task);
@@ -111,7 +105,6 @@ public class SimpleTaskList implements TaskList {
 	 * @param task
 	 *            Task object.
 	 */
-	//@author
 	@Override
 	public void set(int pos, Task task) {
 		tasks.set(pos, task);
@@ -123,7 +116,6 @@ public class SimpleTaskList implements TaskList {
 	 * @param pos
 	 *            Specified position to remove the Task object.
 	 */
-	//@author
 	@Override
 	public void remove(int pos) {
 		tasks.remove(pos);
@@ -134,7 +126,6 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return True if the task list is empty.
 	 */
-	//@author
 	@Override
 	public boolean isEmpty() {
 		return tasks.isEmpty();
@@ -145,7 +136,6 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return Index of the task in the task list.
 	 */
-	//@author
 	@Override
 	public Integer indexOf(Task task) {
 		return tasks.indexOf(task);
@@ -158,7 +148,6 @@ public class SimpleTaskList implements TaskList {
 	 *            Position of the task in the task list.
 	 * @return Task object at that position in the task list.
 	 */
-	//@author
 	@Override
 	public Task get(Integer pos) {
 		return tasks.get(pos);
@@ -169,7 +158,6 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of tasks.
 	 */
-	//@author
 	@Override
 	public TaskList clone() {
 		TaskList clone = new SimpleTaskList(getStringList());
@@ -199,7 +187,6 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return List of numbered stringed tasks.
 	 */
-	//@author
 	@Override
 	public List<String> getNumberedStringList() {
 		ArrayList<String> taskStrings = new ArrayList<String>();
@@ -248,7 +235,6 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return Number of tasks in the task list.
 	 */
-	//@author
 	@Override
 	public int size() {
 		return tasks.size();
@@ -257,7 +243,7 @@ public class SimpleTaskList implements TaskList {
 	/**
 	 * Sets the number of tasks on a page.
 	 */
-	//@author
+	//@author A0115194J
 	@Override
 	public void setNumTaskOnPage(Integer number) {
 		assert number > 0;
@@ -272,7 +258,6 @@ public class SimpleTaskList implements TaskList {
 	 *            Page number of the task list.
 	 * @return List of stringed tasks on that page.
 	 */
-	//@author
 	@Override
 	public List<String> getPage(Integer pageNum) {
 		assert numTaskOnPage != null;
@@ -304,7 +289,6 @@ public class SimpleTaskList implements TaskList {
 	 * 
 	 * @return Total number of pages.
 	 */
-	//@author
 	@Override
 	public Integer getTotalPageNum() {
 		assert numTaskOnPage != null;
@@ -321,7 +305,6 @@ public class SimpleTaskList implements TaskList {
 	 *            Page number.
 	 * @return List of numbered stringed tasks in that page.
 	 */
-	//@author
 	@Override
 	public List<String> getNumberedPage(Integer pageNum) {
 		assert numTaskOnPage != null;
@@ -355,7 +338,6 @@ public class SimpleTaskList implements TaskList {
 	 *            Position of the task in the task list.
 	 * @return Page number of page that contains this task.
 	 */
-	//@author
 	@Override
 	public Integer getIndexPageContainTask(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {
@@ -372,7 +354,6 @@ public class SimpleTaskList implements TaskList {
 	 *            Position of the task in the task list.
 	 * @return Task number of the task on a page.
 	 */
-	//@author
 	@Override
 	public Integer getIndexTaskOnPage(Integer taskIndex) {
 		if (taskIndex < 0 || taskIndex >= tasks.size()) {

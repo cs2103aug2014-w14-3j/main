@@ -19,7 +19,6 @@ public class Triple implements Comparable<Triple> {
 	 * @param _third
 	 *            Third integer.
 	 */
-	//@author
 	public Triple(int _first, int _second, Task _third) {
 		first = _first;
 		second = _second;
@@ -31,7 +30,6 @@ public class Triple implements Comparable<Triple> {
 	 * 
 	 * @return First integer.
 	 */
-	//@author
 	public int getFirst() {
 		return first;
 	}
@@ -41,7 +39,6 @@ public class Triple implements Comparable<Triple> {
 	 * 
 	 * @return Second integer.
 	 */
-	//@author
 	public int getSecond() {
 		return second;
 	}
@@ -51,7 +48,6 @@ public class Triple implements Comparable<Triple> {
 	 * 
 	 * @return Third integer.
 	 */
-	//@author
 	public Task getThird() {
 		return third;
 	}
@@ -63,7 +59,6 @@ public class Triple implements Comparable<Triple> {
 	 *            Triple object containing three integers.
 	 * @return Difference between the first two integers.
 	 */
-	//@author
 	public int compareTo(Triple triple) {
 		if (this.getFirst() != triple.getFirst()) {
 			return this.getFirst() - triple.getFirst();

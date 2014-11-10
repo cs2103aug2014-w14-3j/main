@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Interface for StoragePlus.
  */
-//@author Tran Cong Thien
+//@author A0112044B
 public interface Storage {
 
 	/**
@@ -13,7 +13,6 @@ public interface Storage {
 	 * 
 	 * @return	List of stringed tasks.
 	 */
-	//@author
 	List<String> read();
 	
 	/**
@@ -21,7 +20,6 @@ public interface Storage {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	//@author
 	List<String> readArchive();
 
 	/**
@@ -30,7 +28,6 @@ public interface Storage {
 	 * 
 	 * @param list	List of stringed tasks.
 	 */
-	//@author
 	void write(List<String> list);
 	
 	/**
@@ -38,7 +35,6 @@ public interface Storage {
 	 * 
 	 * @param archiveList	List of completed stringed tasks.
 	 */
-	//@author
 	void writeArchive(List<String> archiveList);
 }
 
