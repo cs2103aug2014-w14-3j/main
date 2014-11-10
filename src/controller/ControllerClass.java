@@ -269,6 +269,7 @@ public class ControllerClass implements Controller {
 	 *            Feedback message after a command is executed.
 	 */
 	private void setFeedback(String feedback) {
+		assert !feedback.trim().equals("");
 		feedbackMessage = feedback;
 	}
 
@@ -1488,8 +1489,6 @@ public class ControllerClass implements Controller {
 	 */
 	//@author A0115584A
 	private void displayMainList() {
-		// getFileContent();
-		// setNumTaskOnPage(numTasksInSinglePage);
 		tasks.sort();
 		resetRecentChange();
 		setDisplayList(DisplayList.MAIN);
