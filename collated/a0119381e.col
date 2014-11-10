@@ -1,0 +1,1833 @@
+//@author: a0119381e
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Controller.java
+	 */
+
+	public boolean isExiting();
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void addTask(String content) throws Exception {
+		if (isEmptyCommand(content)) {
+			setFeedback(MESSAGE_FEEDBACK_ADD_SPECIFY);
+			throw new Exception(MESSAGE_FEEDBACK_ADD_SPECIFY);
+		}
+
+		Task task = processUserInput(content);
+		this.tasks.add(task);
+
+		setFeedback(MESSAGE_FEEDBACK_ADD);
+		tasks.sort();
+		setRecentChange(task, tasks);
+		setDisplayList(DisplayList.MAIN);
+	}
+
+	/**
+	 * Processes user input and creates a Task object.
+	 * 
+	 * @param content
+	 *            User input.
+	 * @return Task object made from user input.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private Task processUserInput(String content) {
+		String desc = EMPTY_STRING;
+		Integer singlePos = 0;
+		Integer doublePos = 0;
+		singlePos = content.indexOf('\'', 0);
+		doublePos = content.indexOf('\"', 0);
+		if (singlePos == -1 && doublePos == -1) {
+			// return processUserInputClassic(content);
+			desc = content + SPACE_STRING;
+			content = EMPTY_STRING;
+		}
+
+		String regex = "([\"'])(?:(?=(\\\\?))\\2.)*?\\1";
+		Matcher matcher = Pattern.compile(regex).matcher(content);
+		while (matcher.find()) {
+			desc += content.substring(matcher.start() + 1, matcher.end() - 1)
+					+ SPACE_STRING;
+		}
+		desc = desc.substring(0, desc.length() - 1);
+		content = content.replaceAll(regex, EMPTY_STRING);
+
+		Task task = new TaskClass();
+		Boolean priority;
+		if (content.indexOf('!') != -1) {
+			content = content.replaceAll("!", EMPTY_STRING);
+			priority = true;
+		} else {
+			priority = false;
+		}
+		task.setPriority(priority.toString());
+
+		task.setDesc(desc);
+		task.setType(TaskType.FLOATING);
+		processTime(task, content);
+
+		return task;
+	}
+
+	/**
+	 * Processes user input into time.
+	 * 
+	 * @param task
+	 *            Task object that time will be added to.
+	 * @param content
+	 *            Stringed time input from user.
+	 * @return true if time is added to Task object.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private boolean processTime(Task task, String content) {
+		content = content.trim();
+		if (content.isEmpty()) {
+			return false;
+		}
+
+		Parser parser = new Parser();
+		List<DateGroup> groups = parser.parse(content);
+		List<Date> dates = new ArrayList<Date>();
+		for (DateGroup group : groups) {
+			dates.addAll(group.getDates());
+		}
+
+		Collections.sort(dates);
+
+		if (dates.size() < 1) {
+			return false;
+		} else if (dates.size() == 1) {
+			task.clearTimes();
+			task.setDeadline(dates.get(0));
+			task.setType(TaskType.DEADLINE);
+			return true;
+		} else {
+			task.clearTimes();
+			task.setStartTime(dates.get(0));
+			task.setEndTime(dates.get(dates.size() - 1));
+			task.setType(TaskType.TIMED);
+			return true;
+		}
+	}
+
+	/**
+	 * Removes the command type from the command string.
+	 * 
+	 * @param command
+	 *            User input.
+	 * @param operation
+	 *            Command type that user wants to execute.
+	 * @return Trimmed user input without the command type.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	public static Controller getInstance() {
+		if (theController == null) {
+			theController = new ControllerClass();
+		}
+
+		return theController;
+	}
+
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+public class SimpleTaskList implements TaskList {
+
+	private static final String SPACE = "\\s+";
+	private static final String SINGLE_SPACE=" ";
+	private static final String SEPARATOR = ". ";
+	private static final String STRING_TODAY = "today";
+	private static final String STRING_BY = "by";
+	private static final String EMPTY_STRING="";
+	private static final String SLASH_STRING="/";
+	private static final String QUOTATION_MARK_STRING="\"";
+	private static final Character QUOTATION_MARK_CHAR='\"';
+	private static final Character SLASH_CHAR='/';
+	private static final int MAX_SCORE = 1000;
+	private static final int NOT_INDEX=-1;
+	private static final int MAX_MONTH=12;
+	private static final int MAX_DAY=31;
+	private static final double HALF=0.5;
+	private static final double UNIT=1.0;
+	
+
+	private List<Task> tasks;
+	private Integer numTaskOnPage;
+
+	/**
+	 * Constructs a SimpleTaskList object.
+	 */
+	public SimpleTaskList() {
+		tasks = new ArrayList<Task>();
+		numTaskOnPage = null;
+	}
+
+	/**
+	 * Constructs a SimpleTaskList object using a list of strings.
+	 * 
+	 * @param strList
+	 *            List of strings.
+	 */
+	public SimpleTaskList(List<String> strList) {
+		this();
+		addAll(strList);
+	}
+
+	/**
+	 * Constructs Task objects from the list of strings and adds them into a
+	 * task list.
+	 * 
+	 * @param strList
+	 *            List of stringed tasks.
+	 */
+	@Override
+	public void addAll(List<String> strList) {
+		for (String str : strList) {
+			tasks.add(new TaskClass(str));
+		}
+	}
+
+	/**
+	 * Clears the list.
+	 */
+	@Override
+	public void clear() {
+		tasks.clear();
+	}
+
+	/**
+	 * Adds a Task object into a task list.
+	 * 
+	 * @param task
+	 *            Task object.
+	 * @return true if Task object is successfully added into the task list.
+	 */
+	@Override
+	public boolean add(Task task) {
+		return tasks.add(task);
+	}
+
+	/**
+	 * Adds a Task object into a task list at a specific position.
+	 * 
+	 * @param index
+	 *            Specified position to add task.
+	 * @param task
+	 *            Task object.
+	 */
+	@Override
+	public void add(int index, Task task) {
+		tasks.add(index, task);
+	}
+
+	/**
+	 * Sets a Task object at a specific position.
+	 * 
+	 * @param pos
+	 *            Specified position to set the Task object.
+	 * @param task
+	 *            Task object.
+	 */
+	@Override
+	public void set(int pos, Task task) {
+		tasks.set(pos, task);
+	}
+
+	/**
+	 * Removes a task from a specific position.
+	 * 
+	 * @param pos
+	 *            Specified position to remove the Task object.
+	 */
+	@Override
+	public void remove(int pos) {
+		tasks.remove(pos);
+	}
+
+	/**
+	 * Checks if the task list is empty.
+	 * 
+	 * @return True if the task list is empty.
+	 */
+	@Override
+	public boolean isEmpty() {
+		return tasks.isEmpty();
+	}
+
+	/**
+	 * Gets the index of the task in the task list.
+	 * 
+	 * @return Index of the task in the task list.
+	 */
+	@Override
+	public Integer indexOf(Task task) {
+		return tasks.indexOf(task);
+	}
+
+	/**
+	 * Gets a task based on its position.
+	 * 
+	 * @param pos
+	 *            Position of the task in the task list.
+	 * @return Task object at that position in the task list.
+	 */
+	@Override
+	public Task get(Integer pos) {
+		return tasks.get(pos);
+	}
+
+	/**
+	 * Clones the task list of stringed tasks.
+	 * 
+	 * @return List of tasks.
+	 */
+	@Override
+	public TaskList clone() {
+		TaskList clone = new SimpleTaskList(getStringList());
+		clone.setNumTaskOnPage(numTaskOnPage);
+		return clone;
+	}
+
+	/**
+	 * Converts list of Task objects to strings.
+	 * 
+	 * @return List of stringed tasks.
+	 */
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\TaskList.java
+	 */
+
+public interface TaskList {
+
+	/**
+	 * Adds a Task object into a task list.
+	 * 
+	 * @param task
+	 *            Task object.
+	 * @return true if Task object is successfully added into the task list.
+	 */
+	boolean add(Task task);
+
+	/**
+	 * Adds a Task object into a task list at a specific position.
+	 * 
+	 * @param index
+	 *            Specified position to add task.
+	 * @param task
+	 *            Task object.
+	 */
+	void add(int index, Task task);
+
+	/**
+	 * Constructs Task objects from the list of strings and adds them into a
+	 * task list.
+	 * 
+	 * @param strList
+	 *            List of stringed tasks.
+	 */
+	void addAll(List<String> strList);
+
+	/**
+	 * Sets a Task object at a specific position.
+	 * 
+	 * @param pos
+	 *            Specified position to set the Task object.
+	 * @param task
+	 *            Task object.
+	 */
+	void set(int pos, Task task);
+
+	/**
+	 * Removes a task from a specific position.
+	 * 
+	 * @param pos
+	 *            Specified position to remove the Task object.
+	 */
+	void remove(int pos);
+
+	/**
+	 * Sorts the list of Task objects in the task list according to priority,
+	 * date, time and description.
+	 */
+	void sort();
+
+	/**
+	 * Checks if the task list is empty.
+	 * 
+	 * @return True if the task list is empty.
+	 */
+	boolean isEmpty();
+
+	/**
+	 * Gets the index of the task in the task list.
+	 * 
+	 * @return Index of the task in the task list.
+	 */
+	Integer indexOf(Task task);
+
+	/**
+	 * Gets a task based on its position.
+	 * 
+	 * @param pos
+	 *            Position of the task in the task list.
+	 * @return Task object at that position in the task list.
+	 */
+	Task get(Integer pos);
+
+	/**
+	 * Gets the number of tasks in the task list.
+	 * 
+	 * @return Number of tasks in the task list.
+	 */
+	int size();
+
+	/**
+	 * Clones the task list of stringed tasks.
+	 * 
+	 * @return List of tasks.
+	 */
+	TaskList clone();
+
+	/**
+	 * Converts list of Task objects to strings.
+	 * 
+	 * @return List of stringed tasks.
+	 */
+	List<String> getStringList();
+
+	/**
+	 * Generates a numbered stringed list of tasks.
+	 * 
+	 * @return List of numbered stringed tasks.
+	 */
+	List<String> getNumberedStringList();
+
+	/**
+	 * Clears the list.
+	 */
+	void clear();
+
+	/**
+	 * Sets the number of tasks on a page.
+	 */
+	void setNumTaskOnPage(Integer number);
+
+	/**
+	 * Generates a list of stringed tasks on a page.
+	 * 
+	 * @param pageNum
+	 *            Page number of the task list.
+	 * @return List of stringed tasks on that page.
+	 */
+	List<String> getPage(Integer pageNum);
+
+	/**
+	 * Generates a list of numbered stringed tasks in a page.
+	 * 
+	 * @param pageNum
+	 *            Page number.
+	 * @return List of numbered stringed tasks in that page.
+	 */
+	List<String> getNumberedPage(Integer pageNum);
+
+	/**
+	 * Gets the total number of pages the list has.
+	 * 
+	 * @return Total number of pages.
+	 */
+	Integer getTotalPageNum();
+
+	/**
+	 * Gets the page number that contains the task.
+	 * 
+	 * @param taskIndex
+	 *            Position of the task in the task list.
+	 * @return Page number of page that contains this task.
+	 */
+	Integer getIndexPageContainTask(Integer taskIndex);
+
+	/**
+	 * Gets the task number of the task on a page.
+	 * 
+	 * @param taskIndex
+	 *            Position of the task in the task list.
+	 * @return Task number of the task on a page.
+	 */
+	Integer getIndexTaskOnPage(Integer taskIndex);
+
+	/**
+	 * Gets a list of floating tasks.
+	 * 
+	 * @return List of floating tasks.
+	 */
+	TaskList getFloatingTasks();
+
+	/**
+	 * Gets a list of overdue tasks.
+	 * 
+	 * @return List of overdue tasks.
+	 */
+	TaskList getOverdueTasks();
+
+	/**
+	 * Searches for tasks that consist of the keyword entered by user.
+	 * 
+	 * @param content
+	 *            Keyword entered by user.
+	 * @return List of search results.
+	 */
+	TaskList search(String content);
+
+	/**
+	 * Searches on the exact date of tasks.
+	 * 
+	 * @param deadline
+	 *            Date to search.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	TaskList searchOnDate(Date date, TaskList list);
+
+	/**
+	 * Searches for the descriptions of tasks that contain the keyword. If the
+	 * keyword appears in the list of tasks, return the list of exact search.
+	 * Else, return the list of nearMatch search.
+	 * 
+	 * @param keyword
+	 *            Keyword entered by user.
+	 * @param listToSearch
+	 *            Task list to search from.
+	 * @return List of search results.
+	 */
+	TaskList searchDesc(String key, TaskList list);
+
+	/**
+	 * Suggest possible word based on key
+	 * 
+	 * @param key
+	 * @return list of words
+	 */
+	List<String> suggestWord(String key);
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\TaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\tests\ListItemTest.java
+	 */
+
+public class ListItemTest{
+	private ListItem list;
+	
+	public ListItemTest() {
+		list = new ListItem();
+	}
+	
+	@Test
+	public void testDesc() {
+		list.setDesc("abc");
+		HBox hbox = list.getHBox();
+		
+		Object firstChild = hbox.getChildren().get(0);
+		Assert.assertTrue("Wrong description position", firstChild instanceof Text);
+		Assert.assertTrue("Wrong description", ((Text) firstChild).getText().equals("abc"));
+	}
+	
+	@Test
+	public void testPriority() {
+		list.setPriority(true);
+		HBox hbox = list.getHBox();
+		
+		Assert.assertFalse("Priority not setted", hbox.getStyle().trim().isEmpty());
+	}
+
+	@Test
+	public void testFloatingTime() {
+		list.clearTime();
+		list.setTimes();
+		HBox hbox = list.getHBox();
+		
+		Object secondChild = hbox.getChildren().get(1);
+		Assert.assertTrue("Wrong time position", secondChild instanceof TextFlow);
+		
+		TextFlow timeText = (TextFlow) secondChild;
+		Assert.assertTrue("Wrong floating text", ((Text) timeText.getChildren().get(0)).getText().equals("Floating"));
+	}
+	
+	@Test
+	public void testDeadlineTime() {
+		list.clearTime();
+		list.setTimes(Instant.EPOCH.toEpochMilli());
+		HBox hbox = list.getHBox();
+		
+		Object secondChild = hbox.getChildren().get(1);
+		Assert.assertTrue("Wrong time position", secondChild instanceof TextFlow);
+		
+		TextFlow timeText = (TextFlow) secondChild;
+		Assert.assertEquals("Wrong number of time text", 
+				timeText.getChildren().size(), 1
+				);
+		
+		String text = ((Text) timeText.getChildren().get(0)).getText();
+		Assert.assertFalse("Deadline text empty", 
+				text.trim().isEmpty()
+				);
+	}
+	
+	@Test
+	public void testTimedTime() {
+		list.clearTime();
+		list.setTimes(Instant.EPOCH.toEpochMilli(), Instant.EPOCH.toEpochMilli());
+		HBox hbox = list.getHBox();
+		
+		Object secondChild = hbox.getChildren().get(1);
+		Assert.assertTrue("Wrong time position", secondChild instanceof TextFlow);
+		
+		TextFlow timeText = (TextFlow) secondChild;
+		Assert.assertEquals("Wrong number of time text", 
+				timeText.getChildren().size(), 3
+				);
+		
+		String text1 = ((Text) timeText.getChildren().get(0)).getText();
+		String text2 = ((Text) timeText.getChildren().get(2)).getText();
+		Assert.assertFalse("Timed text empty", 
+				text1.trim().isEmpty() || text2.trim().isEmpty()
+				);
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\tests\ListItemTest.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Config.java
+	 */
+
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Config.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Config.java
+	 */
+
+public interface Config {
+	public static final boolean onDevelopment = true;
+	
+	
+	//log
+	public static final String logFile = "log.txt";
+	public static final String logDateFormat = "yyyy/MM/dd HH:mm:ss";
+	
+	//UI
+	//fxml
+	public static final String main = "Main.fxml";
+	
+	
+	//misc
+	public static final String title = "Forget-Me-Not";
+	public static final String floating = "Floating";
+	public static final String timeSeparater = " to ";
+	public static final String curTimeDateFormat = "MMM dd, yyyy hh:mm:ss a";
+	public static final String taskDateFormat = "MMM dd, yyyy hh:mm a";
+	
+	//style
+	public static final String minorTextStyle = "-fx-fill: #777777";
+	public static final String timeStyle = "-fx-fill: #222222";
+	
+	//command
+	public static final String cmdList = "list";
+	public static final String cmdPageUp = "page up";
+	public static final String cmdPageDown = "page down";
+	public static final int maxNumHistory = 20;
+	
+	
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\Config.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+ *
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+public class ListItem{
+	@FXML
+	private HBox box;
+	
+	@FXML
+	private Text desc; 
+	
+	@FXML
+	private TextFlow time;
+	
+	@FXML
+	private Label prior;
+	
+	@FXML
+	private Label overdue;
+	
+	public ListItem() {
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ListItem.fxml"));
+		fxmlLoader.setController(this);
+		
+		try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+		
+		time.getChildren().clear();
+		desc.setText("");
+	}
+	
+	/**
+	 * Get the Node representation of the list item
+	 * 
+	 * @return HBox
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public HBox getHBox() {
+		return box;
+	}
+	
+	
+	/**
+	 * Set text to position of description
+	 * 
+	 * @param text
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public void setDesc(String text) {
+		desc.setText(text);
+	}
+	
+	/**
+	 * Set if the item is shown as prioritized
+	 * 
+	 * @param priority
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public void setPriority(boolean priority) {
+		this.prior.setVisible(priority);
+	}
+	
+	/**
+	 * Clear all text in time field
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public void clearTime() {
+		time.getChildren().clear();
+		this.overdue.setVisible(false);
+	}
+	
+	/**
+	 * Set as no time
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public void setTimes() {
+		clearTime();
+		Text floating = new Text(Config.floating);
+		floating.setStyle(Config.minorTextStyle);
+		time.getChildren().add(floating);
+		this.overdue.setVisible(false);
+	}
+	
+	/**
+	 * Set with one time
+	 * 
+	 * @param timeInMilli
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public void setTimes(Long timeInMilli) {
+		clearTime();
+		time.getChildren().add(timeToText(timeInMilli));
+		this.overdue.setVisible(isOverdue(timeInMilli));
+		
+	}
+	
+	/**
+	 * Set with two times
+	 * 
+	 * @param timeStart
+	 * @param timeEnd
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	public void setTimes(Long timeStart, Long timeEnd) {
+		clearTime();
+		time.getChildren().add(timeToText(timeStart));
+		
+		Text to = new Text();
+		to.setText(Config.timeSeparater);
+		to.setStyle(Config.minorTextStyle);
+		time.getChildren().add(to);
+		time.getChildren().add(timeToText(timeEnd));
+		this.overdue.setVisible(isOverdue(timeStart));
+	}
+	
+	/**
+	 * Convert time(epoch) to Text
+	 * 
+	 * @param timeInMilli
+	 * @return
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	private Text timeToText(Long timeInMilli) {
+		Date time = new Date(timeInMilli);
+		LocalDateTime timeobj = LocalDateTime.ofInstant(time.toInstant(), 
+														ZoneId.systemDefault()
+														);
+		Text timeText = new Text();
+		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.taskDateFormat);
+		timeText.setText(format.format(timeobj));
+		timeText.setStyle(Config.timeStyle);
+		return timeText;
+	}
+	
+	/**
+	 * Check if overdue
+	 * 
+	 * @param timeInMilli
+	 * @return if the task is overdue
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListItem.java
+	 */
+
+	private boolean isOverdue(Long timeInMilli) {
+		LocalDateTime time = LocalDateTime.ofInstant(
+								new Date(timeInMilli).toInstant(), 
+								ZoneId.systemDefault()
+								);
+		
+		if (LocalDateTime.now().isAfter(time)) {
+			return true;
+		}
+
+		return false;
+	}
+	
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListItem.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListViewCell.java
+	 */
+
+ *
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListViewCell.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\ListViewCell.java
+	 */
+
+class ListViewCell extends ListCell<String> {
+	@Override
+	public void updateItem(String str, boolean empty){
+		super.updateItem(str, empty);
+		if (empty) {
+			setGraphic(null);
+			return;
+        }
+		ListItem item = new ListItem();
+		String[] split = str.split("%");
+		if (split.length < 4) {
+			item.setDesc(str);
+			item.setPriority(false);
+			item.clearTime();
+			setGraphic(item.getHBox());
+			return;
+		}
+		
+		String desc = split[0].trim();
+		Boolean priority = Boolean.parseBoolean(split[3].trim());
+		Long timeStart = null;
+		if (!split[1].trim().isEmpty()) {
+			timeStart = Long.parseLong(split[1].trim());
+		}
+		Long timeEnd = null;
+		if (!split[2].trim().isEmpty()) {
+			timeEnd = Long.parseLong(split[2].trim());
+		}
+		item.setDesc(desc);
+		item.setPriority(priority);
+		
+		if (timeStart != null) {
+			if (timeEnd != null) {
+				item.setTimes(timeStart, timeEnd);
+			} else {
+				item.setTimes(timeStart);
+			}
+		}  else {
+			item.setTimes();
+		}
+		
+		setGraphic(item.getHBox());
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\ListViewCell.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Log.java
+	 */
+
+ *
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Log.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Log.java
+	 */
+
+public class Log {
+	PrintWriter logWriter;
+	
+	public Log() {
+		logWriter = null;
+	}
+	
+	/**
+	 * return if the log cannot work properly
+	 * 
+	 * @return if there is an error
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Log.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Log.java
+	 */
+
+	public boolean hasError() {
+		if (logWriter == null) {
+			return true;
+		} else  if (logWriter.checkError()){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Log the text to file
+	 * 
+	 * @param logText
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Log.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Log.java
+	 */
+
+	public void log(String logText) {
+		openFile();
+		if (hasError()) {
+			return;
+		}
+		
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat(Config.logDateFormat);
+		String prefix = dateFormat.format(now) + " - ";
+		
+		logWriter.println(prefix + logText);
+		closeFile();
+	}
+	
+	/**
+	 * Open log file
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Log.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Log.java
+	 */
+
+	private void openFile() {
+		try {
+			logWriter = new PrintWriter(new FileWriter(Config.logFile, true));
+		} catch (IOException e) {
+			if(Config.onDevelopment) {
+				e.printStackTrace();
+			}
+			logWriter = null;
+		}	
+	}
+	
+	/**
+	 * Close log file
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Log.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Log.java
+	 */
+
+	private void closeFile() {
+		logWriter.close();
+		logWriter = null;
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\Log.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+public class Main extends Application{
+	
+	private UIControl mainControl;
+	private Stage stage;
+
+	private Log log;
+	
+	private ArrayList<String> commandHistory;
+	private Integer historyPos;
+	
+	private Controller controller;
+	private List<String> displayBuf;
+	private Integer recentChange;
+	
+	
+	public Main() {
+		controller = ControllerClass.getInstance();
+		log = new Log();
+		commandHistory = new ArrayList<String>();
+		historyPos = 0;
+	}
+	
+	/**
+	 * GUI entry of the program (javafx)
+	 * To launch call static method launch(args)
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	@Override
+	public void start(Stage stage) { 
+		try {
+			this.stage = stage;
+			stage.initStyle(StageStyle.UNDECORATED);
+			stage.setScene(loadScene());
+			mainControl.init();
+		} catch (IOException e) {
+			if (Config.onDevelopment) {
+				e.printStackTrace();
+			}
+			Platform.exit();
+			System.exit(0);
+		}
+		
+		stage.show();
+		log.log("Initialized");
+	}
+	
+	/**
+	 * Initialize and return the main scene
+	 * 
+	 * @return Scene to be load into the stage
+	 * @throws IOException	
+	 * 				when error loading the FXML file
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private Scene loadScene() throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		Pane mainPane = (Pane) loader.load(getClass().getResourceAsStream(Config.main));
+		
+		mainControl = loader.getController();
+		
+		Scene scene = new Scene(mainPane);
+		
+		mainControl.setOnExecCmd((command) -> onEnter(command));
+		mainControl.setOnRequestHistory((direction) -> onUpDown(direction));
+		mainControl.setInputOnChange((str) -> onInputChange(str));
+		
+		execCmd(Config.cmdList);
+		
+		setHotKeys(scene);
+		return scene;
+	}
+	
+	
+	/**
+	 * Execute command by calling Controller.execCmd
+	 * load the list from controller every time called
+	 * 
+	 * @param cmd
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private void execCmd(String cmd) {
+		try {
+			log.log("Command: " + cmd);
+			
+			recentChange = controller.execCmd(cmd);
+			
+			if(controller.isExiting()) {
+				log.log("on exit");
+				Platform.exit();
+				System.exit(0);
+			}
+			
+			displayBuf = controller.getCurrentList();
+			if (displayBuf == null) {
+				return;
+			}
+			mainControl.loadList(displayBuf, recentChange);
+			mainControl.showNoti(controller.getFeedback());
+		} catch (Exception e) {
+			if (Config.onDevelopment) {
+				e.printStackTrace();
+			}
+			mainControl.showNoti(e.getMessage());
+			
+			log.log(e.getMessage());
+		}
+
+	}
+	
+	/**
+	 * Called when enter is pressed
+	 * 
+	 * @param command
+	 * @return command pass to this function
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private String onEnter(String command) {
+		if (command.isEmpty()) {
+			return command;
+		}
+		
+		execCmd(command);
+		pushHistory(command);
+		return command;
+	}
+	
+	/**
+	 * Called when up/down is pressed in input box
+	 * 
+	 * @param direction
+	 * @return history command
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private String onUpDown(String direction) {
+		if (historyPos > 0 && direction.trim().equalsIgnoreCase("UP")) {
+			historyPos--;
+		} else if (historyPos < commandHistory.size() && direction.trim().equalsIgnoreCase("DOWN")) {
+			historyPos++;
+		}
+		
+		if (historyPos >= 0 && historyPos < commandHistory.size()) {
+			return commandHistory.get(historyPos);
+		}
+		return null;
+	}
+	
+	/**
+	 * Called when input is changed
+	 * 
+	 * @param newValue
+	 * @return suggest word returned by controller
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private String onInputChange(String newValue) {
+		String suggest = controller.suggest(newValue);
+		mainControl.showNoti(controller.getFeedback());
+		return suggest;
+	}
+	
+	/**
+	 * Push a new history entry 
+	 * 
+	 * @param command
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private void pushHistory(String command) {
+		commandHistory.add(command);
+		while (commandHistory.size() > Config.maxNumHistory) {
+			commandHistory.remove(0);
+		}
+		historyPos = commandHistory.size();
+	}
+	
+	/**
+	 * Set general hot keys include: page up/down
+	 * & Escape to minimize 
+	 * 
+	 * @param scene
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	private void setHotKeys(Scene scene) {
+		scene.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
+			if (event.getCode() == KeyCode.PAGE_DOWN || 
+					(event.getCode() == KeyCode.RIGHT && event.isAltDown())) {
+				execCmd(Config.cmdPageDown);
+				event.consume();
+			} else if (event.getCode() == KeyCode.PAGE_UP
+					|| (event.getCode() == KeyCode.LEFT && event.isAltDown())) {
+				execCmd(Config.cmdPageUp);
+				event.consume();
+			} else if (event.getCode() == KeyCode.ESCAPE) {
+				stage.setIconified(true);
+			}
+		});
+	}
+	
+	/**
+	 * Command line entry
+	 * Execute command from args, or launch GUI
+	 * Any error will cause the program launch the GUI
+	 * @param args
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\Main.java
+	 */
+
+	public static void main(String[] args) {
+		if (args.length > 0) {
+			try {
+				String command = "";
+				for (String str : args) {
+					command += str;
+				}
+				Main main = new Main();
+				main.controller.execCmd(command);
+				System.out.println(main.controller.getFeedback());
+				return;
+			} catch (Exception e) {
+				launch(args);
+				return;
+			}
+		}
+		launch(args);
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\Main.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\OnEvent.java
+	 */
+
+ *
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\OnEvent.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\OnEvent.java
+	 */
+
+public interface OnEvent {
+	String onEventExec(String command);
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\OnEvent.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+ */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+public class UIControl extends BorderPane {	
+	@FXML
+	private Text time;
+	
+	@FXML
+	private ListView<String> list;
+	
+	@FXML
+	private TextField input;
+	
+	@FXML
+	private HBox title;
+	
+	@FXML
+	private Text noti;
+	
+	private double mouseX;
+	private double mouseY;
+	
+	private String appendOnComplete;
+	
+	public UIControl() {
+		displayCurTime();
+	}
+	
+	/**
+	 * Initializer, 
+	 * must be called after set scene to stage 
+	 * and before all other operation
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void init() {
+		list.setFocusTraversable(false);
+		setDraggable(title);
+	}
+	
+	/**
+	 * Load the list to main list with selection cleared
+	 * 
+	 * @param displayBuf
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void loadList(List<String> displayBuf) {
+		loadList(displayBuf, -1);
+	}
+	
+	/**
+	 * Load the list to main list and set selection
+	 * 
+	 * @param strList
+	 * @param recentChange
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void loadList(List<String> strList, Integer recentChange) { 
+		ObservableList<String> observableList = FXCollections.observableArrayList(strList);
+		list.setItems(observableList);
+		list.setCellFactory((list) -> {
+			return new ListViewCell();
+		});
+		
+		if (strList.isEmpty()) {
+			return;
+		}
+		
+		if (recentChange < 0 || recentChange >= strList.size()) {
+			list.getSelectionModel().clearSelection();
+		} else {
+			list.scrollTo(recentChange);
+			list.getSelectionModel().select(recentChange);
+		}
+		input.requestFocus();
+	}
+	
+	/**
+	 * Show message to notification area
+	 * 
+	 * @param message
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void showNoti(String message) {
+		noti.setText(message);
+	}
+	
+	/**
+	 * Set the operation when command need to be executed
+	 * 
+	 * @param value
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void setOnExecCmd(OnEvent value) {
+		input.setOnKeyReleased((event) -> {
+			if (event.getCode() == KeyCode.ENTER) {
+				value.onEventExec(input.getText());
+				input.clear();
+			}
+		});
+	}
+	
+	/**
+	 * Set the operation when command history is needed 
+	 * 
+	 * @param value
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void setOnRequestHistory(OnEvent value) {
+		input.setOnKeyPressed((event) -> {
+			if (event.getCode() == KeyCode.UP) {
+				input.setText(value.onEventExec("UP"));
+				setInputCaretToEnd();
+				event.consume();
+			}
+			if (event.getCode() == KeyCode.DOWN) {
+				input.setText(value.onEventExec("DOWN"));
+				setInputCaretToEnd();
+				event.consume();
+			}
+			if (event.getCode() == KeyCode.TAB) {
+				input.setText(input.getText() + appendOnComplete);
+				appendOnComplete = "";
+				setInputCaretToEnd();
+				event.consume();
+			}
+		});
+	}
+	
+	/**
+	 * Set the operation when suggest is needed
+	 * 
+	 * @param value
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void setInputOnChange(OnEvent value) {
+		input.textProperty().addListener((observable, oldString, newString)->{
+			//ensure caret is at the end
+			if (input.caretPositionProperty().get() < newString.length() - 1) {
+				return;
+			}
+			
+			String suggest = value.onEventExec(newString).trim();
+			
+			if (suggest.isEmpty()) {
+				return;
+			}
+			
+			String[] words = newString.split(" ");
+			String originWord = words[words.length - 1];
+			appendOnComplete = suggest.substring(suggest.indexOf(originWord) 
+									   + originWord.length());
+		});
+	}
+	
+	/**
+	 * Let input box get focus
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	public void setInputOnFocus() {
+		input.requestFocus();
+	}
+	
+	/**
+	 * Push caret of input box to the end position
+	 */
+	private void setInputCaretToEnd() {
+		try {
+			input.positionCaret(input.getText().length());
+		} catch (Exception e) {
+			//do nothing
+			//if input has no text, exception will be thrown
+		}
+	}
+	
+	/**
+	 * Display current time on title bar
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	private void displayCurTime() {
+		DateTimeFormatter format = DateTimeFormatter.ofPattern(Config.curTimeDateFormat);
+		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), (event) -> {
+			time.setText(format.format(LocalDateTime.now()));
+		}));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		timeline.play();
+	}
+	
+	/**
+	 * Set the title bar to be draggable
+	 * 
+	 * @param node
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\ui\UIControl.java
+	 */
+
+	private void setDraggable(Node node) {
+	    node.setOnMousePressed((event) -> {
+	    	mouseX = event.getSceneX();
+	    	mouseY = event.getSceneY();
+	    });
+
+	    node.setOnMouseDragged((event) -> {
+	    	node.getScene().getWindow().setX(event.getScreenX() - mouseX);
+	    	node.getScene().getWindow().setY(event.getScreenY() - mouseY);
+	    });
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\ui\UIControl.java
+
+
+
+
+

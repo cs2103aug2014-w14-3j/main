@@ -1,0 +1,596 @@
+//@author: a0115584a
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Controller.java
+	 */
+
+	public String getFeedback();
+	
+	/**
+	 * Return if the program is exiting
+	 * 
+	 * @return boolean
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\Controller.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void postpone(String content) throws Exception {
+		logger.entering(getClass().getName(), LOGGING_PURPOSE_METHODNAME_POSTPONE);
+		try {
+			if (displayListType == DisplayList.ARCHIVE) {
+				setFeedback(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
+						CMD_POSTPONE));
+				throw new Exception(String.format(MESSAGE_FEEDBACK_INVALIDLIST,
+						CMD_POSTPONE));
+
+			} else {
+				String[] taskNumbers = content.split(SPACE_STRING);
+				Arrays.sort(taskNumbers);
+				for (int i = 0; i < taskNumbers.length; i++) {
+					Integer taskNum = Integer.parseInt(taskNumbers[i]) - 1;
+					Task postponedTask = tasks.get(taskNum);
+					postponedTask.clearTimes();
+					postponedTask.setType(TaskType.FLOATING);
+
+					// set the last task to be highlighted in the UI after postpone is done.
+					if (i == taskNumbers.length - 1) { 
+						setRecentChange(postponedTask, tasks);
+					}
+				}
+
+				tasks.sort();
+				setDisplayList(DisplayList.MAIN);
+
+				if (taskNumbers.length == 1) {
+					setFeedback(MESSAGE_FEEDBACK_POSTPONE);
+				} else {
+					setFeedback(taskNumbers.length
+							+ MESSAGE_FEEDBACK_POSTPONEMULTIPLE);
+				}
+			}
+		} catch (NumberFormatException e) {
+			setFeedback(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+			throw new Exception(MESSAGE_FEEDBACK_INVALID_NUMBERFORMAT);
+		}
+		
+		logger.exiting(getClass().getName(), LOGGING_PURPOSE_METHODNAME_POSTPONE);
+	}
+
+	/*
+	 * Displays the existing tasks to the user.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+	 */
+
+	private void displayMainList() {
+		tasks.sort();
+		resetRecentChange();
+		setDisplayList(DisplayList.MAIN);
+		setFeedback(MESSAGE_FEEDBACK_MAINLIST);
+	}
+
+	/**
+	 * Checks if the list the user is on is the main list or search list. If it
+	 * either the main or search list, deems the edit valid and proceeds with
+	 * it.
+	 * 
+	 * @param content
+	 *            User input
+	 * @throws Exception
+	 *             If current displayed list is not on the main or search list.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\ControllerClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+	 */
+
+	@Override
+	public void sort() {
+		Collections.sort(tasks, (task1, task2) -> {
+			if (task1.isPrioritized() && !task2.isPrioritized()) {
+				return -1;
+			} else if (!task1.isPrioritized() && task2.isPrioritized()) {
+				return 1;
+			}
+
+			if (task1.getStartTime() == null && task2.getStartTime() != null) {
+				return 1;
+			} else if (task1.getStartTime() != null
+					&& task2.getStartTime() == null) {
+				return -1;
+			}
+
+			if (task1.getStartTime() == null && task2.getStartTime() == null) {
+				return task1.getDesc().compareTo(task2.getDesc());
+			} else {
+				Long thisDate = task1.getStartTime().getTime();
+				Long taskDate = task2.getStartTime().getTime();
+
+				return thisDate.compareTo(taskDate);
+			}
+
+		});
+	}
+
+	/**
+	 * Gets the number of tasks in the task list.
+	 * 
+	 * @return Number of tasks in the task list.
+	 */
+	@Override
+	public int size() {
+		return tasks.size();
+	}
+
+	/**
+	 * Sets the number of tasks on a page.
+	 */
+	// End of segment: C:\Users\Thien\git\main\src\controller\SimpleTaskList.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\Task.java
+	 */
+
+public interface Task {
+	public enum TaskType {
+		FLOATING, TIMED, DEADLINE
+	}
+	
+	/**
+	 * Gets the deadline of a task.
+	 * If the task is a Floating task, return null.
+	 * 
+	 * @return 	Date object representing the deadline of a task.
+	 */
+	public Date getDeadline();
+	
+	/**
+	 * Gets the start time of a task.
+	 * If the task is a Floating task, return null.
+	 * 
+	 * @return	Date object representing the start time of a task.
+	 */
+	public Date getStartTime();
+	
+	/**
+	 * Gets the end time of a task.
+	 * If the task is a Floating or Deadline task, return null.
+	 * 
+	 * @return	Date object representing the end time of a task.
+	 */
+	public Date getEndTime();
+	
+	/**
+	 * Gets the description of a task.
+	 * 
+	 * @return	Stringed description of a task.
+	 */
+	public String getDesc();
+	
+	/**
+	 * Checks if a task is prioritized.
+	 * 
+	 * @return True if a task is prioritized.
+	 */
+	public Boolean isPrioritized();
+	
+	/**
+	 * Checks if a task is overdue.
+	 * 
+	 * @return	True if a task is overdue.
+	 */
+	public Boolean isOverdue();
+	
+	/**
+	 * Gets the type of task.
+	 * 
+	 * @return	Type of task.
+	 */
+	public TaskType getType();
+	
+	/**
+	 * Sets the priority of a task.
+	 * If string is "true", task is prioritized.
+	 * If string is "false", remove priority from a task.
+	 * 
+	 * @param priority	String of "true" or "false.
+	 */
+	public void setPriority(String priority);
+	
+	/**
+	 * Sets the description of a task.
+	 * 
+	 * @param desc	Description of a task.
+	 */
+	public void setDesc(String desc);
+	
+	/**
+	 * Sets a deadline for task.
+	 * If there is no deadline, it remains null. (Floating task)
+	 * 
+	 * @param date	Deadline of a task.
+	 */
+	public void setDeadline(Date date);
+	
+	/**
+	 * Sets the start time of a task.
+	 * If there is no start time, it remains null. (Floating task)
+	 * 
+	 * @param time	Start time of a task.
+	 */
+	public void setStartTime(Date time);
+	
+	/**
+	 * Sets the end time of a task.
+	 * If there is no end time, it remains null. (Floating and Deadline tasks)
+	 * 
+	 * @param time	End time of a task.
+	 */
+	public void setEndTime(Date time);
+	
+	/**
+	 * Removes the time attributes of a task.
+	 */
+	public void clearTimes();
+	
+	/**
+	 * Sets the task type to a task.
+	 * 
+	 * @param type	Type of task.
+	 */
+	public void setType(TaskType type);
+	
+	/**
+	 * Converts Task object into string.
+	 * 
+	 * @return	Stringed task.
+	 */
+	public String toString();
+	
+	/**
+	 * Creates a Task object from a string.
+	 * 
+	 * @return	Task object.
+	 */
+	public Task clone();
+}
+	// End of segment: C:\Users\Thien\git\main\src\controller\Task.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\controller\TaskClass.java
+	 */
+
+public class TaskClass implements Task {
+	boolean isPrioritized;
+	String description;
+	Date startTime;
+	Date endTime;
+	TaskType type;
+	
+	/**
+	 * Constructs a Task object.
+	 */
+	TaskClass() {
+	
+	}
+	
+	/**
+	 * Constructs a Task object from a string.
+	 * 
+	 * @param stringedTask	Stringed task.
+	 */
+	TaskClass(String stringedTask) {
+		String[] attributes = stringedTask.split("%");
+		
+		setDesc(attributes[0]);
+		
+		if(attributes[1].trim().isEmpty()) {
+			setStartTime(null);
+			setType(TaskType.FLOATING);
+		} else {
+			setStartTime(new Date(Long.parseLong(attributes[1].trim())));
+			setType(TaskType.DEADLINE);
+		}
+		
+		if(attributes[2].trim().isEmpty()) {
+			setEndTime(null);
+		} else {
+			setEndTime(new Date(Long.parseLong(attributes[2].trim())));
+			setType(TaskType.TIMED);
+		}
+		
+		setPriority(attributes[3]);
+	}
+	
+	/**
+	 * Gets the deadline of a task.
+	 * If the task is a Floating task, return null.
+	 * 
+	 * @return 	Date object representing the deadline of a task.
+	 */
+	public Date getDeadline() {
+		return startTime;
+	}
+	
+	/**
+	 * Gets the start time of a task.
+	 * If the task is a Floating task, return null.
+	 * 
+	 * @return	Date object representing the start time of a task.
+	 */
+	public Date getStartTime() {
+		return startTime;
+	}
+	
+	/**
+	 * Gets the end time of a task.
+	 * If the task is a Floating or Deadline task, return null.
+	 * 
+	 * @return	Date object representing the end time of a task.
+	 */
+	public Date getEndTime() {
+		return endTime;
+	}
+	
+	/**
+	 * Gets the description of a task.
+	 * 
+	 * @return	Stringed description of a task.
+	 */
+	public String getDesc() {
+		return description;
+	}
+	
+	/**
+	 * Checks if a task is prioritized.
+	 * 
+	 * @return True if a task is prioritized.
+	 */
+	public Boolean isPrioritized() {
+		return isPrioritized;
+	}
+	
+	/**
+	 * Checks if a task is overdue.
+	 * 
+	 * @return	True if a task is overdue.
+	 */
+	public Boolean isOverdue() {
+		return false;
+	}
+	
+	/**
+	 * Gets the type of task.
+	 * 
+	 * @return	Type of task.
+	 */
+	public TaskType getType() {
+		return type;
+	}
+	
+	/**
+	 * Sets the priority of a task.
+	 * If string is "true", task is prioritized.
+	 * If string is "false", remove priority from a task.
+	 * 
+	 * @param priority	String of "true" or "false.
+	 */
+	public void setPriority(String priority) {
+		if(priority.equals("true")) {
+			isPrioritized = true;
+		} else {
+			isPrioritized = false;
+		}
+	}
+	
+	/**
+	 * Sets the description of a task.
+	 * 
+	 * @param desc	Description of a task.
+	 */
+	public void setDesc(String desc) {
+		description = desc;
+	}
+	
+	/**
+	 * Sets a deadline for task.
+	 * If there is no deadline, it remains null. (Floating task)
+	 * 
+	 * @param date	Deadline of a task.
+	 */
+	public void setDeadline(Date date) {
+		startTime = date;
+	}
+	
+	/**
+	 * Sets the start time of a task.
+	 * If there is no start time, it remains null. (Floating task)
+	 * 
+	 * @param time	Start time of a task.
+	 */
+	public void setStartTime(Date time) {
+		startTime = time;
+	}
+	
+	/**
+	 * Sets the end time of a task.
+	 * If there is no end time, it remains null. (Floating and Deadline tasks)
+	 * 
+	 * @param time	End time of a task.
+	 */
+	public void setEndTime(Date time) {
+		endTime = time;
+	}
+	
+	/**
+	 * Removes the time attributes of a task.
+	 */
+	public void clearTimes() {
+		startTime = null;
+		endTime = null;
+	}
+	
+	/**
+	 * Sets the task type to a task.
+	 * 
+	 * @param type	Type of task.
+	 */
+	public void setType(TaskType tasktype) {
+		type = tasktype;
+	}
+	
+	/**
+	 * Converts Task object into string.
+	 * 
+	 * @return	Stringed task.
+	 */
+	public String toString() {
+		boolean isNullStartTime =(startTime == null);
+		boolean isNullEndTime = (endTime == null);
+		return   description + "%" + 
+				(isNullStartTime? " " : startTime.getTime()) + "%" + 
+				(isNullEndTime? " " : endTime.getTime()) + "%" +
+				isPrioritized;
+	}
+	
+	/**
+	 * Creates a Task object from a string.
+	 * 
+	 * @return	Task object.
+	 */
+	public Task clone() {
+		return new TaskClass(toString());
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\controller\TaskClass.java
+
+
+
+
+
+	/**
+	 * origin: C:\Users\Thien\git\main\src\tests\TestControllerClassSortAndPostpone.java
+	 */
+
+public class TestControllerClassSortAndPostpone {
+
+	Controller controller;
+	List<String> displayTaskList;
+	
+	@Before
+	public void setup() {
+		controller = ControllerClass.getInstance();
+	}
+
+	public String getDescFromTaskStrings(String stringedTask) {
+		String[] splitStringedTasks = stringedTask.split("%");
+		return splitStringedTasks[0];
+	}
+	
+	@Test
+	// This is the case below the boundary for sorting the displayed list by date & time partition - sorting alphabetically
+	public void testSortTasks() throws Exception {
+		controller.execCmd("add little brown fox");
+		controller.execCmd("add jumped over blue moon");
+		controller.execCmd("list");
+		displayTaskList = controller.getCurrentList();
+		assertEquals(displayTaskList.size(), 2);
+		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + getDescFromTaskStrings(displayTaskList.get(1)), 
+				"jumped over blue moon\n" + "little brown fox");
+		controller.execCmd("delete 2");
+		controller.execCmd("delete 1");
+	}	
+	
+	@Test 
+	// This is the boundary case for sorting the displayed list by date & time partition - sorting by date
+	public void testSortTasksWithDate() throws Exception {
+		controller.execCmd("add jumped over blue moon");
+		controller.execCmd("add \"little brown fox\" 10/14");
+		displayTaskList = controller.getCurrentList();
+		assertEquals(displayTaskList.size(), 2);
+		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+						getDescFromTaskStrings(displayTaskList.get(1)),
+				"little brown fox\n" + "jumped over blue moon");
+		controller.execCmd("delete 2");
+		controller.execCmd("delete 1");
+	}
+	
+	@Test
+	// This is the boundary case for sorting the displayed list by date & time partition - sorting by date and time
+	public void testSortTasksWithDateAndTime() throws Exception {
+		controller.execCmd("add \"jumped over blue moon\" 10/14");
+		controller.execCmd("add \"little brown fox\" 10/14");
+		displayTaskList = controller.getCurrentList();
+		assertEquals(displayTaskList.size(), 2);
+		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				getDescFromTaskStrings(displayTaskList.get(1)),
+		"jumped over blue moon\n" + "little brown fox");
+		controller.execCmd("delete 2");
+		controller.execCmd("delete 1");
+	}
+	
+	@Test
+	// This is boundary case for sorting the displayed list by date & time partition - sorting by priority with date & time
+	public void testSortTasksWithPriority() throws Exception {
+		controller.execCmd("add \"jumped over blue moon\" 10/15 23:50");
+		controller.execCmd("add ! \"little brown fox\" 10/14 23:00");
+		displayTaskList = controller.getCurrentList();
+		assertEquals(displayTaskList.size(), 2);
+		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				getDescFromTaskStrings(displayTaskList.get(1)),
+		"little brown fox\n" + "jumped over blue moon");
+		controller.execCmd("delete 2");
+		controller.execCmd("delete 1");
+	}
+	
+	@Test
+	public void testPostpone() throws Exception {
+		controller.execCmd("add \"little brown fox\" 10/19");
+		controller.execCmd("add jumped over blue moon");
+		controller.execCmd("pp 1");
+		displayTaskList = controller.getCurrentList();
+		assertEquals(displayTaskList.size(), 2);
+		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				getDescFromTaskStrings(displayTaskList.get(1)),
+		"jumped over blue moon\n" + "little brown fox");
+		controller.execCmd("delete 2");
+		controller.execCmd("delete 1");
+	}
+}
+
+	// End of segment: C:\Users\Thien\git\main\src\tests\TestControllerClassSortAndPostpone.java
+
+
+
+
+
