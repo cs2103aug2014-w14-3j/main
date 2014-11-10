@@ -16,6 +16,8 @@ public class Pair {
 	 * @param _second
 	 *            Second integer of the pair.
 	 */
+	//@author A0112044B
+
 	public Pair(int _first, int _second) {
 		first = _first;
 		second = _second;
@@ -25,7 +27,10 @@ public class Pair {
 	 * Gets the first integer of the pair.
 	 * 
 	 * @return First integer of the pair.
-	 */
+
+	 */ 
+	//@author A0112044B
+
 	public int getFirst() {
 		return first;
 	}
@@ -35,6 +40,8 @@ public class Pair {
 	 * 
 	 * @return Second integer of the pair.
 	 */
+
+	//@author A0112044B	
 	public int getSecond() {
 		return second;
 	}
