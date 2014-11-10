@@ -210,7 +210,6 @@ public class ControllerClass implements Controller {
 	/**
 	 * Constructs the Controller Class object.
 	 */
-	//@author
 	private ControllerClass() {
 		onExit = false;
 		storage = createStorageObject();
@@ -252,7 +251,6 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return Stringed feedback message.
 	 */
-	//@author
 	public String getFeedback() {
 		if (suggestFeedback != null) {
 			return suggestFeedback;
@@ -306,7 +304,6 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return List of stringed tasks.
 	 */
-	//@author
 	public List<String> getCurrentList() {
 		List<String> list = null;
 		switch (displayListType) {
@@ -352,7 +349,6 @@ public class ControllerClass implements Controller {
 	 *            Input from user.
 	 * @return List of suggested stringed commands and words.
 	 */
-	//@author
 	public String suggest(String content) {
 		String emptySuggest = "";
 		String suggest;
@@ -447,7 +443,6 @@ public class ControllerClass implements Controller {
 	 * @param number
 	 *            Number of tasks on a page (10).
 	 */
-	//@author
 	private void setNumTaskOnPage(Integer number) {
 		tasks.setNumTaskOnPage(number);
 		archiveTasks.setNumTaskOnPage(number);
@@ -478,7 +473,6 @@ public class ControllerClass implements Controller {
 	 * @param listType
 	 *            Type of displayed list.
 	 */
-	//@author
 	private void setDisplayList(DisplayList listType) {
 		this.displayListType = listType;
 	}
@@ -489,7 +483,6 @@ public class ControllerClass implements Controller {
 	 * @param list
 	 *            A list of searched results.
 	 */
-	//@author
 	private void setResultList(TaskList list) {
 		this.resultTasks = list;
 		resultTasks.setNumTaskOnPage(numTasksInSinglePage);
@@ -503,7 +496,6 @@ public class ControllerClass implements Controller {
 	 * @param list
 	 *            A list of searched results.
 	 */
-	//@author
 	private void setFreeSlotList(List<String> list) {
 		if (list.size() <= 10) {
 			this.freeSlots = list;
@@ -520,7 +512,6 @@ public class ControllerClass implements Controller {
 	 * Resets recent change to page 1 when changing to another displayed list
 	 * type.
 	 */
-	//@author
 	private void resetRecentChange() {
 		currentPageNum = 1;
 		recentChange = -1;
@@ -536,7 +527,6 @@ public class ControllerClass implements Controller {
 	 * @param taskList
 	 *            Current displayed list.
 	 */
-	//@author
 	private void setRecentChange(Task task, TaskList taskList) {
 		taskList.sort();
 		Integer index = taskList.indexOf(task);
@@ -552,7 +542,6 @@ public class ControllerClass implements Controller {
 	 * @param taskList
 	 *            Current displayed list.
 	 */
-	//@author
 	private void setRecentChange(Integer recent, TaskList taskList) {
 		currentPageNum = taskList.getIndexPageContainTask(recent);
 		recentChange = taskList.getIndexTaskOnPage(recent);
@@ -719,7 +708,6 @@ public class ControllerClass implements Controller {
 	/**
 	 * Changes current displayed list to archive list.
 	 */
-	//@author
 	private void moveToArchive() {
 		setDisplayList(DisplayList.ARCHIVE);
 		setFeedback(MESSAGE_FEEDBACK_ARCHIVELIST);
@@ -735,7 +723,6 @@ public class ControllerClass implements Controller {
 	 * @throws NumberFormatException
 	 *             If task numbers entered are not numbers.
 	 */
-	//@author
 	private void markAsDone(String content) throws Exception {
 		String[] taskNumbers = content.trim().split("\\s+");
 		Arrays.sort(taskNumbers, new Comparator<String>() {
@@ -1335,7 +1322,6 @@ public class ControllerClass implements Controller {
 	 * @param listToSearch
 	 * @return
 	 */
-	//@author
 	private ArrayList<longPair> getOccupied(TaskList listToSearch) {
 		int numOfTask = listToSearch.size();
 
@@ -1943,7 +1929,6 @@ public class ControllerClass implements Controller {
 	 *             If user keys in an invalid direction or if the page is the
 	 *             first or the last.
 	 */
-	//@author
 	private void changeCurrentPageNum(String direction) throws Exception {
 		if (direction.equalsIgnoreCase(PAGE_DIRECTION_UP)) {
 			if (checkValidPageUp()) {
@@ -1979,7 +1964,6 @@ public class ControllerClass implements Controller {
 	 * 
 	 * @return true if it is possible to go to the next page.
 	 */
-	//@author
 	private boolean checkValidPageDown() {
 		Integer totalNumPages;
 		totalNumPages = getTotalNumOfPages(displayListType);
@@ -1996,7 +1980,6 @@ public class ControllerClass implements Controller {
 	 *            Type of list.
 	 * @return Total number of pages for a list.
 	 */
-	//@author
 	private int getTotalNumOfPages(DisplayList displayListType) {
 		int totalNumPages;
 
@@ -2215,7 +2198,6 @@ public class ControllerClass implements Controller {
 	 *            Command input by user.
 	 * @return CommandType
 	 */
-	//@author
 	private CommandType matchCommandType(String operation) {
 		CommandType command = commandMap.get(operation.trim().toLowerCase());
 		if (command == null) {

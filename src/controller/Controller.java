@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Interface for ControllerClass which contains the Logic of the software.
  */
-//@author
+//@author A0115194J
 public interface Controller {
 	
 	/**
@@ -19,7 +19,6 @@ public interface Controller {
 	 * @return		Task position of a page on the current list.
 	 * @throws		Exception 	If command entered by user is invalid.	
 	 */
-	//@author 
 	public Integer execCmd(String cmd) throws Exception;
 	
 	/**
@@ -27,7 +26,6 @@ public interface Controller {
 	 * 
 	 * @return	List of stringed tasks.
 	 */
-	//@author
 	public List<String> getCurrentList();
 	
 	/**
@@ -36,7 +34,6 @@ public interface Controller {
 	 * @param content	Input from user.
 	 * @return			List of suggested stringed commands and words.			
 	 */
-	//@author
 	public String suggest(String content);
 	
 	/**
@@ -52,5 +49,6 @@ public interface Controller {
 	 * 
 	 * @return boolean
 	 */
+	//@author A0119381E
 	public boolean isExiting();
 }

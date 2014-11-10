@@ -205,7 +205,6 @@ public class TaskClass implements Task {
 	 * 
 	 * @return	Task object.
 	 */
-	//@author
 	public Task clone() {
 		return new TaskClass(toString());
 	}
