@@ -18,6 +18,9 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @param _maxSize	Size of stack.
 	 */
+
+	//@author A0112044B
+
 	public FixedSizeStack(int _maxSize){
 		maxSize=_maxSize;
 		stack=new LinkedList<E>();
@@ -29,6 +32,9 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @return	Size of stack.
 	 */
+
+	//@author A0112044B
+
 	public int size(){
 		return stack.size();
 	}
@@ -38,6 +44,9 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @return	Maximum size.
 	 */
+
+	//@author A0112044B
+
 	public int getMaxSize(){
 		return maxSize;
 	}
@@ -47,6 +56,9 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @return	true if stack is empty.
 	 */
+
+	//@author A0112044B
+
 	public boolean empty(){
 		if (stack.size()==0){
 			return true;
@@ -60,6 +72,8 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @return	First item of the stack.
 	 */
+	//@author A0112044B
+
 	public E peek(){
 		return stack.peekFirst();
 	}
@@ -69,6 +83,7 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @return	First item of the stack.
 	 */
+	//@author A0112044B
 	public E pop(){
 		return stack.removeFirst();
 	}
@@ -78,6 +93,9 @@ public class FixedSizeStack<E> {
 	 * 
 	 * @param item	Item to be inserted into the stack.
 	 */
+
+	//@author A0112044B
+
 	public void push(E item){
 		if (stack.size()< maxSize){
 			stack.addFirst(item);

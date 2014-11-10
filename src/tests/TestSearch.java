@@ -16,7 +16,7 @@ public class TestSearch {
 
 	public String getDesc(String task) {
 		String[] para=task.split("%");
-		return para[1];
+		return para[0];
 	}
 	
 	@Test
@@ -25,14 +25,12 @@ public class TestSearch {
 	public void tesExactSearch() throws Exception{
 		Controller controller=ControllerClass.getInstance();
 		List<String> list;
-		controller.execCmd("add go home");
-		controller.execCmd("add go to school and eat lunch");
 		//search for "go home"
 		controller.execCmd("go home");
 		
 		list = controller.getCurrentList();
 	
-		assertEquals(getDesc(list.get(0))," go home");
+		assertEquals(getDesc(list.get(0)),"10. go home");
 	}	
 	
 	
@@ -42,14 +40,28 @@ public class TestSearch {
 	public void testNearMatchSearch() throws Exception{
 		Controller controller=ControllerClass.getInstance();
 		List<String> list;
-		//controller.execCmd("add go home");
-		//controller.execCmd("add go to school and eat lunch");
 		//search for "eat lunch" but user types it as "ate lunchh";
-		controller.execCmd("ate lunchh");
+		controller.execCmd("lunchh");
 		
 		list = controller.getCurrentList();
 	
-		assertEquals(getDesc(list.get(0)),"go to school and eat lunch");
+		assertEquals(getDesc(list.get(0)),"16. go to school and eat lunch");
+	}	
+	
+	
+	
+	@Test
+	//Test exactSearch
+	//the keyword is typed wrongly and the software will give the list of the tasks which are nearly matched
+	public void testSearchDate() throws Exception{
+		Controller controller=ControllerClass.getInstance();
+		List<String> list;
+		//search for "eat lunch" but user types it as "ate lunchh";
+		controller.execCmd("today");
+		
+		list = controller.getCurrentList();
+	
+		assertEquals(getDesc(list.get(0)),"16. go to school and eat lunch");
 	}	
 	
 	

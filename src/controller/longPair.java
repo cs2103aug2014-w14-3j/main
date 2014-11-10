@@ -16,6 +16,9 @@ public class longPair implements Comparable<longPair> {
 	 * @param _second
 	 *            Second number of the pair.
 	 */
+
+	//@author A0112044B
+
 	public longPair(long _first, long _second) {
 		first = _first;
 		second = _second;
@@ -26,6 +29,9 @@ public class longPair implements Comparable<longPair> {
 	 * 
 	 * @return First long number of the pair.
 	 */
+
+	//@author A0112044B
+
 	public long getFirst() {
 		return first;
 	}
@@ -35,6 +41,8 @@ public class longPair implements Comparable<longPair> {
 	 * 
 	 * @return Second long number of the pair.
 	 */
+	//@author A0112044B
+
 	public long getSecond() {
 		return second;
 	}
@@ -44,6 +52,9 @@ public class longPair implements Comparable<longPair> {
 	 * 
 	 * @return Difference between the two numbers.
 	 */
+
+	//@author A0112044B
+
 	public int compareTo(longPair num) {
 		return (int) (this.getFirst() - num.getFirst());
 	}
