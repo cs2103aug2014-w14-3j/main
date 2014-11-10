@@ -1645,7 +1645,7 @@ public class ControllerClass implements Controller {
 	//@author A0115194J
 	private void checkDetailsSpecified(String[] words, String attributeToChange)
 			throws Exception {
-		if ((!attributeToChange.equals("!")) && (words.length == 2)) {
+		if ((!attributeToChange.equals(EDIT_ATTRIBUTE_PRIORITY)) && (words.length == 2)) {
 			setFeedback(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
 			throw new Exception(MESSAGE_FEEDBACK_EDIT_INVALID_NULLDETAILS);
 		}
