@@ -33,9 +33,9 @@ public class TestControllerClassSortAndPostpone {
 		controller.execCmd("add jumped over blue moon");
 		controller.execCmd("list");
 		displayTaskList = controller.getCurrentList();
-		assertEquals(displayTaskList.size(), 2);
-		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + getDescFromTaskStrings(displayTaskList.get(1)), 
-				"jumped over blue moon\n" + "little brown fox");
+		assertEquals(2, displayTaskList.size());
+		assertEquals("1. jumped over blue moon\n" + "2. little brown fox", 
+				getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + getDescFromTaskStrings(displayTaskList.get(1)));
 		controller.execCmd("delete 2");
 		controller.execCmd("delete 1");
 	}	
@@ -46,10 +46,9 @@ public class TestControllerClassSortAndPostpone {
 		controller.execCmd("add jumped over blue moon");
 		controller.execCmd("add \"little brown fox\" 10/14");
 		displayTaskList = controller.getCurrentList();
-		assertEquals(displayTaskList.size(), 2);
-		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
-						getDescFromTaskStrings(displayTaskList.get(1)),
-				"little brown fox\n" + "jumped over blue moon");
+		assertEquals(2, displayTaskList.size());
+		assertEquals("1. little brown fox\n" + "2. jumped over blue moon", getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				 getDescFromTaskStrings(displayTaskList.get(1)));
 		controller.execCmd("delete 2");
 		controller.execCmd("delete 1");
 	}
@@ -60,10 +59,9 @@ public class TestControllerClassSortAndPostpone {
 		controller.execCmd("add \"jumped over blue moon\" 10/14");
 		controller.execCmd("add \"little brown fox\" 10/14");
 		displayTaskList = controller.getCurrentList();
-		assertEquals(displayTaskList.size(), 2);
-		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
-				getDescFromTaskStrings(displayTaskList.get(1)),
-		"jumped over blue moon\n" + "little brown fox");
+		assertEquals(2, displayTaskList.size());
+		assertEquals("1. jumped over blue moon\n" + "2. little brown fox", getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				getDescFromTaskStrings(displayTaskList.get(1)));
 		controller.execCmd("delete 2");
 		controller.execCmd("delete 1");
 	}
@@ -74,10 +72,9 @@ public class TestControllerClassSortAndPostpone {
 		controller.execCmd("add \"jumped over blue moon\" 10/15 23:50");
 		controller.execCmd("add ! \"little brown fox\" 10/14 23:00");
 		displayTaskList = controller.getCurrentList();
-		assertEquals(displayTaskList.size(), 2);
-		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
-				getDescFromTaskStrings(displayTaskList.get(1)),
-		"little brown fox\n" + "jumped over blue moon");
+		assertEquals(2, displayTaskList.size());
+		assertEquals("1. little brown fox\n" + "2. jumped over blue moon", getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				getDescFromTaskStrings(displayTaskList.get(1)));
 		controller.execCmd("delete 2");
 		controller.execCmd("delete 1");
 	}
@@ -88,10 +85,9 @@ public class TestControllerClassSortAndPostpone {
 		controller.execCmd("add jumped over blue moon");
 		controller.execCmd("pp 1");
 		displayTaskList = controller.getCurrentList();
-		assertEquals(displayTaskList.size(), 2);
-		assertEquals(getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
-				getDescFromTaskStrings(displayTaskList.get(1)),
-		"jumped over blue moon\n" + "little brown fox");
+		assertEquals(2, displayTaskList.size());
+		assertEquals("1. jumped over blue moon\n" + "2. little brown fox", getDescFromTaskStrings(displayTaskList.get(0)) + "\n" + 
+				getDescFromTaskStrings(displayTaskList.get(1)));
 		controller.execCmd("delete 2");
 		controller.execCmd("delete 1");
 	}
