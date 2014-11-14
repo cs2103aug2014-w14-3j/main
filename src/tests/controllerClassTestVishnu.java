@@ -43,7 +43,7 @@ public class controllerClassTestVishnu {
 		controller.execCmd("list");
 		taskDisplayList = controller.getCurrentList();
 		
-		assertEquals("meet friends for movie", getDescription(taskDisplayList.get(0)));
+		assertEquals("1. meet friends for movie", getDescription(taskDisplayList.get(0)));
 		
 		controller.execCmd("delete 1");
 	}
@@ -58,7 +58,7 @@ public class controllerClassTestVishnu {
 			controller.execCmd("delete -1");
 			fail("Should throw an Exception when negative numbers are given as input.");
 		} catch (Exception e) {
-			assertEquals("Task does not exist. Please enter task number within the range.", e.getMessage());
+			assertEquals("Task does not exist. Please enter task numbers within the range.", e.getMessage());
 			controller.execCmd("delete 2");
 			controller.execCmd("delete 1");
 		}
@@ -71,7 +71,7 @@ public class controllerClassTestVishnu {
 		controller.execCmd("list");
 		taskDisplayList = controller.getCurrentList();
 		
-		assertEquals("have lunch at home", getDescription(taskDisplayList.get(0)));
+		assertEquals("1. have lunch at home", getDescription(taskDisplayList.get(0)));
 		controller.execCmd("delete 1");
 	}
 	
