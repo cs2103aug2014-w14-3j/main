@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,9 +23,15 @@ public class TestSearch {
 	}
 	
 	@Before
+	
 	public void setup() throws Exception {
 		controller = ControllerClass.getInstance();
-	
+		controller.execCmd("add go home");
+		controller.execCmd("add go to school");
+		controller.execCmd("add \"do homework and sleep\" nov 20 3pm");
+		controller.execCmd("add \"have lunch\" nov 18");
+		controller.execCmd("add \"do homework\" today 3pm");
+		controller.execCmd("add \"get up early\" tomorrow 7am");
 	
 	}
 	
@@ -33,12 +40,7 @@ public class TestSearch {
 	//return the task list
 	public void tesExactSearch() throws Exception{
 		
-		controller.execCmd("add go home");
-		controller.execCmd("add go to school");
-		controller.execCmd("add \"do homework and sleep\" nov 20 3pm");
-		controller.execCmd("add \"have lunch\" nov 18");
-		controller.execCmd("add \"do homework\" today 3pm");
-		controller.execCmd("add \"get up early\" tomorrow 7am");
+		
 		//search for "go home"
 		controller.execCmd("go home");
 		
@@ -134,11 +136,18 @@ public class TestSearch {
 		
 		controller.execCmd(" \"homework\" nov 20");
 		list = controller.getCurrentList();
-		controller.execCmd("delete 1 2 3 4 5 6");
 		assertEquals(getDesc(list.get(0)),"4. do homework and sleep");
 		
-		
 	}
+	
+	 @After public void delete() throws Exception {
+         controller.execCmd("delete 1");
+         controller.execCmd("delete 1");
+         controller.execCmd("delete 1");
+         controller.execCmd("delete 1");
+         controller.execCmd("delete 1");
+         controller.execCmd("delete 1");
+   }
 	
 	
 }
